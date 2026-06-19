@@ -1,0 +1,463 @@
+<script>
+$(document).ready(function() {
+    $('#menuLecciones').collapse();
+    $('#bt_lecciones_crear').addClass('active');
+});
+</script>
+
+
+<?php
+$hoy = date("Y-m-d H:i:s");
+if ($_GET["id"]) {
+    $_SESSION["id_leccion"] = $_GET["id"];
+}
+
+if ($_GET["id"] == "new") {
+    $_SESSION["id_leccion"] = "";
+}
+
+if ($_POST["descripcion"] != "") {
+    // print_r($_POST);
+
+    $estrategico = $organizacional = $area = $equipo = $vp = 'NULL';
+    $celula = $ruta = "";
+
+    $id_owner = $_POST['id_owner_leccion'];
+    if ($_POST["id_objetivo_estrategico"] != "") {
+        $estrategico = $_POST["id_objetivo_estrategico"];
+        $queryEstrategico = mysqli_query($connect_okrs, "SELECT * FROM Objetivos_estrategicos WHERE id = $estrategico");
+        $dataEstrategico = mysqli_fetch_array($queryEstrategico);
+        $id_owner = $dataEstrategico["id_responsable"];
+        $ruta = "&id_obj_est=" . $_POST["id_objetivo_estrategico"];
+    }
+
+    if ($_POST["id_objetivo_estrategico_e"] != "") {
+        $estrategico = $_POST["id_objetivo_estrategico_e"];
+        $queryEstrategico = mysqli_query($connect_okrs, "SELECT * FROM Objetivos_estrategicos WHERE id = $estrategico");
+        $dataEstrategico = mysqli_fetch_array($queryEstrategico);
+        $id_owner = $dataEstrategico["id_responsable"];
+    }
+
+    if ($_POST["id_okr_organizacional"] != "") {
+        $organizacional = $_POST["id_okr_organizacional"];
+        $queryOrganizacional = mysqli_query($connect_okrs, "SELECT * FROM Okrs WHERE id = $organizacional");
+        $dataOrganizacional = mysqli_fetch_array($queryOrganizacional);
+        $id_owner = $dataOrganizacional["id_empleado"];
+    }
+
+    if ($_POST["id_okr_equipo"] != "") {
+        $equipo = $_POST["id_okr_equipo"];
+        $queryEquipo = mysqli_query($connect_okrs, "SELECT * FROM Okrs WHERE id = $equipo");
+        $dataEquipo = mysqli_fetch_array($queryEquipo);
+        $id_owner = $dataEquipo["id_empleado"];
+    }
+
+    if ($_POST["area_sel"] != "") {
+        $area = $_POST["area_sel"];
+        $id_owner = $_POST["id_owner_leccion"];
+        $ruta = "&id_area=" . $_POST["area_sel"];
+    }
+
+    if ($_POST["vp_sel"] != "") {
+        $vp = $_POST["vp_sel"];
+        $ruta = "&id_vp=" . $_POST["vp_sel"];
+        $id_owner = $_POST["id_owner_leccion1"];
+    }
+
+    if ($_POST["id_registro"] != "") {
+        $sentencia = "
+			UPDATE Lecciones_Aprendidas SET 
+            descripcion = '" . $_POST["descripcion"] . "',
+            anio = '" . $_POST["anio"] . "',
+            fecha_inicia = '" . $_POST["fecha_inicia"] . "', 
+			fecha_termina = '" . $_POST["fecha_termina"] . "',
+            periodo = '" . $_POST["periodo"] . "',
+            id_vp = '$vp',
+            area = '$area',
+            id_empleado = " . $_POST['id_owner_leccion']  . ",
+            updated_at = '$hoy'          
+			WHERE id = '" . $_POST["id_registro"] . "'
+			";
+
+        mysqli_query($connect_clima, $sentencia);
+
+        $respuesta = '
+			<div class="alert alert-success" role="alert">
+			 	Los datos han sido actualizados
+			</div>
+			';
+    } else {
+        $sentencia = "
+			INSERT INTO Lecciones_Aprendidas ( id_empresa , id_empleado, descripcion, tipo_leccion, anio, fecha_inicia, fecha_termina, periodo, id_okr_estrategico, id_okr_organizacional, id_okr_equipo, id_vp, area, estado, fecha_publicacion, created_at ) 
+			VALUES 
+			( '" . $_SESSION['id_empresa'] . "', $id_owner, '" . $_POST["descripcion"] . "','" . $_POST["tipo_sel"] . "', '" . $_POST["anio"] . "', '" . $_POST["fecha_inicia"] . "', '" . $_POST["fecha_termina"] . "', '" . $_POST["periodo"] . "',  $estrategico, $organizacional, $equipo, $vp ,$area , 1, '" . $hoy . "', '" . $hoy . "' )
+			";
+        // echo $sentencia;
+        mysqli_query($connect_clima, $sentencia);
+        $id_tmp = mysqli_insert_id($connect_clima);
+        // $_SESSION["id_leccion"] = $id_tmp;
+
+        if ($vp > 0) {
+            $queryVPLA = mysqli_query($connect_clima, "SELECT * FROM Celula_Integrantes WHERE id_vp = $vp AND id_empresa = " . $_SESSION['id_empresa'] . "");
+            if (mysqli_num_rows($queryVPLA) > 0) {
+                $dataVPLA = mysqli_fetch_array($queryVPLA);
+                $celula = $dataVPLA["responsables"];
+            } else {
+                $queryVPCI = mysqli_query($connect_admin, "SELECT * FROM Empleados WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND unidad_corporativa = '$vp' AND role = 2 AND estado = 1 ORDER BY nombre ASC");
+                while ($dataVPCI = mysqli_fetch_array($queryVPCI)) {
+                    $celula .= $dataVPCI["id"] . ',';
+                }
+
+                $celula = substr($celula, 0, -1);
+
+                $sentencia = "
+			INSERT INTO Celula_Integrantes ( id_empresa , id_vp, responsables, estado, created_at ) 
+			VALUES 
+			( '" . $_SESSION['id_empresa'] . "', $vp, '$celula', 1, '" . $hoy . "' )
+			";
+                // echo $sentencia;
+                mysqli_query($connect_clima, $sentencia);
+            }
+
+            $sentenciaCelula = "
+        UPDATE Lecciones_Aprendidas SET 
+        celula = '$celula'
+        WHERE id = $id_tmp
+        ";
+            // echo $sentenciaCelula;
+            mysqli_query($connect_clima, $sentenciaCelula);
+        }
+        if ($area > 0) {
+            $queryVPLA = mysqli_query($connect_clima, "SELECT * FROM Celula_Integrantes WHERE id_area = $area AND id_empresa = " . $_SESSION['id_empresa'] . "");
+            if (mysqli_num_rows($queryVPLA) > 0) {
+                $dataVPLA = mysqli_fetch_array($queryVPLA);
+                $celula = $dataVPLA["responsables"];
+            } else {
+                $queryAreaCI = mysqli_query($connect_admin, "SELECT * FROM Empleados WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND area = $area AND estado = 1 ORDER BY nombre ASC");
+                while ($dataAreaCI = mysqli_fetch_array($queryAreaCI)) {
+                    $celula .= $dataAreaCI["id"] . ',';
+                }
+                $celula = substr($celula, 0, -1);
+                $sentencia = "
+			INSERT INTO Celula_Integrantes ( id_empresa , id_area, responsables, estado, created_at ) 
+			VALUES 
+			( '" . $_SESSION['id_empresa'] . "', $area, '$celula', 1, '" . $hoy . "' )
+			";
+                // echo $sentencia;
+                mysqli_query($connect_clima, $sentencia);
+            }
+
+            $sentenciaCelula = "
+        UPDATE Lecciones_Aprendidas SET 
+        celula = '$celula'
+        WHERE id = $id_tmp
+        ";
+            // echo $sentenciaCelula;
+            mysqli_query($connect_clima, $sentenciaCelula);
+        }
+        if ($estrategico > 0) {
+            $queryVPLA = mysqli_query($connect_clima, "SELECT * FROM Celula_Integrantes WHERE id_obj_estrategico = $estrategico AND id_empresa = " . $_SESSION['id_empresa'] . "");
+            if (mysqli_num_rows($queryVPLA) > 0) {
+                $dataVPLA = mysqli_fetch_array($queryVPLA);
+                $celula = $dataVPLA["responsables"];
+            } else {
+                $queryOE = mysqli_query($connect_okrs, "SELECT * FROM Objetivos_estrategicos WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND id = $estrategico AND estado = 1 ORDER BY objetivo ASC");
+                $dataOE = mysqli_fetch_array($queryOE);
+                $id_lider = $dataOE["id_responsable"];
+                $queryEMP = mysqli_query($connect_admin, "SELECT * FROM Empleados WHERE id = $id_lider");
+                $dataEMP = mysqli_fetch_array($queryEMP);
+                $queryAreaCI = mysqli_query($connect_admin, "SELECT * FROM Empleados WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND unidad_corporativa = ".$dataEMP["unidad_corporativa"]." AND role = 2 AND estado = 1 ORDER BY nombre ASC");
+                while ($dataAreaCI = mysqli_fetch_array($queryAreaCI)) {
+                    $celula .= $dataAreaCI["id"] . ',';
+                }
+                $celula = substr($celula, 0, -1);
+                $sentencia = "
+			INSERT INTO Celula_Integrantes ( id_empresa , id_obj_estrategico, responsables, estado, created_at ) 
+			VALUES 
+			( '" . $_SESSION['id_empresa'] . "', $estrategico, '$celula', 1, '" . $hoy . "' )
+			";
+                // echo $sentencia;
+                mysqli_query($connect_clima, $sentencia);
+            }
+
+            $sentenciaCelula = "
+        UPDATE Lecciones_Aprendidas SET 
+        celula = '$celula'
+        WHERE id = $id_tmp
+        ";
+            // echo $sentenciaCelula;
+            mysqli_query($connect_clima, $sentenciaCelula);
+        }
+
+        $array_lista_la = explode(",", $celula);
+        foreach ($array_lista_la as $id_resp) {
+            $sentenciaCL = "
+			INSERT INTO Celula_Lecciones ( id_leccion, id_empresa , id_empleado, estado, created_at ) 
+			VALUES 
+			( $id_tmp, '" . $_SESSION['id_empresa'] . "', $id_resp,  1, '" . $hoy . "' )
+			";
+            // echo $sentenciaCL;
+            mysqli_query($connect_clima, $sentenciaCL);
+        }
+
+        echo '<script> window.location.href = "?pg=lecciones_aprendidas/detalle/participantes&id=' . $id_tmp . '' . $ruta . '";</script>';
+    }
+}
+
+$queryOkrs = mysqli_query($connect_okrs, "SELECT * FROM Okrs WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND anio = " . $_SESSION["anio_fill"] . "");
+$dataOkrs = mysqli_fetch_array($queryOkrs);
+
+$query = mysqli_query($connect_clima, "SELECT * FROM Lecciones_Aprendidas WHERE id = '" . $_GET["id"] . "' ");
+$data = mysqli_fetch_array($query);
+?>
+
+
+<div class="container">
+
+    <?php echo $respuesta; ?>
+
+    <ul class="nav nav-tabs justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="<?php echo $url; ?>?pg=lecciones_aprendidas/detalle/crear" style="color:white !important;">
+                        Lección Aprendida
+                    </a>
+                </li>
+                <?php if ($_SESSION["id_leccion"]) { ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo $url; ?>?pg=lecciones_aprendidas/detalle/participantes&id=<?php echo $_SESSION["id_leccion"]; ?>" style="color:black !important;">
+                            Célula
+                        </a>
+                    </li>
+                <?php } ?>
+    </ul>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3>Creación para publicación en el muro de Lecciones Aprendidas</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <label>* Año</label>
+                    <select class="form-control" name="anio" id="anio" required onchange="anio_select(this);">
+                        <option value="">Selecciona...</option>
+                        <?php
+                        foreach ($Array_Anio as $periodo) {
+                            if ($data["anio"] ==  $periodo[0]) {
+                                echo '<option value="' . $periodo[0] . '" selected>' . $periodo[1] . '</option>';
+                            } else {
+                                echo '<option value="' . $periodo[0] . '">' . $periodo[1] . '</option>';
+                            }
+                        }
+                        ?>
+                    </select>
+                </div>
+
+
+                <div class="col-md-2">
+                                    <label>* Periodo Inicia</label>
+                                    <input type="date" class="form-control" name="fecha_inicia" value="<?php echo $data["fecha_inicia"]; ?>" required>
+                </div>
+
+                <div class="col-md-2">
+                                    <label>* Periodo Termina</label>
+                                    <input type="date" class="form-control" name="fecha_termina" value="<?php echo $data["fecha_termina"]; ?>" required>
+                </div>
+                <div class="col-md-2">
+                                    <label>* Periodo</label>
+                                    <select class="form-control" name="periodo" required>
+                                        <option value="">Selecciona...</option>
+                                        <?php
+                                        foreach ($Array_Periodos_Q as $periodo) {
+                                            if ($data["periodo"] ==  $periodo[0] || $data_equipo["periodo"] ==  $periodo[0]) {
+                                                echo '<option value="' . $periodo[0] . '" selected>' . $periodo[1] . '</option>';
+                                            } else {
+                                                echo '<option value="' . $periodo[0] . '">' . $periodo[1] . '</option>';
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                </div>
+
+                <div class="col-md-2" id="TipoSel">
+                                    <label>* Tipo</label>
+                                    <select class="form-control" name="tipo_sel" id="tipo_sel" onchange="select_leccion(this);">
+                                        <option value="">Selecciona...</option>
+                                        <?php
+                                        foreach ($Array_Leccion as $tipo) {
+                                            if ($data["tipo_leccion"] ==  $tipo[0]) {
+                                                echo '<option value="' . $tipo[0] . '" selected>' . $tipo[1] . '</option>';
+                                            } else {
+                                                echo '<option value="' . $tipo[0] . '">' . $tipo[1] . '</option>';
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                </div>
+
+                <div class="col-md-2" id="ObjetivoEstrategico">
+                                    <label for="">* Objetivo Estratégico</label>
+                                    <select class="form-control" name="id_objetivo_estrategico" id="id_objetivo_estrategico" onchange="select_organizacional(this);">
+
+                                    </select>
+                </div>
+
+                <div class="col-md-2" id="ObjetivoEstrategicoE">
+                                    <label for="">* Objetivo Estratégico</label>
+                                    <select class="form-control" name="id_objetivo_estrategico_e" id="id_objetivo_estrategico_e" onchange="select_equipos(this);">
+
+                                    </select>
+                </div>
+
+                <div class="col-md-4" id="OkrOrganizacional">
+                                    <label>* OKR Organizacional</label>
+                                    <select class="form-control" id="id_okr_organizacional" name="id_okr_organizacional">
+                                        <?php if ($data["id_okr_organizacional"] > 0) {
+
+                                            $queryResultado = mysqli_query($connect_okrs, "SELECT * FROM Okrs WHERE id_empresa = '" . $data["id_empresa"] . "' AND objetivos_estrategicos LIKE '%" . $data["id_okr_estrategico"] . "%' AND tipo = 1 AND estado = 1 ORDER BY objetivo_okr ASC");
+
+                                            while ($dataResultado = mysqli_fetch_array($queryResultado)) {
+
+                                                if ($data["id_okr_organizacional"] == $dataResultado["id"]) {
+                                                    echo '<option value="' . $dataResultado["id"] . '" selected> ' . $dataResultado["objetivo_okr"] . '</option>';
+                                                } else {
+                                                    echo '<option value="' . $dataResultado["id"] . '">' . $dataResultado["objetivo_okr"] . '</option>';
+                                                }
+                                            }
+                                        } ?>
+                                    </select>
+                </div>
+
+                <div class="col-md-4" id="OkrEquipo">
+                                    <label>* OKR Equipo</label>
+                                    <select class="form-control" id="id_okr_equipo" name="id_okr_equipo">
+                                        <?php if ($data["id_okr_equipo"] > 0) {
+
+                                            $queryResultadoE = mysqli_query($connect_okrs, "SELECT * FROM Okrs WHERE id_empresa = '" . $data["id_empresa"] . "' AND objetivos_estrategicos LIKE '%" . $data["id_okr_estrategico"] . "%' AND tipo = 2 AND estado = 1 ORDER BY objetivo_okr ASC");
+
+                                            while ($dataResultadoE = mysqli_fetch_array($queryResultadoE)) {
+
+                                                if ($data["id_okr_equipo"] == $dataResultadoE["id"]) {
+                                                    echo '<option value="' . $dataResultadoE["id"] . '" selected> ' . $dataResultadoE["objetivo_okr"] . '</option>';
+                                                } else {
+                                                    echo '<option value="' . $dataResultadoE["id"] . '">' . $dataResultadoE["objetivo_okr"] . '</option>';
+                                                }
+                                            }
+                                        } ?>
+                                    </select>
+                </div>
+
+                <div class="col-md-3" id="VPSel1">
+                                    <label>* Alta Dirección</label>
+                                    <select class="form-control" id="vicepresidencia" name="vicepresidencia" onchange="select_vicepresidencia(this);">
+                                        <option value="">Seleccione alta dirección..</option>
+                                        <?php
+                                        $queryVP = mysqli_query($connect_valentina, "SELECT * FROM Vicepresidencia WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND estado = 1 ORDER BY nombre");
+                                        while ($dataVP = mysqli_fetch_array($queryVP)) {
+
+                                            if ($data['area'] == $dataVP["id"]) {
+                                                echo '<option value="' . $dataVP["id"] . '" selected>' . $dataVP["nombre"] . '</option>';
+                                            } else {
+                                                echo '<option value="' . $dataVP["id"] . '">' . $dataVP["nombre"] . '</option>';
+                                            }
+                                        }
+
+                                        ?>
+                                    </select>
+
+                </div>
+
+                <div class="col-md-3" id="AreaSel">
+                                    <label>* Area</label>
+                                    <select class="form-control" id="area_sel" name="area_sel" onchange="select_owner(this);">
+                                        <option value="">Seleccione area..</option>
+                                        <?php
+                                        // $queryAreas = mysqli_query($connect_valentina, "SELECT * FROM Areas WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND estado = 1 ORDER BY nombre");
+                                        // while ($dataAreas = mysqli_fetch_array($queryAreas)) {
+
+                                        //     if ($data['area'] == $dataAreas["id"]) {
+                                        //         echo '<option value="' . $dataAreas["id"] . '" selected>' . $dataAreas["nombre"] . '</option>';
+                                        //     } else {
+                                        //         echo '<option value="' . $dataAreas["id"] . '">' . $dataAreas["nombre"] . '</option>';
+                                        //     }
+                                        // }
+
+                                        ?>
+                    </select>
+
+                </div>
+                <div class="col-md-3" id="VPSel">
+                                    <label>* Alta Dirección</label>
+                                    <select class="form-control" id="vp_sel" name="vp_sel" onchange="select_owner1(this);">
+                                        <option value="">Seleccione alta dirección..</option>
+                                        <?php
+                                        $queryVP = mysqli_query($connect_valentina, "SELECT * FROM Vicepresidencia WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND estado = 1 ORDER BY nombre");
+                                        while ($dataVP = mysqli_fetch_array($queryVP)) {
+
+                                            if ($data['area'] == $dataVP["id"]) {
+                                                echo '<option value="' . $dataVP["id"] . '" selected>' . $dataVP["nombre"] . '</option>';
+                                            } else {
+                                                echo '<option value="' . $dataVP["id"] . '">' . $dataVP["nombre"] . '</option>';
+                                            }
+                                        }
+
+                                        ?>
+                                    </select>
+
+                </div>
+                <div class="col-md-3" id="dependiente">
+                                    <label>Owner * </label>
+                                    <select class="form-control" name="id_owner_leccion" id="id_owner_leccion">
+                                        <?php if ($data["id_empleado"] > 0) {
+
+                                            $queryResultado = mysqli_query($connect_valentina, "SELECT * FROM Empleados WHERE id_empresa = '" . $data["id_empresa"] . "' AND area = '" . $data["area"] . "' ORDER BY nombre ASC");
+
+                                            while ($dataResultado = mysqli_fetch_array($queryResultado)) {
+
+                                                if ($id_empleado == $dataResultado["id"]) {
+                                                    echo '<option value="' . $dataResultado["id"] . '" selected> ' . $dataResultado["nombre"] . '</option>';
+                                                } else {
+                                                    echo '<option value="' . $dataResultado["id"] . '">' . $dataResultado["nombre"] . '</option>';
+                                                }
+                                            }
+                                        } ?>
+                                    </select>
+                </div>
+
+                <div class="col-md-3" id="dependiente1">
+                                    <label>Owner * </label>
+                                    <select class="form-control" name="id_owner_leccion1" id="id_owner_leccion1">
+                                        <?php if ($data["id_empleado"] > 0) {
+
+                                            $queryResultado = mysqli_query($connect_valentina, "SELECT * FROM Empleados WHERE id_empresa = '" . $data["id_empresa"] . "' AND unidad_corporativa = '" . $data["id_vp"] . "' AND role = 2 ORDER BY nombre ASC");
+
+                                            while ($dataResultado = mysqli_fetch_array($queryResultado)) {
+
+                                                if ($id_empleado == $dataResultado["id"]) {
+                                                    echo '<option value="' . $dataResultado["id"] . '" selected> ' . $dataResultado["nombre"] . '</option>';
+                                                } else {
+                                                    echo '<option value="' . $dataResultado["id"] . '">' . $dataResultado["nombre"] . '</option>';
+                                                }
+                                            }
+                                        } ?>
+                                    </select>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label>* Descripción de la lección aprendida</label>
+                                    <textarea rows="3" class="form-control" name="descripcion" required placeholder="Ingrese la descripción de la lección aprendida..."><?php echo $data["descripcion"]; ?></textarea>
+                </div>
+
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-success mb-3 ">Guardar</button>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
