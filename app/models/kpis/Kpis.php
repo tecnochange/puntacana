@@ -847,10 +847,10 @@ class Kpis
         $sentencia =
             "SELECT
             Kpis.*,
-            goforagile_admin.Vicepresidencia.nombre as vicepresidencia_nombre,
-            goforagile_admin.Areas.nombre as area_nombre,
-            goforagile_admin.Empleados.role as empleado_role,
-            goforagile_admin.Roles.nombre as role_nombre
+            puntacana_admin.Vicepresidencia.nombre as vicepresidencia_nombre,
+            puntacana_admin.Areas.nombre as area_nombre,
+            puntacana_admin.Empleados.role as empleado_role,
+            puntacana_admin.Roles.nombre as role_nombre
         FROM
             Kpis
         INNER JOIN
@@ -858,13 +858,13 @@ class Kpis
         INNER JOIN
             Frecuencia_Kpis ON Frecuencia_Kpis.id_kpi = Kpis.id
         LEFT JOIN
-            goforagile_admin.Empleados ON goforagile_admin.Empleados.id = Kpis.id_empleado
+            puntacana_admin.Empleados ON puntacana_admin.Empleados.id = Kpis.id_empleado
         LEFT JOIN
-            goforagile_admin.Roles ON goforagile_admin.Roles.id = goforagile_admin.Empleados.role
+            puntacana_admin.Roles ON puntacana_admin.Roles.id = puntacana_admin.Empleados.role
         LEFT JOIN
-            goforagile_admin.Vicepresidencia ON goforagile_admin.Vicepresidencia.id = Kpis.area_macro
+            puntacana_admin.Vicepresidencia ON puntacana_admin.Vicepresidencia.id = Kpis.area_macro
         LEFT JOIN
-            goforagile_admin.Areas ON goforagile_admin.Areas.id = Kpis.area_proceso
+            puntacana_admin.Areas ON puntacana_admin.Areas.id = Kpis.area_proceso
         WHERE
             Kpis.id_empresa = '$id_empresa'
             AND Kpis.anio = '$anio'
