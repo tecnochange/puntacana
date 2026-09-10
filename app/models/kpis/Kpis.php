@@ -2068,14 +2068,14 @@ class Kpis
         $sentencia =
             "SELECT
             Objetivo_Sg.*,
-            goforagile_admin.Vicepresidencia.nombre as nombre_vicepresidencia,
-            goforagile_admin.Areas.nombre as nombre_area
+            puntacana_admin.Vicepresidencia.nombre as nombre_vicepresidencia,
+            puntacana_admin.Areas.nombre as nombre_area
         FROM
             Objetivo_Sg
         LEFT JOIN
-            goforagile_admin.Vicepresidencia ON goforagile_admin.Vicepresidencia.id = Objetivo_Sg.id_vp
+            puntacana_admin.Vicepresidencia ON puntacana_admin.Vicepresidencia.id = Objetivo_Sg.id_vp
         LEFT JOIN
-            goforagile_admin.Areas ON goforagile_admin.Areas.id = Objetivo_Sg.id_area
+            puntacana_admin.Areas ON puntacana_admin.Areas.id = Objetivo_Sg.id_area
         WHERE
             Objetivo_Sg.id_empresa = '$id_empresa'
         ";
