@@ -1999,14 +1999,14 @@ class Kpis
             SELECT 
             Kpis.id AS id_kpi,
             Kpis.*,
-            goforagile_admin.Areas.nombre as area_nombre,
-            goforagile_admin.Lideres_Area.id_lider as id_lider
+            puntacana_admin.Areas.nombre as area_nombre,
+            puntacana_admin.Lideres_Area.id_lider as id_lider
             FROM
                 Kpis
             LEFT JOIN
-                goforagile_admin.Areas ON goforagile_admin.Areas.id = Kpis.area_proceso
+                puntacana_admin.Areas ON puntacana_admin.Areas.id = Kpis.area_proceso
             LEFT JOIN
-                goforagile_admin.Lideres_Area ON goforagile_admin.Lideres_Area.id_area = Kpis.area_proceso
+                puntacana_admin.Lideres_Area ON puntacana_admin.Lideres_Area.id_area = Kpis.area_proceso
             WHERE
                 Kpis.id_empresa = '$id_empresa'
                 AND Kpis.area_macro = '$area_macro'
