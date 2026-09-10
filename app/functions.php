@@ -527,5 +527,15 @@ function ObtenerAntiguedad($fecha_ingreso){
     return $antiguedad;
 }
 
+function MesesHabilitados($id_empresa, $anio){
+    global $connect_kpis;
+
+    $queryMesesHabiltiados = mysqli_query($connect_kpis, "SELECT * FROM Habilitar_Mes WHERE id_empresa = ".$id_empresa." AND anio = '".$anio."' ");
+    $dataMesesHabiltiados = mysqli_fetch_array($queryMesesHabiltiados);
+
+
+    return $dataMesesHabiltiados;
+}
+
 ?>
 

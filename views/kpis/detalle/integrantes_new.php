@@ -246,7 +246,7 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
                             ?>
 
                             <tr>
-                                <td><img src="<?= 'https://goforagile.com/recursos/' . $integrante_foto; ?>" width="40" height="40" class="foto_miniaturas" title="<?= $integrante["nombre"]; ?>" onclick="FichaEmpleado('<?= $integrante['id_colaborador']; ?>')"></td>
+                                <td><img src="<?= $recursos_local . $integrante_foto; ?>" width="40" height="40" class="foto_miniaturas" title="<?= $integrante["nombre"]; ?>" onclick="FichaEmpleado('<?= $integrante['id_colaborador']; ?>')"></td>
                                 <td><?= $integrante["nombre"]; ?></td>
                                 <td><?= $integrante["cargo"]; ?></td>
                                 <td><?= $integrante["vicepresidencia"]; ?></td>
@@ -474,7 +474,7 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
                 empleado.foto = empleado.foto ? empleado.foto : "/img_default.jpg";
                 $tbody.append(`
                 <tr data-id="${empleado.id}">
-                    <td><img src="https://goforagile.com/recursos/${empleado.foto}" width="40" height="40" class="foto_miniaturas" onclick="FichaEmpleado('${empleado.id}')"></td>
+                    <td><img src="https://puntacana.goforagile.com/recursos/${empleado.foto}" width="40" height="40" class="foto_miniaturas" onclick="FichaEmpleado('${empleado.id}')"></td>
                     <td>${empleado.nombre}</td>
                     <td>${empleado.nombre_cargo}</td>
                     <td align="center"><input type="checkbox" class="chk-rol" name="empleados[${empleado.id}]" value="1"></td>

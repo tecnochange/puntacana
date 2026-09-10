@@ -68,7 +68,7 @@ if ($pagina == "") {
             <div id="content">
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
                     <img class="img-profile rounded-circle"
-                        src="https://goforagile.com/recursos/1698844635LogoGrupoPuntacanaFullColor.png" style="max-width: 50px;max-height: 50px;">
+                        src="https://puntacana.goforagile.com/recursos/1698844635LogoGrupoPuntacanaFullColor.png" style="max-width: 50px;max-height: 50px;">
                     <ul class="navbar-nav ml-auto">
 
                         <div class="topbar-divider d-none d-sm-block"></div>
@@ -77,7 +77,7 @@ if ($pagina == "") {
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small" style="font-size: 1rem !important;"><?php echo $_SESSION['nombre_super_valentina']; ?></span>
                                 <img class="img-profile rounded-circle"
-                                    src="https://goforagile.com/recursos/<?php echo $_SESSION['foto_valentina']; ?>">
+                                    src="https://puntacana.goforagile.com/recursos/<?php echo $_SESSION['foto_valentina']; ?>">
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">

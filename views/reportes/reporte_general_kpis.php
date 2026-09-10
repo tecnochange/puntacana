@@ -1,5 +1,18 @@
 <?php
 
+$filtros = '';
+if($_POST["area_macro_filtro"] > 0){
+    $filtros .= " AND Kpis.area_macro = '".$_POST["area_macro_filtro"]."' "; 
+}
+
+if($_POST["area_proceso_filtro"]  > 0){
+    $filtros .= " AND Kpis.area_proceso = '".$_POST["area_proceso_filtro"]."' ";
+}
+if($_POST["subproceso_filtro"]  > 0){
+    $filtros .= " AND Kpis.subproceso = '".$_POST["subproceso_filtro"]."' ";
+}
+
+
 $array_vicepresidencia = [];
 $queryVicepresidencias = mysqli_query($connect_admin, "SELECT id, nombre FROM Vicepresidencia WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND estado = 1 ORDER BY nombre ASC");
 while ($dataVicepresidencia = mysqli_fetch_assoc($queryVicepresidencias)) {
@@ -17,24 +30,140 @@ $ClassKpisServicios = new KpisServicios($user_log["id_empresa"]);
 
 ?>
 
+<script>
+    var api = '<?php echo $url; ?>api/kpis/';
+
+    function ListaFiltroProceso(){
+
+        data = {
+            id_empresa: <?php echo $user_log["id_empresa"]; ?>,
+            id_vicepresidencia: $("#area_macro_fill").val(),
+        };
+        jQuery.ajax({
+            url: api + "filtro_lista_proceso.php",
+            type: 'post',
+            data: data,
+            })
+            .done(function(resp) {
+                $("#area_proceso_fill").html(resp);
+            })
+            .fail(function(resp) {
+                console.log(resp);
+            })
+            .always(function(resp) {}
+        );
+
+        ListaFiltroObjetivosSG();
+    }
+
+    
+    function ListaFiltroSubProceso(){
+
+        data = {
+            id_empresa: <?php echo $user_log["id_empresa"]; ?>,
+            id_vicepresidencia: $("#area_macro_fill").val(), 
+            id_area: $("#area_proceso_fill").val()  
+        };
+        jQuery.ajax({
+            url: api + "filtro_lista_subproceso.php",
+            type: 'post',
+            data: data,
+            })
+            .done(function(resp) {
+                $("#subproceso_fill").html(resp);
+            })
+            .fail(function(resp) {
+                console.log(resp);
+            })
+            .always(function(resp) {}
+        );
+        ListaFiltroObjetivosSG();
+    }
+</script>
+
 <form action="app/models/exportarExcel.php" method="post" target="_blank" id="FormularioExportacion">
     <input type="hidden" id="datos_a_enviar" name="datos_a_enviar" />
 </form>
 
 <div class="container-fluid">
 
-    <div class="card mb-3" style="display:none">
+    <form action="" method="POST">
+    <div class="card mb-3" >
         <div class="card-body">
             <div class="row">
-                <div class="col-md-4 mb-2">
-                    <label>Por Alta Dirección</label>
+
+                <div class="col-md-3 mb-2" >
+                    <select class="form-control form-control-sm select_2_search" name="area_macro_filtro" id="area_macro_fill" onchange="ListaFiltroProceso(this.value)" <?= $seleccionados["area_macro"]; ?> >
+                        <option value="">Área Macro...</option>
+                    <?php
+                    $queryVicepresidencias = mysqli_query($connect_admin, "SELECT * FROM Vicepresidencia WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND estado = 1 ORDER BY nombre ASC");
+                    while ($dataVicepresidencia = mysqli_fetch_array($queryVicepresidencias)) {
+                        if ($$_POST["area_macro_fill"] == $dataVicepresidencia["id"]) {
+                            echo '<option value="' . $dataVicepresidencia["id"] . '" selected>' . $dataVicepresidencia["nombre"] . '</option>';
+                        } else {
+                            echo '<option value="' . $dataVicepresidencia["id"] . '">' . $dataVicepresidencia["nombre"] . '</option>';
+                        }
+                    }
+                    ?>
+                    </select>
                 </div>
-                <div class="col-md-4 mb-2">
-                    <label>Por Objetivos Estratégicos</label>
+
+
+                <div class="col-md-3 mb-2" >
+                    <select class="form-control form-control-sm select_2_search" name="area_proceso_filtro" id="area_proceso_fill" onchange="ListaFiltroSubProceso()" <?= $seleccionados["area_proceso"]; ?>  >
+                        <option value="">Área Proceso...</option>
+                    <?php
+                    $queryVicepresidencias = mysqli_query($connect_admin, "SELECT * FROM Areas WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND estado = 1 ORDER BY nombre ASC");
+                    while ($dataVicepresidencia = mysqli_fetch_array($queryVicepresidencias)) {
+                        if ($_POST["area_proceso_fill"] == $dataVicepresidencia["id"]) {
+                            echo '<option value="' . $dataVicepresidencia["id"] . '" selected>' . $dataVicepresidencia["nombre"] . '</option>';
+                        } else {
+                            echo '<option value="' . $dataVicepresidencia["id"] . '">' . $dataVicepresidencia["nombre"] . '</option>';
+                        }
+                    }
+                    ?>
+                    </select>
                 </div>
+
+                <div class="col-md-3 mb-2" >
+                    <select class="form-control form-control-sm select_2_search" name="subproceso_filtro" id="subproceso_fill"  onchange="ListaFiltroObjetivosSG()" <?= $seleccionados["area_subproceso"]; ?> >
+                        <option value="">Subproceso...</option>
+                    <?php
+                    $sentencia_sub = "
+                    SELECT
+                        Estructura_Empresa.id, Estructura_Empresa.unidad_organizativa, Vicepresidencia.nombre AS vicepresidencia, Areas.nombre AS area
+                    FROM
+                        Estructura_Empresa 
+                        LEFT JOIN Vicepresidencia ON Vicepresidencia.id = Estructura_Empresa.vicepresidencia
+                        LEFT JOIN Areas ON Areas.id = Estructura_Empresa.area   
+                    WHERE
+                        Estructura_Empresa.id_empresa = '".$_SESSION["id_empresa"]."' AND Estructura_Empresa.estado = 1 AND Estructura_Empresa.unidad_organizativa != ''
+                    ORDER BY
+                        Estructura_Empresa.unidad_organizativa;
+                    ";
+                    $queryVicepresidencias = mysqli_query( $connect_admin, $sentencia_sub );
+                    while ($dataVicepresidencia = mysqli_fetch_array($queryVicepresidencias)) {
+                        if ($_POST["subproceso_fill"] == $dataVicepresidencia["id"]) {
+                            echo '<option value="' . $dataVicepresidencia["id"] . '" selected>' . $dataVicepresidencia["vicepresidencia"] . ' / ' . $dataVicepresidencia["area"] . ' / ' . $dataVicepresidencia["unidad_organizativa"] . '</option>';
+                        } else {
+                            echo '<option value="' . $dataVicepresidencia["id"] . '" >' . $dataVicepresidencia["vicepresidencia"] . ' / ' . $dataVicepresidencia["area"] . ' / ' . $dataVicepresidencia["unidad_organizativa"] . '</option>';
+                        }
+                    }
+                    ?>
+                    </select>
+                </div>
+
+                <div class="col-md-12 text-end mt-3">
+                    <button type="submit" class="btn btn-success ">Filtrar</button>
+                </div> 
+
+
+
+                
             </div>
         </div>
     </div>
+    </form> 
 
     <div class="card">
         <div class="card-header">
@@ -145,8 +274,9 @@ $ClassKpisServicios = new KpisServicios($user_log["id_empresa"]);
                 Kpis 
                 LEFT JOIN Frecuencia_Kpis ON Frecuencia_Kpis.id_kpi = Kpis.id
             WHERE
-                Kpis.id_empresa = '".$_SESSION["id_empresa"]."' AND Kpis.anio = '".$_SESSION["anio_fill"]."'  
-            ";
+                Kpis.id_empresa = '".$_SESSION["id_empresa"]."' AND Kpis.anio = '".$_SESSION["anio_fill"]."' 
+                ".$filtros."  
+            "; 
             $query = mysqli_query( $connect_kpis, $sentencia );
             while($data = mysqli_fetch_array($query)){
 
@@ -216,8 +346,8 @@ $ClassKpisServicios = new KpisServicios($user_log["id_empresa"]);
                     <td>'.$txt_unidad_medida.'</td>
                     <td>'.$txt_frecuencia.'</td>
 
-                    <td>'.$data["meta"].'</td>
-                    <td>'.$avance["avance_numero"].'</td>
+                    <td>'.number_format($data["meta"],2,'.',',').'</td>
+                    <td>'.number_format($avance["avance_numero"],2,'.',',').'</td>
                     <td>'.$avance["avance_porcentaje"].'%</td>
 
                     <td>'.$data["enero"].'</td>

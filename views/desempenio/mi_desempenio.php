@@ -5,6 +5,29 @@ $(document).ready(function() {
 });
 </script>
 
+<script>
+    var api = '<?php echo $url; ?>api/competencias/';
+    function ValidarCicloSidebar(anio){
+
+        $.ajax({
+				url: api + 'validar_ciclo.php',
+				type: 'post',
+				data: {
+					anio: anio,
+					id_empresa: <?php echo $user_log["id_empresa"] ?>
+				},
+			}).done(function(resp) {
+                $("#ciclo_filter").html(resp);
+			})
+			.fail(function(resp) {
+				console.log(resp);
+			})
+			.always(function(resp) {});
+
+        
+    }
+</script>
+
 <style>
 	.progreso-bar {
 		width: 250px;
@@ -50,12 +73,40 @@ $(document).ready(function() {
 
 <?php 
 
+
+
+
+//PARA FILTRAR EL AÑO Y CICLO
 if ($_POST["anio_fill"] != "") {
 	$_SESSION["anio_fill"] = $_POST["anio_fill"];
+    $_SESSION["anio_ciclo"] = $_POST["anio_fill"];
+    $_SESSION["ciclo"] = $_POST["ciclo_fill"];
 }
+
 if ($_POST["anio_fill"] == -1) {
 	$_SESSION["anio_fill"] = "";
 }
+
+//PARA VALIDAR QUE TENGA EL AÑO Y CILO
+if($_SESSION["anio_fill"] != $_SESSION["anio_ciclo"] ){
+
+    $_SESSION["anio_ciclo"] = $_SESSION["anio_fill"];
+
+    $queryCicloFill = mysqli_query($connect_valoracion, "SELECT * FROM Ciclos WHERE id_empresa = '" . $_SESSION['id_empresa'] . "' AND anio = '".$_SESSION["anio_fill"]."' ");
+    $dataCiclosFill = mysqli_fetch_array($queryCicloFill);
+    $_SESSION["ciclo"] = $dataCiclosFill["id"];
+}
+
+/*
+//VALIDAR QUE EL CICLO PERTENEZCA AL AÑO
+$queryCicloValidar = mysqli_query($connect_valoracion, "SELECT * FROM Ciclos WHERE id_empresa = '" . $_SESSION['id_empresa'] . "' AND id = '".$_SESSION["ciclo"]."' ");
+$dataCiclosValidar = mysqli_fetch_array($queryCicloValidar);
+if($dataCiclosValidar["anio"] != $_SESSION["anio_fill"] ){
+    $_SESSION["ciclo"] = $dataCiclosFill["id"];
+}
+*/
+
+
 
 //DATOS DEL USUARIO
 include("app/models/estructura/Colaboradores.php");
@@ -72,9 +123,11 @@ $kpis = $ClassKpis->ResultadoKpis($user_log["id"], $user_log["id_empresa"], $_SE
 //COMPETENCIAS
 //COMPETENCIAS
 //COMPETENCIAS
+/*
 include("views/competencias/informes/funciones.php");
 $VALIDACION = PromedioGeneralEvaluado($user_log["id"], $connect_valoracion, $connect_admin);
 $promedio = $VALIDACION["promedio"];
+
 
 //PASAR A FUNCION GLOBAL
 function ResultadoLiderCompetencias( $id_user, $anio, $ciclo ){
@@ -125,6 +178,7 @@ function ResultadoLiderCompetencias( $id_user, $anio, $ciclo ){
 
 
 
+
 $competencias = 0;
 if($promedio > 0){
     $competencias = $promedio*100/5;
@@ -136,8 +190,10 @@ if($VALIDACION["tipo_ponderacion"] == '180'){
     $competencias = ResultadoLiderCompetencias( $user_log["id"], $_SESSION["anio_fill"], $_SESSION['ciclo'] );
     $competencias = round($competencias,2);
 }
+*/
 
-
+include("views/competencias/informes/function_numero_competencias.php");
+$competencias = ConsolidadoColaboradorCompetencias($_SESSION["id_empresa"], $_SESSION["anio_ciclo"], $_SESSION["ciclo"], $user_log["id"]);
 
 
 
@@ -171,7 +227,7 @@ $back_color = "background-color:" . $escala_home . " !important";
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-3">
-							<select class="form-control" name="anio_fill">
+							<select class="form-control" name="anio_fill" onchange="ValidarCicloSidebar(this.value)" >
 								<option value="-1">Filtrar por Periodo...</option>
 								<?php
 								foreach ($Array_Anio_Desempenio as $periodo) {
@@ -184,6 +240,21 @@ $back_color = "background-color:" . $escala_home . " !important";
 								?>
 							</select>
 						</div>
+                        <div class="col-md-3">
+                            <select class="form-control form-control-sm" name="ciclo_fill" id="ciclo_filter"  >
+                                    <option value="">Por Ciclo...</option>
+                                    <?php
+                                    $query = mysqli_query($connect_valoracion, "SELECT * FROM Ciclos WHERE id_empresa = '" . $_SESSION['id_empresa'] . "' AND anio = '".$_SESSION["anio_ciclo"]."' ");
+                                    while ($dataCiclos = mysqli_fetch_array($query)) {
+                                        if ($_SESSION["ciclo"] ==  $dataCiclos["id"]) {
+                                            echo '<option value="' . $dataCiclos["id"] . '" selected>' . $dataCiclos["nombre"] . '</option>';
+                                        } else {
+                                            echo '<option value="' . $dataCiclos["id"] . '">' . $dataCiclos["nombre"] . '</option>';
+                                        }
+                                    }
+                                    ?>
+                            </select>
+                        </div>
 						<div class="col-md-2" style="text-align: right;">
 							<button type="submit" class="btn btn-primary w-100">Filtrar</button>
 						</div>
@@ -207,7 +278,17 @@ $back_color = "background-color:" . $escala_home . " !important";
 
     <div class="card mb-3">
         <div class="card-header">
-            <h3>MI DESEMPEÑO</h3>
+            <table class="w-100">
+                <tr>
+                    <td><h3>MI DESEMPEÑO</h3></td>
+                    <td class="text-end">
+                        <button type="button" class="btn btn-success btn-sm" onclick="ExportarExcel()">
+                            <i class="bx bx-download"></i> Excel
+                        </button>               
+                    </td>
+                </tr>
+            </table>
+            
         </div>
         <div class="card-body">
             <div class="row row-cols-sm-1 row-cols-md-5">
@@ -245,12 +326,12 @@ $back_color = "background-color:" . $escala_home . " !important";
 			</div>
  
             <div class="row">
-						<div class="col-md-12" style="text-align: center;">
-							<h3># Único de desempeño</h3>
-						</div>
+				<div class="col-md-12" style="text-align: center;">
+					<h3># Único de desempeño</h3>
+				</div>
 			</div>
 			<div class="progresos" data-bs-toggle="tooltip" align="center" style="background-color: #e9ecef;">
-						<h1 style="font-size: 3.5rem;color: black !important; font-weight: bold;"><?php echo round($numero_desempenio,2); ?>%</h1>
+				<h1 style="font-size: 3.5rem;color: black !important; font-weight: bold;"><?php echo round($numero_desempenio,2); ?>%</h1>
 			</div>
 			<div class="progress-bar bg-success" role="progressbar" style=" width: <?php echo $numero_desempenio; ?>%; <?php echo $back_color; ?>;z-index: 2;margin-top: -76px;height: 66px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
             </div>
@@ -325,5 +406,62 @@ $back_color = "background-color:" . $escala_home . " !important";
     </div>
 </div>
 
+<div style="display:none" >
+    <table id="formularios">
+        <tr>
+            <td>Vicepresidencia</td>
+            <td>Área</td>
+            <td>Unidad Organizativa</td>
+            <td>Nivel Jerárquico</td>
+            <td>Cargo</td>
+            <td>Resultado de mis OKRs</td>
+            <td>Resultado de mis KPIs</td>
+            <td>Resultado de mis Competencias</td>
+            <td># Único de desempeño</td>
+        </tr>
+        <tr>
+            <td><?php echo $colaborador["nombre_vicepresidencia"]; ?></td>
+            <td><?php echo $colaborador["nombre_area"]; ?></td>
+            <td><?php echo $colaborador["nombre_unidad"]; ?></td>
+            <td><?php echo $colaborador["nombre_nivel_jerarquico"]; ?></td>
+            <td><?php echo $colaborador["nombre_cargo"]; ?></td>
+            <td><?php echo number_format($okrs, 2); ?></td>
+            <td><?php echo number_format($kpis, 2); ?></td>
+            <td><?php echo number_format($competencias, 2); ?></td>
+            <td><?php echo round($numero_desempenio,2); ?></td>
+        </tr>
+    </table>
+</div>
+
+<script>
+    function ExportarExcel() {
+
+        setTimeout(function(){
+
+            var tabla = document.getElementById("formularios").outerHTML;
+
+            var archivo = new Blob(
+                ['\ufeff' + tabla],
+                { type: 'application/vnd.ms-excel' }
+            );
+
+            var url = URL.createObjectURL(archivo);
+
+            var link = document.createElement("a");
+            link.href = url;
+            link.download = "Consolidado_Desempenio_Individual.xls";
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+
+            // Volver a 50 registros
+            table.page.len(50).draw();
+
+        }, 500);
+    }
+</script>
 
 

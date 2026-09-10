@@ -32,7 +32,7 @@ $( document ).ready(function() {
 	$ClassColaboradores = new Colaboradores();
 
 	$colaborador =  $ClassColaboradores->colaborador( $user_log["id"], $connect_admin);
-    $foto = "https://goforagile.com/recursos/".$colaborador["foto"];
+    $foto = $recursos_local . $colaborador["foto"];
     if(!$colaborador["foto"]){
         $colaborador["foto"] = 'img_default.jpg';
     }
@@ -56,7 +56,7 @@ $( document ).ready(function() {
             <div class="row">
 				
 				<div class="col-md-4">
-					<img src="https://goforagile.com/recursos/<?php echo $colaborador["foto"]; ?>" style="width: 100%; max-width: 300px;" >
+					<img src="<?= $recursos_local . $colaborador["foto"]; ?>" style="width: 100%; max-width: 300px;" >
                 </div>
 				
 				<div class="col-md-8">

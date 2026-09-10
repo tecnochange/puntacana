@@ -84,7 +84,7 @@ if (isset($iniciativa['id'])) {
                         $responsable_foto = !empty($item_planificado["publicado_por"]["foto"]) ? $item_planificado["publicado_por"]["foto"] : "img_default.jpg";
                         $modalId = "modal_responsable_" . $item_planificado["publicado_por"]["id"];
                         ?>
-                        <img src="https://goforagile.com/recursos/<?= $responsable_foto; ?>"
+                        <img src="<?= $recursos_local . $responsable_foto; ?>"
                             class="foto_miniaturas mb-1"
                             title="<?= $item_planificado["publicado_por"]["nombre"]; ?>"
                             style="cursor:pointer;"
@@ -109,7 +109,7 @@ if (isset($iniciativa['id'])) {
                         $responsable_foto = !empty($item_en_progreso["publicado_por"]["foto"]) ? $item_en_progreso["publicado_por"]["foto"] : "img_default.jpg";
                         $modalId = "modal_responsable_" . $item_en_progreso["publicado_por"]["id"];
                         ?>
-                        <img src="https://goforagile.com/recursos/<?= $responsable_foto; ?>"
+                        <img src="<?= $recursos_local . $responsable_foto; ?>"
                             class="foto_miniaturas mb-1"
                             title="<?= $item_en_progreso["publicado_por"]["nombre"]; ?>"
                             style="cursor:pointer;"
@@ -134,7 +134,7 @@ if (isset($iniciativa['id'])) {
                         $responsable_foto = !empty($item_en_revision["publicado_por"]["foto"]) ? $item_en_revision["publicado_por"]["foto"] : "img_default.jpg";
                         $modalId = "modal_responsable_" . $item_en_revision["publicado_por"]["id"];
                         ?>
-                        <img src="https://goforagile.com/recursos/<?= $responsable_foto; ?>"
+                        <img src="<?= $recursos_local . $responsable_foto; ?>"
                             class="foto_miniaturas mb-1"
                             title="<?= $item_en_revision["publicado_por"]["nombre"]; ?>"
                             style="cursor:pointer;"
@@ -159,7 +159,7 @@ if (isset($iniciativa['id'])) {
                         $responsable_foto = !empty($item_completado["publicado_por"]["foto"]) ? $item_completado["publicado_por"]["foto"] : "img_default.jpg";
                         $modalId = "modal_responsable_" . $item_completado["publicado_por"]["id"];
                         ?>
-                        <img src="https://goforagile.com/recursos/<?= $responsable_foto; ?>"
+                        <img src="<?= $recursos_local . $responsable_foto; ?>"
                             class="foto_miniaturas mb-1"
                             title="<?= $item_completado["publicado_por"]["nombre"]; ?>"
                             style="cursor:pointer;"

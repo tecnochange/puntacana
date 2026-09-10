@@ -57,7 +57,7 @@ $progress = '
                             $foto_responsable = !empty($responsableData["foto"]) ? $responsableData["foto"] : "img_default.jpg";
                             $modalId = "modal_responsable_" . $responsableData["id"];
                         ?>
-                            <img src="https://goforagile.com/recursos/<?= $foto_responsable; ?>"
+                            <img src="<?= $recursos_local . $foto_responsable; ?>"
                                 class="foto_miniaturas mb-1"
                                 title="<?= $responsableData["nombre"]; ?>"
                                 style="cursor:pointer; width:32px !important; height:32px !important;"
@@ -138,7 +138,7 @@ $progress = '
                                 $fotoResp = !empty($respData["foto"]) ? $respData["foto"] : "img_default.jpg";
                                 ?>
                                 <div class="d-flex align-items-center mb-2">
-                                    <img src="https://goforagile.com/recursos/<?= $fotoResp ?>"
+                                    <img src="<?= $recursos_local . $fotoResp ?>"
                                         class="rounded-circle me-2"
                                         width="35" height="35">
                                     <span><?= $respData["nombre"] ?></span>
@@ -220,10 +220,10 @@ $progress = '
                                     <a href="?pg=okrs/okr/resultados&id=<?= $resultado[" id_okrs"]; ?>&id_resultado=<?= $resultado["id"]; ?>" class="dropdown-item">Editar Resultado Clave</a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item text-secondary">Mover a otro OKR</a>
+                                    <a class="dropdown-item " onclick="FichaMoverResultado(<?= $resultado["id"]; ?>)">Mover a otro OKR</a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item text-secondary">Duplicar</a>
+                                    <a class="dropdown-item " onclick="FichaDuplicarResultado(<?= $resultado["id"]; ?>)">Duplicar</a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" onclick="EliminarResultadoClave(<?= $resultado["id"]; ?>)">Eliminar</a>
@@ -282,7 +282,7 @@ $progress = '
                                         $fotoRespIni = !empty($respDataIni["foto"]) ? $respDataIni["foto"] : "img_default.jpg";
                                         $modalId = "modal_responsable_" . $respDataIni["id"];
                                     ?>
-                                        <img src="https://goforagile.com/recursos/<?= $fotoRespIni; ?>"
+                                        <img src="<?= $recursos_local . $fotoRespIni; ?>"
                                             width="32" height="32"
                                             class="rounded-circle mb-1"
                                             title="<?= $respDataIni["nombre"]; ?>"
@@ -432,7 +432,7 @@ $progress = '
                                                     $fotoIniFull = !empty($respIniData["foto"]) ? $respIniData["foto"] : "img_default.jpg";
                                                 ?>
                                                     <div class="d-flex align-items-center mb-2">
-                                                        <img src="https://goforagile.com/recursos/<?= $fotoIniFull ?>"
+                                                        <img src="<?= $recursos_local . $fotoIniFull ?>"
                                                             class="rounded-circle me-2"
                                                             width="35" height="35">
                                                         <span><?= $respIniData["nombre"] ?></span>

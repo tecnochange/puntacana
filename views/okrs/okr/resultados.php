@@ -188,7 +188,7 @@ if (isset($_GET["id_resultado"]) && !empty($_GET["id_resultado"])) {
 
                             <tr>
                                 <td class="text-center"><?= $item["periodo"]; ?></td>
-                                <td class="text-center"><img src="<?= 'https://goforagile.com/recursos/' . $empleado_owner_foto; ?>" width="40" height="40" class="rounded-circle" title="<?= $item["empleado_owner"]["nombre"]; ?>"></td>
+                                <td class="text-center"><img src="<?= $recursos_local . $empleado_owner_foto; ?>" width="40" height="40" class="rounded-circle" title="<?= $item["empleado_owner"]["nombre"]; ?>"></td>
                                 <td><?= $item["descripcion"]; ?></td>
                                 <td class="text-center">
                                     <?php for ($i = 0; $i < count($responsables); $i++): ?>
@@ -197,7 +197,7 @@ if (isset($_GET["id_resultado"]) && !empty($_GET["id_resultado"])) {
                                         $responsableData = $OkrsServicios->Empleado($id_responsable); //OBTENER DATOS DEL RESPONSABLE
                                         $foto_responsable = !empty($responsableData["foto"]) ? $responsableData["foto"] : "img_default.jpg"; //FOTO DEL RESPONSABLE
                                         ?>
-                                        <img src="<?= 'https://goforagile.com/recursos/' . $foto_responsable; ?>" width="25" height="25" class="rounded-circle" title="<?= $responsableData["nombre"]; ?>">
+                                        <img src="<?= $recursos_local . $foto_responsable; ?>" width="25" height="25" class="rounded-circle" title="<?= $responsableData["nombre"]; ?>">
                                     <?php endfor; ?>
                                 </td>
                                 <td><?= $item["fecha_inicia"]; ?></td>

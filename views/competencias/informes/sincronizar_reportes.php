@@ -102,7 +102,7 @@ while ($dataAreas = mysqli_fetch_array($queryAreas)) {
                         <form action="" method="post">
                             <input type="hidden" name="generar_sincronizacion" value="true">
                             Esta apunto de generar una sincronización de los reportes para este año y ciclo. Recuerde que esta sincroniación tomará los ultimos datos registrados en la plataforma. esta acción permite generar reportes de manera más rápida. ¿Está seguro? <br><br>
-                            <button type="submit" class="btn btn-danger w-100" onClick="Ver_Activar_Informes()" disabled>
+                            <button type="submit" class="btn btn-danger w-100" onClick="Ver_Activar_Informes()" >
                                 Sincronizar
                             </button>
                         </form>
@@ -115,7 +115,7 @@ while ($dataAreas = mysqli_fetch_array($queryAreas)) {
 </div>
 
 <!-- VALIDAMOS SI EXISTE UN CICLO SELECCIONADO -->
-<?php if ($_SESSION['ciclo'] != "" && $_POST["generar_sincronizacion"]) { ?>
+<?php if ($_SESSION['ciclo'] != "" && $_POST["generar_sincronizacion"] && $_SESSION['ciclo'] >= 21 ) { ?>
 
     <div class="container-fluid" style="max-width: 90%; margin: 0 auto;">
         <div class="row">
@@ -143,9 +143,8 @@ while ($dataAreas = mysqli_fetch_array($queryAreas)) {
                     </thead>
                     <tbody id="listado">
                         <?php
-
-                        mysqli_query($connect_valoracion, "DELETE FROM aa_sincronizacion WHERE id_empresa = '" . $_SESSION['id_empresa'] . "' AND anio = '" . $_SESSION["anio_ciclo"] . "' AND ciclo = '" . $_SESSION["ciclo"] . "' ");
-                        include("views/valoracion/informes/funciones.php");
+                        //mysqli_query($connect_valoracion, "DELETE FROM aa_sincronizacion WHERE id_empresa = '" . $_SESSION['id_empresa'] . "' AND anio = '" . $_SESSION["anio_ciclo"] . "' AND ciclo = '" . $_SESSION["ciclo"] . "' ");
+                        include("views/competencias/informes/funciones.php");
 
                         $count = 1;
                         //CONSULTAMOS A TODOS LOS EMPLEADOS DE ESTA EMPRESA
@@ -177,7 +176,7 @@ while ($dataAreas = mysqli_fetch_array($queryAreas)) {
                         LEFT JOIN Nivel_Jerarquico ON Nivel_Jerarquico.id = Empleados.nivel_jerarquico
 
                         WHERE
-                            Empleados.estado = 1 AND Empleados.id_empresa = '" . $dtEmpleado["id_empresa"] . "' 
+                            Empleados.estado = 1 AND Empleados.id_empresa = '" . $user_log["id_empresa"] . "'  
                         ORDER BY
                             Empleados.nombre ASC 
                         ";
@@ -186,23 +185,30 @@ while ($dataAreas = mysqli_fetch_array($queryAreas)) {
                         while ($data = mysqli_fetch_array($query)) {
 
                             //VALIDAMOS SI TIENE POR LO MENOS 1 EVALUACION
-                            $sentencia_validar =
-                                "SELECT *
+                            $sentencia_validar = "
+                            SELECT *
                                 FROM Competencias_Evaluaciones_New
-                                WHERE id_empresa = '" . $_SESSION['id_empresa'] . "' AND id_ciclo = '" . $_SESSION['ciclo'] . "' AND id_evaluado = '" . $data["id"] . "' AND anio = '" . $_SESSION['anio_ciclo'] . "' AND estado >= 2 ";
+                                WHERE id_empresa = '" . $_SESSION['id_empresa'] . "' AND id_ciclo = '" . $_SESSION['ciclo'] . "' AND id_evaluado = '" . $data["id"] . "' AND anio = '" . $_SESSION['anio_ciclo'] . "' AND estado >= 2 
+                            ";
                             $queryValidar = mysqli_query($connect_valoracion, $sentencia_validar);
                             if ($queryValidar->num_rows > 0) {
 
                                 //$DATOS_GENERALES_EVALUADO = ResultadoGeneral($data["id"]);
 
                                 //VALIDAMOS SI TIENE TODAS LAS EVALUACIONES Y EVALUADORES
-                                //$VALIDACION = PromedioGeneralEvaluado($data["id"], $connect_valoracion, $connect_admin);
+                                $VALIDACION = PromedioGeneralEvaluado($data["id"], $connect_valoracion, $connect_admin); 
+
                                 $datos_ponderar = $VALIDACION["datos_ponderar"];
+                                //print_r($datos_ponderar);
+                                //echo "<br>";
 
                                 //$id_cargo = $VALIDACION["id_cargo"];
 
-                                //$datos_generales = ValidarEvaluacionesCompletas($data["id"], $connect_valoracion, $connect_admin);
-                                $datos_generales = [];
+                                $datos_generales = ValidarEvaluacionesCompletas($data["id"], $connect_valoracion, $connect_admin);
+                                //$datos_generales = [];
+
+                                //print_r($datos_generales);
+                                //echo "<br>";
 
                                 //LOS EVALUADORES DE ESTE EVALUADO
                                 $lista_array_evaludadores = $datos_generales["dato_evaluadores"];
@@ -232,10 +238,12 @@ while ($dataAreas = mysqli_fetch_array($queryAreas)) {
                                 $COMPETENCIAS = array();
 
                                 $id_cargo = 0;
-                                $queryEvaluaciones = mysqli_query($connect_valoracion,
-                                "SELECT * FROM Competencias_Evaluaciones_New 
+                                $sentencia_evaluaciones = "
+                                SELECT * FROM Competencias_Evaluaciones_New 
                                     WHERE id_empresa = '" . $_SESSION['id_empresa'] . "' AND id_ciclo = '" . $_SESSION['ciclo'] . "' AND 
-                                        id_evaluado = '" . $data["id"] . "' AND anio = '" . $_SESSION['anio_ciclo'] . "' AND estado = 2 ORDER BY created_at DESC ");
+                                    id_evaluado = '" . $data["id"] . "' AND anio = '" . $_SESSION['anio_ciclo'] . "' AND estado >= 2 ORDER BY created_at DESC 
+                                ";
+                                $queryEvaluaciones = mysqli_query($connect_valoracion, $sentencia_evaluaciones);
                                 while ($dataEvaluacion = mysqli_fetch_array($queryEvaluaciones)) {
                                     $Array_Objeto = json_decode($dataEvaluacion["obj_evaluacion"], true);
                                     foreach ($Array_Objeto as $respuestas) {
@@ -311,11 +319,11 @@ while ($dataAreas = mysqli_fetch_array($queryAreas)) {
                                                 $prom = $obj_evaluador["total_competencia"] / $obj_evaluador["cantidad_competencia"];
 
                                                 if ($obj_evaluador["tipo"] == 1) {
-                                                    $array_final_grupos[$llave]["promedio"] += ($prom * 0) / 100;
+                                                    $array_final_grupos[$llave]["promedio"] += ($prom * $datos_ponderar["auto"]) / 100;
                                                     $array_final_grupos[$llave]["cantidad"]++;
                                                 }
                                                 if ($obj_evaluador["tipo"] == 5) {
-                                                    $array_final_grupos[$llave]["promedio"] += ($prom * 100) / 100;
+                                                    $array_final_grupos[$llave]["promedio"] += ($prom * $datos_ponderar["jefe"]) / 100;
                                                     $array_final_grupos[$llave]["cantidad"]++;
                                                 }
                                                 if ($obj_evaluador["tipo"] == 2) {
@@ -388,6 +396,8 @@ while ($dataAreas = mysqli_fetch_array($queryAreas)) {
                                 $json_comptencias = json_encode($COMPETENCIAS);
                                 $json_consolidado = json_encode($CONSOLIDADO_EVALUACION);
 
+                                
+
                                 $nombre_completo = $data["nombre"] . " " . $data["nombre_2"] . " " . $data["apellidos"] . " " . $data["apellidos_2"];
 
                                 $sentencia = "
@@ -415,7 +425,7 @@ while ($dataAreas = mysqli_fetch_array($queryAreas)) {
                                     '" . $_SESSION["anio_ciclo"] . "',
                                     '" . $_SESSION["ciclo"] . "',
                                     '" . $data["id"] . "',
-                                    '" . $dtEmpleado["id_empresa"] . "',
+                                    '" . $user_log["id_empresa"] . "',
                                     '" . $nombre_completo . "',
                                     '" . $data["id_cargo"] . "',
                                     '" . $data["id_area"] . "',
@@ -433,7 +443,11 @@ while ($dataAreas = mysqli_fetch_array($queryAreas)) {
                                 )
                                 ";
 
+                                //echo $sentencia;
+
                                 mysqli_query($connect_valoracion, $sentencia);
+
+                                
 
                                 echo '
                                 <tr>

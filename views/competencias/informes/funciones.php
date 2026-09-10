@@ -607,7 +607,7 @@ function PromedioGeneralEvaluado($id_empleado, $connect_valoracion, $connect_adm
         $queryEval = mysqli_query($connect_valoracion, "SELECT * FROM Competencias_Evaluaciones_New WHERE 
         id_empresa = '" . $_SESSION['id_empresa'] . "' AND anio = '" . $_SESSION['anio_ciclo'] . "' AND
         id_evaluado = '" . $id_empleado . "' AND  id_evaluador = '" . $dataEvaluadores['id_evaluador'] . "' AND 
-        id_ciclo = '" . $_SESSION['ciclo'] . "' AND tipo_evaluacion = '" . $dataEvaluadores["tipo"] . "' AND estado > 1 ");
+        id_ciclo = '" . $_SESSION['ciclo'] . "' AND tipo_evaluacion = '" . $dataEvaluadores["tipo"] . "' AND estado > 1 AND promedio > 0 ");
         $dataEval = mysqli_fetch_array($queryEval);
         if ($queryEval->num_rows > 0) {
             $id_cargo = $dataEval["id_cargo"];
@@ -756,6 +756,7 @@ function PromedioGeneralEvaluado($id_empleado, $connect_valoracion, $connect_adm
         "proceso_valoracion" => $proceso_valoracion,
         "estado" => $estado
     );
+    
 }
 
 

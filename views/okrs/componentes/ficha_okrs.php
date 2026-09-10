@@ -64,7 +64,7 @@
                 $foto = !empty($okrs["owner"]["foto"]) ? $okrs["owner"]["foto"] : "img_default.jpg";
                 $modalId = "modal_responsable_" . $okrs["owner"]["id"];
                 ?>
-                <img src="https://goforagile.com/recursos/<?= $foto ?>"
+                <img src="<?= $recursos_local . $foto ?>"
                     class="foto_miniaturas_owner"
                     title="<?= $okrs["owner"]["nombre"]; ?>"
                     style="cursor:pointer;"

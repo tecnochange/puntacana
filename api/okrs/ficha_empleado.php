@@ -52,7 +52,7 @@
 
 <div style="text-align: center;" >
 
-    <img src="https://goforagile.com/recursos/<?= $foto ?>" style="width:150px;height:150px;border-radius:50%;object-fit:cover;">
+    <img src="<?= $recursos_local . $foto ?>" style="width:150px;height:150px;border-radius:50%;object-fit:cover;">
 
     <div class="mt-5 mb-4">
         <h3><?php echo $data["nombre"]; ?></h3>

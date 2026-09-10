@@ -64,10 +64,20 @@ $julio_lectura = '';
 $octubre_lectura = '';
 $enero_lectura = '';
 $abril_lectura = '';
-if(!$kpis["julio"]){ $julio_lectura = ' readonly '; }
-if(!$kpis["octubre"]){ $octubre_lectura = ' readonly '; }
-if(!$kpis["enero"]){ $enero_lectura = ' readonly '; }
-if(!$kpis["abril"]){ $abril_lectura = ' readonly '; }
+if($kpis["julio"] == ""){ $julio_lectura = ' readonly '; }
+if($kpis["octubre"] == ""){ $octubre_lectura = ' readonly '; }
+if($kpis["enero"] == ""){ $enero_lectura = ' readonly '; }
+if($kpis["abril"] == ""){ $abril_lectura = ' readonly '; }
+
+
+if($meses_habilitados["julio"] == ""){ $julio_lectura = ' readonly '; }
+if($meses_habilitados["octubre"] == ""){ $octubre_lectura = ' readonly '; }
+if($meses_habilitados["enero"] == ""){ $enero_lectura = ' readonly '; }
+if($meses_habilitados["abril"] == ""){ $abril_lectura = ' readonly '; }
+
+
+
+
 
 echo "Avance Plano: ".$kpis["avance_plano_kpis"];
 ?>
@@ -108,26 +118,36 @@ echo "Avance Plano: ".$kpis["avance_plano_kpis"];
         <td><?= $kpis["meta"]; ?></td>
 
     </tr>
+    <?php if($_SESSION["anio_fill"] >= 2027){ ?>
+    <tr>
+        <td>MÍNIMO ESPERADO</td>
+        <td><?= $kpis["julio_min"]; ?></td>
+        <td><?= $kpis["octubre_min"]; ?></td>
+        <td><?= $kpis["enero_min"]; ?></td>
+        <td><?= $kpis["abril_min"]; ?></td>
+        <td></td>
+    </tr>
+    <?php } ?>
     <tr>
         <td>SEGUIMIENTO</td>
 
         <td> 
-            <input type="text" class="form-control" value="<?= $kpis["avance_7"]; ?>" name="avance_7" onkeyup="return NumerosDecimales(this)" <?= $julio_lectura; ?> > 
+            <input type="text" class="form-control" value="<?= $kpis["avance_7"]; ?>" name="avance_7" onkeyup="return NumerosDecimales(this)" <?= $julio_lectura; ?> <?= $read_only_kpis; ?> > 
         </td>
         <td> 
-            <input type="text" class="form-control" value="<?= $kpis["avance_10"]; ?>" name="avance_10" onkeyup="return NumerosDecimales(this)" <?= $octubre_lectura; ?> > 
+            <input type="text" class="form-control" value="<?= $kpis["avance_10"]; ?>" name="avance_10" onkeyup="return NumerosDecimales(this)" <?= $octubre_lectura; ?> <?= $read_only_kpis; ?> > 
         </td>
         <td> 
-            <input type="text" class="form-control" value="<?= $kpis["avance_1"]; ?>" name="avance_1" onkeyup="return NumerosDecimales(this)" <?= $enero_lectura; ?> > 
+            <input type="text" class="form-control" value="<?= $kpis["avance_1"]; ?>" name="avance_1" onkeyup="return NumerosDecimales(this)" <?= $enero_lectura; ?> <?= $read_only_kpis; ?> > 
         </td>
         <td> 
-            <input type="text" class="form-control" value="<?= $kpis["avance_4"]; ?>" name="avance_4" onkeyup="return NumerosDecimales(this)" <?= $abril_lectura; ?> > 
+            <input type="text" class="form-control" value="<?= $kpis["avance_4"]; ?>" name="avance_4" onkeyup="return NumerosDecimales(this)" <?= $abril_lectura; ?> <?= $read_only_kpis; ?> > 
         </td>
 
         <td> 
-            <?php if($kpis["avance_plano_kpis"] != 0){ ?>
+            <?php //if($kpis["avance_plano_kpis"] != 0){ ?>
                 <?= $seguimiento_formato; ?>  
-            <?php } ?>
+            <?php //} ?>
         </td>
     </tr>
     <tr>

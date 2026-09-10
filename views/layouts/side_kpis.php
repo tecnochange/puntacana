@@ -8,6 +8,8 @@ $queryRelacionesValidarKpis = mysqli_query($connect_admin, "SELECT * FROM Relaci
 
 ?>
 
+<?php //if($user_log["id"] == 374 || $user_log["id"] == 85 || $user_log["id"] == 261 || $user_log["id"] == 4412 || $user_log["id"] == 4397 || $user_log["id"] == 153 || $user_log["id"] == 2701 ){ ?>
+
 
 <li class="menu_groups" data-bs-toggle="collapse" data-bs-target="#menuKpis" aria-expanded="true" id="mod_kpis">
     <table width="100%">
@@ -134,3 +136,6 @@ if ($mstrr_4 == false) {
 	echo '<script> $("#mod_kpis").hide(); </script>';
 }
 ?>
+
+
+<?php //} ?>

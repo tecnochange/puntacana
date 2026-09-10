@@ -55,7 +55,7 @@ $vicepresidencias_listas = $ClassKpisServicios->vicepresidencias_lista($user_log
 									foreach ($vicepresidencia["array_lideres"] as $lider) {
 										if ($lider["id"]) {
 											$min_lider .= '
-											<img src="https://goforagile.com/recursos/' . $lider["foto"] . '"
+											<img src="' . $recursos_local . $lider["foto"] . '"
 												width="32" height="32"
 												class="foto_miniaturas"
 												title="' . $lider["nombre"] . '"
@@ -123,7 +123,7 @@ $vicepresidencias_listas = $ClassKpisServicios->vicepresidencias_lista($user_log
 
 												if ($lider["id"]) {
 													$min_lider_area = '
-													<img src="https://goforagile.com/recursos/' . $lider["foto"] . '"
+													<img src="' . $recursos_local . $lider["foto"] . '"
 														width="32" height="32"
 														class="foto_miniaturas mb-1"
 														title="' . $lider["nombre"] . '" 
@@ -302,7 +302,7 @@ $vicepresidencias_listas = $ClassKpisServicios->vicepresidencias_lista($user_log
 										$fotoLider = !empty($responsableData["foto"]) ? $responsableData["foto"] : "img_default.jpg";
 										$modalId = "modal_responsable_" . $responsableData["id"];
 									?>
-										<img src="https://goforagile.com/recursos/<?= $fotoLider; ?>"
+										<img src="<?= $recursos_local. $fotoLider; ?>"
 											width="32" height="32"
 											class="foto_miniaturas mb-1"
 											title="<?= $responsableData["nombre"]; ?>"
@@ -339,7 +339,7 @@ $vicepresidencias_listas = $ClassKpisServicios->vicepresidencias_lista($user_log
 														$fotoIniFull = !empty($liderData["foto"]) ? $liderData["foto"] : "img_default.jpg";
 													?>
 														<div class="d-flex align-items-center mb-2">
-															<img src="https://goforagile.com/recursos/<?= $fotoIniFull ?>"
+															<img src="<?= $recursos_local . $fotoIniFull ?>"
 																class="rounded-circle me-2"
 																width="35" height="35"
 																title="<?= $liderData["nombre"] ?>">
@@ -430,7 +430,7 @@ $vicepresidencias_listas = $ClassKpisServicios->vicepresidencias_lista($user_log
 															$fotoLider = !empty($responsableData["foto"]) ? $responsableData["foto"] : "img_default.jpg";
 															$modalId = "modal_responsable_" . $responsableData["id"];
 															?>
-															<img src="https://goforagile.com/recursos/<?= $fotoLider; ?>"
+															<img src="<?= $recursos_local . $fotoLider; ?>"
 																width="32" height="32"
 																class="foto_miniaturas mb-1"
 																title="<?= $responsableData["nombre"]; ?>"

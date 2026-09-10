@@ -22,7 +22,7 @@
                 <!-- Foto del accordion-item -->
                 <div class="col-md-1 text-center">
                     <?php $foto = !empty($okrs["empleado"]["foto"]) ? $okrs["empleado"]["foto"] : "img_default.jpg"; ?>
-                    <img src="https://goforagile.com/recursos/<?= $foto ?>" class="foto_miniaturas" title="<?= $okrs["empleado"]["nombre"]; ?>">
+                    <img src="<?= $recursos_local . $foto ?>" class="foto_miniaturas" title="<?= $okrs["empleado"]["nombre"]; ?>">
                 </div>
 
                 <div class="col-md-7 d-flex align-items-center">
@@ -109,7 +109,7 @@
                                 $responsable_foto = !empty($responsableData["foto"]) ? $responsableData["foto"] : "img_default.jpg";
                                 $modalId = "modal_responsable_" . $responsableData["id"];
                             ?>
-                                <img src="https://goforagile.com/recursos/<?= $responsable_foto; ?>"
+                                <img src="<?= $recursos_local . $responsable_foto; ?>"
                                     class="foto_miniaturas mb-1"
                                     title="<?= $responsableData["nombre"]; ?>"
                                     style="cursor:pointer;"

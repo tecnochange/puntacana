@@ -13,6 +13,8 @@ $hoy = date("Y-m-d H:i:s");
 include("app/models/kpis/KpisServicios.php");
 $ClassKpisServicios = new KpisServicios($user_log["id_empresa"]);
 
+//MESES HABILTIADOS KPIS
+$meses_habilitados = MesesHabilitados($user_log["id_empresa"], $_SESSION["anio_fill"]);
 //dd($user_log);
 
 //PARA GUARDAR EL AVANCE DE LOS KPIS
@@ -126,7 +128,8 @@ $datos_consolidado_kpis = $ClassKpisServicios->datos_consolidado_kpis($user_log[
                     $seguimiento_formato = '';
                     if( $kpis["unidad_medida"] != 4 ){
                         $meta_formato = round($kpis["meta"], 2);
-                        $seguimiento_formato = round($kpis["avance_plano_kpis"], 2);
+                        //$seguimiento_formato = round($kpis["avance_plano_kpis"], 2);
+                        $seguimiento_formato = number_format($kpis["avance_plano_kpis"], 2, '.', ',');
                     }
                     else{
                         $meta_formato = $kpis["meta"]; 

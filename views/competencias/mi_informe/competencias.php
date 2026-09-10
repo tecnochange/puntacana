@@ -6,7 +6,7 @@
 
                 <div class="progreso-bar-container" style="--i:<?php echo round($general); ?>;--clr:<?php echo $color_competencia; ?>">
                     <div class="progreso-bar objetivo-okr">
-                        <progreso id="objetivo-okr" min="0" value="<?php echo number_format($general, 1); ?>"></progreso>
+                        <progreso id="objetivo-okr" min="0" value="<?php echo number_format($general, 1); ?>"><?php echo number_format($general, 1); ?>%</progreso>
                     </div>
                 </div>
                 <div style="margin-top: 10px; margin-bottom: 20px">

@@ -26,6 +26,26 @@ $data = mysqli_fetch_array($query);
 ?>
 
 <div class="container">
+
+    <ul class="nav nav-tabs justify-content-center">
+        <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="?pg=estrategica/configurar">General</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="?pg=estrategica/desempenio">Desempeño</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="?pg=estrategica/competencias">Competencias</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="?pg=estrategica/kpis">Kpis</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="?pg=estrategica/okrs">Okrs</a>
+        </li>
+        
+    </ul>
+
     <div class="card mb-3">
         <div class="card-header">
             <h3>Configuración General</h3>

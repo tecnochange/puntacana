@@ -239,3 +239,42 @@ $datos_consolidado_planes = $ClassOkrsServicios->datos_consolidado_planes_accion
         });
     };
 </script>
+
+
+<script>
+    var api = '<?php echo $url; ?>api/okrs/';
+    var permitir = false;
+    function EliminarIniciativa(id_iniciativa){
+
+        if(permitir == false){
+            $("#modal_general").modal("show");
+            $("#modal_body").html("Estas a punto de eliminar una iniciativa, esto eliminará todos los datos relacionados. esta acción  es irreversible. ¿Está seguro? <br><br> ");
+            $("#modal_body").append('<button type="button" class="btn btn-danger btn-sm" onclick="permitir = true;EliminarIniciativa('+id_iniciativa+')">Eliminar Iniciativa</button> <br> Nota: este esta acción será registrada en la auditoría con su nombre.');
+            
+        }
+        else{
+
+            data = {
+                id_empresa: <?php echo $user_log["id_empresa"]; ?>, 
+                id_user: <?php echo $user_log["id"]; ?>,
+                id_iniciativa: id_iniciativa, 
+                url: '?pg=okrs/equipos'
+            };
+            jQuery.ajax({
+                url: api + "eliminar_iniciativa.php",
+                type: 'post',
+                data: data,
+                })
+                .done(function(resp) {
+                    $("#xscript").html(resp);
+                })
+                .fail(function(resp) {
+                    console.log(resp);
+                })
+                .always(function(resp) {}
+            );
+
+        }
+
+    }
+</script>

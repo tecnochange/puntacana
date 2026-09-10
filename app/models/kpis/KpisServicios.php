@@ -213,14 +213,14 @@ class KpisServicios{
                 Kpis.id AS id_kpi, 
                 Kpis.area_proceso AS area_proceso, 
                 Kpis.area_macro AS area_macro, 
-                goforagile_admin.Areas.nombre as nombre_area,
-                goforagile_admin.Lideres_Area.id_lider as id_lider
+                puntacana_admin.Areas.nombre as nombre_area,
+                puntacana_admin.Lideres_Area.id_lider as id_lider
             FROM
                 Kpis
             LEFT JOIN
-                goforagile_admin.Areas ON goforagile_admin.Areas.id = Kpis.area_proceso
+                puntacana_admin.Areas ON puntacana_admin.Areas.id = Kpis.area_proceso
             LEFT JOIN
-                goforagile_admin.Lideres_Area ON goforagile_admin.Lideres_Area.id_area = Kpis.area_proceso
+                puntacana_admin.Lideres_Area ON puntacana_admin.Lideres_Area.id_area = Kpis.area_proceso
             
             WHERE
                 Kpis.id_empresa = '".$id_empresa."'
@@ -307,7 +307,7 @@ class KpisServicios{
             Kpis.unidad_medida,  
             Kpis.meta, 
             Kpis.subproceso,
-            goforagile_admin.Estructura_Empresa.unidad_organizativa as nombre_unidad, 
+            puntacana_admin.Estructura_Empresa.unidad_organizativa as nombre_unidad, 
             Kpis.tipo_calculo, 
             Kpis.tipo_resultado, 
             Kpis.indicador, 
@@ -326,11 +326,19 @@ class KpisServicios{
             Frecuencia_Kpis.septiembre, Frecuencia_Kpis.avance_9, 
             Frecuencia_Kpis.octubre, Frecuencia_Kpis.avance_10, 
             Frecuencia_Kpis.noviembre, Frecuencia_Kpis.avance_11, 
-            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12
+            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12, 
+
+            Frecuencia_Kpis.enero_min, Frecuencia_Kpis.febrero_min, 
+            Frecuencia_Kpis.marzo_min, Frecuencia_Kpis.abril_min, 
+            Frecuencia_Kpis.mayo_min, Frecuencia_Kpis.junio_min, 
+
+            Frecuencia_Kpis.julio_min, Frecuencia_Kpis.agosto_min,
+            Frecuencia_Kpis.septiembre_min, Frecuencia_Kpis.octubre_min, 
+            Frecuencia_Kpis.noviembre_min, Frecuencia_Kpis.diciembre_min 
         FROM
             Kpis
         INNER JOIN Frecuencia_Kpis ON Frecuencia_Kpis.id_kpi = Kpis.id
-        LEFT JOIN goforagile_admin.Estructura_Empresa ON goforagile_admin.Estructura_Empresa.id = Kpis.subproceso
+        LEFT JOIN puntacana_admin.Estructura_Empresa ON puntacana_admin.Estructura_Empresa.id = Kpis.subproceso
         WHERE
             Kpis.id_empresa = ".$id_empresa." 
             AND Kpis.area_proceso = '".$id_area."' 
@@ -444,7 +452,7 @@ class KpisServicios{
             Kpis.unidad_medida,  
             Kpis.meta, 
             Kpis.subproceso,
-            goforagile_admin.Estructura_Empresa.unidad_organizativa as nombre_unidad, 
+            puntacana_admin.Estructura_Empresa.unidad_organizativa as nombre_unidad, 
             Kpis.tipo_calculo, 
             Kpis.tipo_resultado, 
             Kpis.indicador, 
@@ -463,11 +471,20 @@ class KpisServicios{
             Frecuencia_Kpis.septiembre, Frecuencia_Kpis.avance_9, 
             Frecuencia_Kpis.octubre, Frecuencia_Kpis.avance_10, 
             Frecuencia_Kpis.noviembre, Frecuencia_Kpis.avance_11, 
-            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12
+            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12, 
+
+            Frecuencia_Kpis.enero_min, Frecuencia_Kpis.febrero_min, 
+            Frecuencia_Kpis.marzo_min, Frecuencia_Kpis.abril_min, 
+            Frecuencia_Kpis.mayo_min, Frecuencia_Kpis.junio_min, 
+
+            Frecuencia_Kpis.julio_min, Frecuencia_Kpis.agosto_min,
+            Frecuencia_Kpis.septiembre_min, Frecuencia_Kpis.octubre_min, 
+            Frecuencia_Kpis.noviembre_min, Frecuencia_Kpis.diciembre_min 
+
         FROM
             Kpis
         INNER JOIN Frecuencia_Kpis ON Frecuencia_Kpis.id_kpi = Kpis.id
-        LEFT JOIN goforagile_admin.Estructura_Empresa ON goforagile_admin.Estructura_Empresa.id = Kpis.subproceso
+        LEFT JOIN puntacana_admin.Estructura_Empresa ON puntacana_admin.Estructura_Empresa.id = Kpis.subproceso
         WHERE
             Kpis.id_empresa = ".$id_empresa." 
             AND Kpis.area_proceso = '".$id_area."' 
@@ -645,22 +662,26 @@ class KpisServicios{
 
             //CASO 2 SOLO TOMA LAS METAS
             $suma_avances = 
-                (int)$data["avance_7"] +
-                (int)$data["avance_8"] +
-                (int)$data["avance_9"] +
-                (int)$data["avance_10"] +
-                (int)$data["avance_11"] +
-                (int)$data["avance_12"] +
-                (int)$data["avance_1"] +
-                (int)$data["avance_2"] +
-                (int)$data["avance_3"] +
-                (int)$data["avance_4"] +
-                (int)$data["avance_5"] +
-                (int)$data["avance_6"]; 
+                (float)$data["avance_7"] +
+                (float)$data["avance_8"] +
+                (float)$data["avance_9"] +
+                (float)$data["avance_10"] +
+                (float)$data["avance_11"] +
+                (float)$data["avance_12"] +
+                (float)$data["avance_1"] +
+                (float)$data["avance_2"] +
+                (float)$data["avance_3"] +
+                (float)$data["avance_4"] +
+                (float)$data["avance_5"] +
+                (float)$data["avance_6"]; 
 
             if( $data["avance_7"] == "" && $data["avance_8"] == "" && $data["avance_9"] == "" && $data["avance_10"] == "" && $data["avance_11"] == "" && $data["avance_12"] == "" && $data["avance_1"] == "" && $data["avance_2"] == "" && $data["avance_3"] == "" && $data["avance_4"] == "" && $data["avance_5"] == "" && $data["avance_6"] == "" ){
                 $suma_avances = '';
             }
+
+
+
+    
 
             //EN CASO DE NO TENER NINGUN AVANCE
            
@@ -670,16 +691,38 @@ class KpisServicios{
             if($tipo_calculo == 1 && $suma_avances !== ""  ){ 
 
                 $PROGRESO_KPI = 0;
-                if($suma_avances > 0){
+                if($suma_avances > 0){ 
 
                     $avance_numerico = $cant_avances == 0 || $cant_avances < 0 ? 0 : $suma_avances/$cant_avances; 
 
                     //ESTA ES LA FORMULA DE JULIAN
                     $PROGRESO_KPI = $cant_avances == 0 || $cant_avances < 0 ? 0 : $suma_avances/$cant_avances;
                     $PROGRESO_KPI = round($PROGRESO_KPI,2);
+
+                    //echo  $PROGRESO_KPI;
+                    //echo "<br>";
+
                     
-                    $PROGRESO_KPI = $data["meta"] == 0 || $data["meta"] < 0 ? 0 : $PROGRESO_KPI*100/$data["meta"];
+                    
+                    //si la meta es 0
+                    if ($data["meta"] == 0) {
+                        $PROGRESO_KPI = 0;
+                    } else {
+                        $PROGRESO_KPI = $PROGRESO_KPI * 100 / $data["meta"];
+                    }
+
+                    //si meta es negativo y segumiento es mayor que meta
+                    if ( $data["meta"] < 0 && $PROGRESO_KPI > $data["meta"] ) {
+                        $PROGRESO_KPI = 100;
+                    }
+
+                    //si la meta es 0 ó menor de 0 queda con resultado 0
+                    //$PROGRESO_KPI = $data["meta"] == 0 || $data["meta"] < 0 ? 0 : $PROGRESO_KPI*100/$data["meta"];
                     $PROGRESO_KPI = round($PROGRESO_KPI,2);
+
+                   
+                    
+                    
 
                     //ACUMULATIVO
                     if($tipo_resultado == 3){ 
@@ -692,8 +735,16 @@ class KpisServicios{
                     
                 }
 
+
+              
+
+                
+
       
             }
+
+            
+
 
             //DESCENDENTE
             if($tipo_calculo == 2 && $suma_avances !== "" ){ 
@@ -738,6 +789,10 @@ class KpisServicios{
                
             }
 
+
+            
+
+
             //echo $avance_numerico;
             //echo "<br>";
             
@@ -766,8 +821,11 @@ class KpisServicios{
             //SOLA PARA VALOR ABSOLUTO ACUMULATIVO O NO ACUMULATIVO
             if($tipo_calculo == 3){
                 if($ultimo_avance > 0){ $PROGRESO_KPI = 0; $avance_numerico = 0; }
-                if($ultimo_avance == 0){ $PROGRESO_KPI = 100; $avance_numerico = 100; }
+                if($ultimo_avance == 0){ $PROGRESO_KPI = 100; $avance_numerico = 0; }
             }
+
+            
+            
 
             //NUEVO PORCENTAJE 
             if ($PROGRESO_KPI > 100) {
@@ -784,6 +842,11 @@ class KpisServicios{
 
             //echo $PROGRESO_KPI;
             //echo "<br>";
+
+            if( $data["avance_7"] == "" && $data["avance_8"] == "" && $data["avance_9"] == "" && $data["avance_10"] == "" && $data["avance_11"] == "" && $data["avance_12"] == "" && $data["avance_1"] == "" && $data["avance_2"] == "" && $data["avance_3"] == "" && $data["avance_4"] == "" && $data["avance_5"] == "" && $data["avance_6"] == "" ){
+                $PROGRESO_KPI = 0;
+                $avance_numerico = 0;
+            }
 
             $nodo = array(
                 "avance_porcentaje" => $PROGRESO_KPI,
@@ -1027,14 +1090,17 @@ class KpisServicios{
         }
         
         if(isset($_SESSION["anio_fill"])){ $filtros .= " AND Kpis.anio = '".$_SESSION["anio_fill"]."' "; }
-        if(isset($_SESSION["tipo_kpi_fill"])){ $filtros .= " AND Kpis.tipo_kpi = '".$_SESSION["tipo_kpi_fill"]."' "; }
-        if(isset($_SESSION["frecuencia_fill"])){ $filtros .= " AND Kpis.frecuencia = '".$_SESSION["frecuencia_fill"]."' "; } 
-        if(isset($_SESSION["tipo_resultado_fill"])){ $filtros .= " AND Kpis.tipo_resultado = '".$_SESSION["tipo_resultado_fill"]."' "; } 
-        if(isset($_SESSION["tipo_calculo_fill"])){ $filtros .= " AND Kpis.tipo_calculo = '".$_SESSION["tipo_calculo_fill"]."' "; }
-        if(isset($_SESSION["unidad_medida_fill"])){ $filtros .= " AND Kpis.unidad_medida = '".$_SESSION["unidad_medida_fill"]."' "; }
-        if(isset($_SESSION["area_macro_fill"])){ $filtros .= " AND Kpis.area_macro = '".$_SESSION["area_macro_fill"]."' "; }
-        if(isset($_SESSION["area_proceso_fill"])){ $filtros .= " AND Kpis.area_proceso = '".$_SESSION["area_proceso_fill"]."' "; }
-        if(isset($_SESSION["subproceso_fill"])){ $filtros .= " AND Kpis.subproceso = '".$_SESSION["subproceso_fill"]."' "; }
+        if($_SESSION["tipo_kpi_fill"]){ $filtros .= " AND Kpis.tipo_kpi = '".$_SESSION["tipo_kpi_fill"]."' "; }
+        
+        if(($_SESSION["frecuencia_fill"])){ $filtros .= " AND Kpis.frecuencia = '".$_SESSION["frecuencia_fill"]."' "; } 
+        if(($_SESSION["tipo_resultado_fill"])){ $filtros .= " AND Kpis.tipo_resultado = '".$_SESSION["tipo_resultado_fill"]."' "; } 
+        if(($_SESSION["tipo_calculo_fill"])){ $filtros .= " AND Kpis.tipo_calculo = '".$_SESSION["tipo_calculo_fill"]."' "; }
+        if(($_SESSION["unidad_medida_fill"])){ $filtros .= " AND Kpis.unidad_medida = '".$_SESSION["unidad_medida_fill"]."' "; }
+        if(($_SESSION["area_macro_fill"])){ $filtros .= " AND Kpis.area_macro = '".$_SESSION["area_macro_fill"]."' "; }
+        if(($_SESSION["area_proceso_fill"])){ $filtros .= " AND Kpis.area_proceso = '".$_SESSION["area_proceso_fill"]."' "; }
+        if(($_SESSION["subproceso_fill"])){ $filtros .= " AND Kpis.subproceso = '".$_SESSION["subproceso_fill"]."' "; }
+        
+        
 
         //OBTENEMOS LOS KPIS
         //OBTENEMOS LOS KPIS
@@ -1045,9 +1111,9 @@ class KpisServicios{
         SELECT 
             Kpis.id AS id_kpi,
             Kpis.area_macro, 
-            goforagile_admin.Vicepresidencia.nombre AS nombre_area_macro,  
+            puntacana_admin.Vicepresidencia.nombre AS nombre_area_macro,  
             Kpis.area_proceso,
-            goforagile_admin.Areas.nombre AS nombre_area_proceso, 
+            puntacana_admin.Areas.nombre AS nombre_area_proceso, 
             Kpis.tipo_kpi,
             Kpis.unidad_medida, 
             Kpis.subproceso AS subproceso,  
@@ -1071,13 +1137,22 @@ class KpisServicios{
             Frecuencia_Kpis.septiembre, Frecuencia_Kpis.avance_9, 
             Frecuencia_Kpis.octubre, Frecuencia_Kpis.avance_10, 
             Frecuencia_Kpis.noviembre, Frecuencia_Kpis.avance_11, 
-            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12
+            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12, 
+
+            Frecuencia_Kpis.enero_min, Frecuencia_Kpis.febrero_min, 
+            Frecuencia_Kpis.marzo_min, Frecuencia_Kpis.abril_min, 
+            Frecuencia_Kpis.mayo_min, Frecuencia_Kpis.junio_min, 
+
+            Frecuencia_Kpis.julio_min, Frecuencia_Kpis.agosto_min,
+            Frecuencia_Kpis.septiembre_min, Frecuencia_Kpis.octubre_min, 
+            Frecuencia_Kpis.noviembre_min, Frecuencia_Kpis.diciembre_min 
+
         FROM
             Kpis
         INNER JOIN Frecuencia_Kpis ON Frecuencia_Kpis.id_kpi = Kpis.id 
         LEFT JOIN Kpis_Colaborador ON Kpis_Colaborador.id_kpi = Kpis.id 
-        LEFT JOIN goforagile_admin.Vicepresidencia ON goforagile_admin.Vicepresidencia.id = Kpis.area_macro
-        LEFT JOIN goforagile_admin.Areas ON goforagile_admin.Areas.id = Kpis.area_proceso
+        LEFT JOIN puntacana_admin.Vicepresidencia ON puntacana_admin.Vicepresidencia.id = Kpis.area_macro
+        LEFT JOIN puntacana_admin.Areas ON puntacana_admin.Areas.id = Kpis.area_proceso
         WHERE
             Kpis.id_empresa = ".$id_empresa." 
             AND Kpis_Colaborador.id_colaborador = '".$id_colaborador."' 
@@ -1211,9 +1286,9 @@ class KpisServicios{
         SELECT 
             Kpis.id AS id_kpi,
             Kpis.area_macro, 
-            goforagile_admin.Vicepresidencia.nombre AS nombre_area_macro,  
+            puntacana_admin.Vicepresidencia.nombre AS nombre_area_macro,  
             Kpis.area_proceso,
-            goforagile_admin.Areas.nombre AS nombre_area_proceso, 
+            puntacana_admin.Areas.nombre AS nombre_area_proceso, 
             Kpis.tipo_kpi,
             Kpis.unidad_medida, 
             Kpis.subproceso AS subproceso,  
@@ -1237,13 +1312,22 @@ class KpisServicios{
             Frecuencia_Kpis.septiembre, Frecuencia_Kpis.avance_9, 
             Frecuencia_Kpis.octubre, Frecuencia_Kpis.avance_10, 
             Frecuencia_Kpis.noviembre, Frecuencia_Kpis.avance_11, 
-            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12
+            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12, 
+
+            Frecuencia_Kpis.enero_min, Frecuencia_Kpis.febrero_min, 
+            Frecuencia_Kpis.marzo_min, Frecuencia_Kpis.abril_min, 
+            Frecuencia_Kpis.mayo_min, Frecuencia_Kpis.junio_min, 
+
+            Frecuencia_Kpis.julio_min, Frecuencia_Kpis.agosto_min,
+            Frecuencia_Kpis.septiembre_min, Frecuencia_Kpis.octubre_min, 
+            Frecuencia_Kpis.noviembre_min, Frecuencia_Kpis.diciembre_min 
+
         FROM
             Kpis
         INNER JOIN Frecuencia_Kpis ON Frecuencia_Kpis.id_kpi = Kpis.id 
         LEFT JOIN Kpis_Colaborador ON Kpis_Colaborador.id_kpi = Kpis.id 
-        LEFT JOIN goforagile_admin.Vicepresidencia ON goforagile_admin.Vicepresidencia.id = Kpis.area_macro
-        LEFT JOIN goforagile_admin.Areas ON goforagile_admin.Areas.id = Kpis.area_proceso
+        LEFT JOIN puntacana_admin.Vicepresidencia ON puntacana_admin.Vicepresidencia.id = Kpis.area_macro
+        LEFT JOIN puntacana_admin.Areas ON puntacana_admin.Areas.id = Kpis.area_proceso
         WHERE
             Kpis.id_empresa = ".$id_empresa." 
             AND Kpis_Colaborador.id_colaborador = '".$id_colaborador."' 
@@ -1400,11 +1484,11 @@ class KpisServicios{
         SELECT
             Kpis.id AS id_kpi,
             Kpis.area_macro,
-            goforagile_admin.Vicepresidencia.nombre AS nombre_area_macro,  
+            puntacana_admin.Vicepresidencia.nombre AS nombre_area_macro,  
             Kpis.area_proceso,
-            goforagile_admin.Areas.nombre AS nombre_area_proceso,
+            puntacana_admin.Areas.nombre AS nombre_area_proceso,
             Kpis.subproceso, 
-            goforagile_admin.Estructura_Empresa.unidad_organizativa AS nombre_subproceso,
+            puntacana_admin.Estructura_Empresa.unidad_organizativa AS nombre_subproceso,
             Kpis.tipo_kpi,
             Kpis.unidad_medida,  
             Kpis.meta, 
@@ -1426,17 +1510,26 @@ class KpisServicios{
             Frecuencia_Kpis.septiembre, Frecuencia_Kpis.avance_9, 
             Frecuencia_Kpis.octubre, Frecuencia_Kpis.avance_10, 
             Frecuencia_Kpis.noviembre, Frecuencia_Kpis.avance_11, 
-            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12
+            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12, 
+
+            Frecuencia_Kpis.enero_min, Frecuencia_Kpis.febrero_min, 
+            Frecuencia_Kpis.marzo_min, Frecuencia_Kpis.abril_min, 
+            Frecuencia_Kpis.mayo_min, Frecuencia_Kpis.junio_min, 
+
+            Frecuencia_Kpis.julio_min, Frecuencia_Kpis.agosto_min,
+            Frecuencia_Kpis.septiembre_min, Frecuencia_Kpis.octubre_min, 
+            Frecuencia_Kpis.noviembre_min, Frecuencia_Kpis.diciembre_min 
+
         FROM
             Kpis
         INNER JOIN
             Frecuencia_Kpis ON Frecuencia_Kpis.id_kpi = Kpis.id 
         LEFT JOIN
-            goforagile_admin.Vicepresidencia ON goforagile_admin.Vicepresidencia.id = Kpis.area_macro
+            puntacana_admin.Vicepresidencia ON puntacana_admin.Vicepresidencia.id = Kpis.area_macro
         LEFT JOIN
-            goforagile_admin.Areas ON goforagile_admin.Areas.id = Kpis.area_proceso
+            puntacana_admin.Areas ON puntacana_admin.Areas.id = Kpis.area_proceso
         LEFT JOIN
-            goforagile_admin.Estructura_Empresa ON goforagile_admin.Estructura_Empresa.id = Kpis.subproceso
+            puntacana_admin.Estructura_Empresa ON puntacana_admin.Estructura_Empresa.id = Kpis.subproceso
         WHERE
             Kpis.id_empresa = ".$id_empresa." 
             ".$filtros." 
@@ -1570,11 +1663,11 @@ class KpisServicios{
         SELECT
             Kpis.id AS id_kpi,
             Kpis.area_macro,
-            goforagile_admin.Vicepresidencia.nombre AS nombre_area_macro,  
+            puntacana_admin.Vicepresidencia.nombre AS nombre_area_macro,  
             Kpis.area_proceso,
-            goforagile_admin.Areas.nombre AS nombre_area_proceso,
+            puntacana_admin.Areas.nombre AS nombre_area_proceso,
             Kpis.subproceso, 
-            goforagile_admin.Estructura_Empresa.unidad_organizativa AS nombre_subproceso,
+            puntacana_admin.Estructura_Empresa.unidad_organizativa AS nombre_subproceso,
             Kpis.tipo_kpi,
             Kpis.unidad_medida,  
             Kpis.meta, 
@@ -1596,17 +1689,26 @@ class KpisServicios{
             Frecuencia_Kpis.septiembre, Frecuencia_Kpis.avance_9, 
             Frecuencia_Kpis.octubre, Frecuencia_Kpis.avance_10, 
             Frecuencia_Kpis.noviembre, Frecuencia_Kpis.avance_11, 
-            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12
+            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12, 
+
+            Frecuencia_Kpis.enero_min, Frecuencia_Kpis.febrero_min, 
+            Frecuencia_Kpis.marzo_min, Frecuencia_Kpis.abril_min, 
+            Frecuencia_Kpis.mayo_min, Frecuencia_Kpis.junio_min, 
+
+            Frecuencia_Kpis.julio_min, Frecuencia_Kpis.agosto_min,
+            Frecuencia_Kpis.septiembre_min, Frecuencia_Kpis.octubre_min, 
+            Frecuencia_Kpis.noviembre_min, Frecuencia_Kpis.diciembre_min 
+
         FROM
             Kpis
         INNER JOIN
             Frecuencia_Kpis ON Frecuencia_Kpis.id_kpi = Kpis.id 
         LEFT JOIN
-            goforagile_admin.Vicepresidencia ON goforagile_admin.Vicepresidencia.id = Kpis.area_macro
+            puntacana_admin.Vicepresidencia ON puntacana_admin.Vicepresidencia.id = Kpis.area_macro
         LEFT JOIN
-            goforagile_admin.Areas ON goforagile_admin.Areas.id = Kpis.area_proceso
+            puntacana_admin.Areas ON puntacana_admin.Areas.id = Kpis.area_proceso
         LEFT JOIN
-            goforagile_admin.Estructura_Empresa ON goforagile_admin.Estructura_Empresa.id = Kpis.subproceso
+            puntacana_admin.Estructura_Empresa ON puntacana_admin.Estructura_Empresa.id = Kpis.subproceso
         WHERE
             Kpis.id_empresa = ".$id_empresa." 
             ".$filtros." 
@@ -1753,11 +1855,11 @@ class KpisServicios{
         SELECT
             Kpis.id AS id_kpi,
             Kpis.area_macro,
-            goforagile_admin.Vicepresidencia.nombre AS nombre_area_macro,  
+            puntacana_admin.Vicepresidencia.nombre AS nombre_area_macro,  
             Kpis.area_proceso,
-            goforagile_admin.Areas.nombre AS nombre_area_proceso,
+            puntacana_admin.Areas.nombre AS nombre_area_proceso,
             Kpis.subproceso, 
-            goforagile_admin.Estructura_Empresa.unidad_organizativa AS nombre_subproceso,
+            puntacana_admin.Estructura_Empresa.unidad_organizativa AS nombre_subproceso,
             Kpis.tipo_kpi,
             Kpis.unidad_medida,  
             Kpis.meta, 
@@ -1779,17 +1881,26 @@ class KpisServicios{
             Frecuencia_Kpis.septiembre, Frecuencia_Kpis.avance_9, 
             Frecuencia_Kpis.octubre, Frecuencia_Kpis.avance_10, 
             Frecuencia_Kpis.noviembre, Frecuencia_Kpis.avance_11, 
-            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12
+            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12, 
+
+            Frecuencia_Kpis.enero_min, Frecuencia_Kpis.febrero_min, 
+            Frecuencia_Kpis.marzo_min, Frecuencia_Kpis.abril_min, 
+            Frecuencia_Kpis.mayo_min, Frecuencia_Kpis.junio_min, 
+
+            Frecuencia_Kpis.julio_min, Frecuencia_Kpis.agosto_min,
+            Frecuencia_Kpis.septiembre_min, Frecuencia_Kpis.octubre_min, 
+            Frecuencia_Kpis.noviembre_min, Frecuencia_Kpis.diciembre_min 
+
         FROM
             Kpis
         INNER JOIN
             Frecuencia_Kpis ON Frecuencia_Kpis.id_kpi = Kpis.id 
         LEFT JOIN
-            goforagile_admin.Vicepresidencia ON goforagile_admin.Vicepresidencia.id = Kpis.area_macro
+            puntacana_admin.Vicepresidencia ON puntacana_admin.Vicepresidencia.id = Kpis.area_macro
         LEFT JOIN
-            goforagile_admin.Areas ON goforagile_admin.Areas.id = Kpis.area_proceso
+            puntacana_admin.Areas ON puntacana_admin.Areas.id = Kpis.area_proceso
         LEFT JOIN
-            goforagile_admin.Estructura_Empresa ON goforagile_admin.Estructura_Empresa.id = Kpis.subproceso
+            puntacana_admin.Estructura_Empresa ON puntacana_admin.Estructura_Empresa.id = Kpis.subproceso
         WHERE
             Kpis.id_empresa = ".$id_empresa." 
             ".$filtros." 
@@ -1925,11 +2036,11 @@ class KpisServicios{
         SELECT
             Kpis.id AS id_kpi,
             Kpis.area_macro,
-            goforagile_admin.Vicepresidencia.nombre AS nombre_area_macro,  
+            puntacana_admin.Vicepresidencia.nombre AS nombre_area_macro,  
             Kpis.area_proceso,
-            goforagile_admin.Areas.nombre AS nombre_area_proceso,
+            puntacana_admin.Areas.nombre AS nombre_area_proceso,
             Kpis.subproceso, 
-            goforagile_admin.Estructura_Empresa.unidad_organizativa AS nombre_subproceso,
+            puntacana_admin.Estructura_Empresa.unidad_organizativa AS nombre_subproceso,
             Kpis.tipo_kpi,
             Kpis.unidad_medida,  
             Kpis.meta, 
@@ -1951,17 +2062,27 @@ class KpisServicios{
             Frecuencia_Kpis.septiembre, Frecuencia_Kpis.avance_9, 
             Frecuencia_Kpis.octubre, Frecuencia_Kpis.avance_10, 
             Frecuencia_Kpis.noviembre, Frecuencia_Kpis.avance_11, 
-            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12
+            Frecuencia_Kpis.diciembre, Frecuencia_Kpis.avance_12, 
+
+            Frecuencia_Kpis.enero_min, Frecuencia_Kpis.febrero_min, 
+            Frecuencia_Kpis.marzo_min, Frecuencia_Kpis.abril_min, 
+            Frecuencia_Kpis.mayo_min, Frecuencia_Kpis.junio_min, 
+
+            Frecuencia_Kpis.julio_min, Frecuencia_Kpis.agosto_min,
+            Frecuencia_Kpis.septiembre_min, Frecuencia_Kpis.octubre_min, 
+            Frecuencia_Kpis.noviembre_min, Frecuencia_Kpis.diciembre_min 
+
+            
         FROM
             Kpis
         INNER JOIN
             Frecuencia_Kpis ON Frecuencia_Kpis.id_kpi = Kpis.id 
         LEFT JOIN
-            goforagile_admin.Vicepresidencia ON goforagile_admin.Vicepresidencia.id = Kpis.area_macro
+            puntacana_admin.Vicepresidencia ON puntacana_admin.Vicepresidencia.id = Kpis.area_macro
         LEFT JOIN
-            goforagile_admin.Areas ON goforagile_admin.Areas.id = Kpis.area_proceso
+            puntacana_admin.Areas ON puntacana_admin.Areas.id = Kpis.area_proceso
         LEFT JOIN
-            goforagile_admin.Estructura_Empresa ON goforagile_admin.Estructura_Empresa.id = Kpis.subproceso
+            puntacana_admin.Estructura_Empresa ON puntacana_admin.Estructura_Empresa.id = Kpis.subproceso
         WHERE
             Kpis.id_empresa = ".$id_empresa." 
             ".$filtros." 
@@ -2185,8 +2306,8 @@ class KpisServicios{
             Cargos.nombre AS nombre_cargo,
             Areas.id AS id_area,
             Areas.nombre AS nombre_area,
-            goforagile_admin.Vicepresidencia.nombre AS nombre_vicepresidencia,
-            goforagile_okrs.Roles_Okrs.nombre_rol AS rol
+            Vicepresidencia.nombre AS nombre_vicepresidencia,
+            puntacana_okrs.Roles_Okrs.nombre_rol AS rol
         FROM
             Empleados
         LEFT JOIN
@@ -2194,11 +2315,11 @@ class KpisServicios{
         LEFT JOIN
             Areas ON Areas.id = Empleados.area
         LEFT JOIN
-            goforagile_admin.Estructura_Empresa ON Empleados.area = goforagile_admin.Estructura_Empresa.area
+            puntacana_admin.Estructura_Empresa ON Empleados.area = puntacana_admin.Estructura_Empresa.area
         LEFT JOIN
-            goforagile_admin.Vicepresidencia ON goforagile_admin.Vicepresidencia.id = goforagile_admin.Estructura_Empresa.vicepresidencia
+            Vicepresidencia ON Vicepresidencia.id = Empleados.unidad_corporativa
         LEFT JOIN
-            goforagile_okrs.Roles_Okrs ON goforagile_okrs.Roles_Okrs.id = Empleados.role
+            puntacana_okrs.Roles_Okrs ON puntacana_okrs.Roles_Okrs.id = Empleados.role
         WHERE
             Empleados.id_empresa = '".$id_empresa."'
         ";

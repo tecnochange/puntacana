@@ -17,7 +17,7 @@ $sql = "SELECT
 
 $res = mysqli_query($connect_okrs, $sql);
 
-$url = "https://goforagile.com/recursos/";
+$url = $recursos_local;
 
 if (mysqli_num_rows($res) > 0) {
 

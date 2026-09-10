@@ -61,7 +61,7 @@
                                         <a class="dropdown-item">Gestionar Iniciativas</a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item">Eliminar Iniciativas **</a>
+                                        <a class="dropdown-item" onclick="EliminarIniciativa(<?= $iniciativa["id"]; ?>)">Eliminar Iniciativas **</a>
                                     </li>
                                 </ul>
                             </td>

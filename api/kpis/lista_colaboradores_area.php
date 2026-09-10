@@ -32,7 +32,7 @@ while ($data = mysqli_fetch_array($query)){
 ?>
 
 <tr>
-                                <td><img src="<?= 'https://goforagile.com/recursos/' . $integrante_foto; ?>" width="40" height="40" class="foto_miniaturas" title="<?= $integrante["nombre"]; ?>" onclick="FichaEmpleado('<?= $integrante['id_colaborador']; ?>')"></td>
+                                <td><img src="<?= $recursos_local . $integrante_foto; ?>" width="40" height="40" class="foto_miniaturas" title="<?= $integrante["nombre"]; ?>" onclick="FichaEmpleado('<?= $integrante['id_colaborador']; ?>')"></td>
                                 <td><?= $data["nombre"]; ?></td>
                                 <td><?= $data["cargo"]; ?></td>
                                 <td></td>
@@ -44,4 +44,5 @@ while ($data = mysqli_fetch_array($query)){
 </tr>
 
 
-<?php } ?>
+<?php }  ?>
+

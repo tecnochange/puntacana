@@ -6,14 +6,6 @@
 </script>
 
 <?php
-// Mostrar errores en pantalla
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-?>
-
-
-<?php
 $id_colaborador = $_GET["id"];
 $array_kpis_general = array();
 $hoy = date("Y-m-d H:i:s");
@@ -326,14 +318,14 @@ $datos_consolidado_kpis = $ClassKpisServicios->datos_consolidado_kpis($user_log[
                             <div class="col-md-2 d-flex align-items-center text-center fs-6">
                                 <div>
                                     <b>Meta:</b> <br>
-                                    <b><?= number_format($meta_formato, 2); ?></b>
+                                    <b><?= number_format($meta_formato, 2, '.', ','); ?></b>
                                 </div>
                             </div>
 
                             <div class="col-md-2 d-flex align-items-center text-center fs-6">
                                 <div>
                                     <b>Seguimiento</b> <br>
-                                    <b><?= number_format($seguimiento_formato, 2); ?></b>
+                                    <b><?= number_format($seguimiento_formato, 2, '.', ','); ?></b>
                                 </div>
                             </div>
 

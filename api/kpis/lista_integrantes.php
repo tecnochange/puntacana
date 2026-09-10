@@ -2,11 +2,16 @@
 include("../../app/connect.php");
 $id_empresa = $_POST["id_empresa"];
 $id_viceprecidencia = $_POST["id_vicepresidencia"];
-$id_area = $_POST["id_area"];
+$id_area = $_POST["id_area"]; 
+$id_subproceso = $_POST["id_subproceso"]; 
 
 $filtro = "";
 if($id_area){
     $filtro .= " AND Empleados.area = '$id_area'  ";
+}
+
+if($id_subproceso > 0){
+    $filtro .= " AND Empleados.unidad_organizativa = '$id_subproceso'  ";
 }
 
 $sentencia =

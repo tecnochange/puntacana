@@ -79,7 +79,7 @@
                                 $responsable_foto = !empty($responsableData["foto"]) ? $responsableData["foto"] : "img_default.jpg"; //FOTO DEL RESPONSABLE
                                 $modalId = "modal_responsable_" . $responsableData["id"];
                                 ?>
-                                <img src="https://goforagile.com/recursos/<?= $responsable_foto; ?>"
+                                <img src="<?= $recursos_local . $responsable_foto; ?>"
                                     class="foto_miniaturas mb-1"
                                     title="<?= $responsableData["nombre"]; ?>"
                                     style="cursor:pointer;"

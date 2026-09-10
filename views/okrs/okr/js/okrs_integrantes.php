@@ -79,7 +79,7 @@
                 empleado.foto = empleado.foto ? empleado.foto : "/img_default.jpg";
                 $tbody.append(`
                 <tr data-id="${empleado.id}">
-                    <td><img src="https://goforagile.com/recursos/${empleado.foto}" width="40" height="40" class="rounded-circle"></td>
+                    <td><img src="https://puntacana.goforagile.com/recursos/${empleado.foto}" width="40" height="40" class="rounded-circle"></td>
                     <td>${empleado.nombre}</td>
                     <td>${empleado.nombre_cargo}</td>
                     <td align="center"><input type="checkbox" class="chk-rol chk-rol-admin" name="empleados[${empleado.id}][admin_kr]" value="1"></td>

@@ -11,6 +11,8 @@ class Desempenio {
         $queryPonderaciones = mysqli_query( $connect_admin , "SELECT * FROM Ponderar_Desempenio WHERE id_empresa = '".$_SESSION["id_empresa"]."' AND anio = '".$_SESSION["anio_fill"]."' AND nivel = '".$nivel."' " );
         $dataPonderaciones = mysqli_fetch_array($queryPonderaciones);
 
+        //print_r($dataPonderaciones);
+
         $okrs_ponderado = 0;
         if($okrs > 0){ 
             $okrs_ponderado = $okrs*($dataPonderaciones["mod_okrs"]/100); 
@@ -23,6 +25,9 @@ class Desempenio {
         if( $kpis > 0 ){ $kpis_ponderado = $kpis*($dataPonderaciones["mod_kpis"]/100); }
 
         $total_ponderado = $okrs_ponderado+$competencias_ponderado+$kpis_ponderado;
+        if($total_ponderado > 0){
+            $total_ponderado = round($total_ponderado,2);
+        }
 
         return $total_ponderado;
     }

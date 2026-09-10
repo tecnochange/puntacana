@@ -260,6 +260,98 @@ class OkrsServicios
         return $array;
     }
 
+    //FUNCION PARA OBTENER LOS OKRS DE LA EMPRESA
+    //FUNCION PARA OBTENER LOS OKRS DE LA EMPRESA
+    //FUNCION PARA OBTENER LOS OKRS DE LA EMPRESA
+    public function okrs_vicepresidencias( $id_empresa, $id_vicepresidencia ){
+        global $connect_okrs;
+
+        $filtros = " AND Okrs_Areas.id_vicepresidencia = '".$id_vicepresidencia."' ";
+        if ($_SESSION["anio_fill"]) {
+            $filtros .= " AND Okrs.anio = '" . $_SESSION["anio_fill"] . "' ";
+        }
+
+        $array = array();
+
+        $sentencia = "
+        SELECT
+            Okrs.id AS id_okrs,
+            Okrs.id_empresa AS id_empresa,
+            Okrs.objetivo_okr AS objetivo,
+            Okrs.id_empleado AS id_empleado_owner,
+            Okrs.tipo AS tipo_okrs,
+            goforagile_admin.Estructura_Empresa.vicepresidencia AS id_vicepresidencia,
+            goforagile_admin.Areas.nombre AS nombre_area,
+            goforagile_admin.Empleados.unidad_organizativa AS id_unidad_organizativa,
+            goforagile_admin.Estructura_Empresa.unidad_organizativa AS nombre_unidad_organizativa
+        FROM
+            Okrs
+        LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs.id
+        LEFT JOIN goforagile_admin.Areas ON Okrs_Areas.id_area = goforagile_admin.Areas.id
+        LEFT JOIN goforagile_admin.Empleados ON Okrs.id_empleado = goforagile_admin.Empleados.id
+        LEFT JOIN goforagile_admin.Estructura_Empresa ON Okrs_Areas.id_area = goforagile_admin.Estructura_Empresa.area
+        WHERE
+            Okrs.id_empresa = '" . $id_empresa . "'  
+            " . $filtros . " 
+        GROUP BY Okrs.id
+        ORDER BY Okrs.objetivo_okr ASC 
+        ";
+
+        //echo $sentencia;
+        $query = mysqli_query($connect_okrs, $sentencia);
+        while ($data = mysqli_fetch_assoc($query)) {
+
+            //EMPLEADO
+            $empleado = $this->Empleado($data['id_empleado_owner']);
+            $data['empleado'] = $empleado;
+
+            //RESULTADOS
+            $resultados = $this->okrs_resultados($data["id_okrs"]);
+            $data['resultados'] = $resultados;
+
+            $porcentaje_avance = $this->PorcentajeAvanceOrks($data["id_okrs"]);
+            $data['porcentaje_avance'] = $porcentaje_avance;
+
+            $color = EscalaColor($porcentaje_avance);
+            $data['color_avance'] = $color;
+
+
+            if ($data['tipo_okrs'] == 1) {
+                $data['tipo_okrs'] = "OKR Organizacional";
+            } else {
+                $data['tipo_okrs'] = "OKR Equipo";
+            }
+
+
+            array_push($array, $data);
+        }
+        return $array;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //FUNCION PARA OBTENER LOS OKRS DE AREA O EQUIPO DE TRABAJO
     //FUNCION PARA OBTENER LOS OKRS DE AREA O EQUIPO DE TRABAJO
@@ -2530,5 +2622,189 @@ class OkrsServicios
         $empleado = mysqli_num_rows($query) > 0 ? mysqli_fetch_assoc($query) : array();
 
         return $empleado;
+    }
+
+    //MOVER OKRS
+    //ESTA FUNCION MUEVE LOS RESULTADOS CLAVES Y TODAS SUS RELACIONES A OTROS OKRS
+    public function MoverResultadoClave($id_resultado, $id_okrs_nuevo){
+
+        global $connect_okrs;
+
+        //DATOS RESULTADO CLAVE
+        $sentencia_resultado = "SELECT * FROM Okrs_Resultados WHERE id = '".$id_resultado."' ";
+        $query = mysqli_query($connect_okrs, $sentencia_resultado);
+        $data = mysqli_fetch_array($query);
+
+        $queryOkrData = mysqli_query($connect_okrs, "SELECT * FROM Okrs WHERE id = '".$data["id_okrs"]."' ");
+        $dataOkrData = mysqli_fetch_array($queryOkrData);
+
+        //TABLAS
+        /*
+        Documentos_Resultados
+        Okrs_Actividades
+        Okrs_Comentarios
+        Okrs_Comentarios_Iniciativas
+        Okrs_Documentos
+        Okrs_Iniciativas
+        Okrs_Iniciativas_punto_restauracion
+        */
+
+        $id_okr_anterior = $data["id_okrs"];
+
+        $sentencia_resultados =  "UPDATE Okrs_Resultados SET id_okrs = '".$id_okrs_nuevo."' WHERE id = '".$id_resultado."' " ;
+        $sentencia_documento_resultados = "UPDATE Documentos_Resultados SET id_okrs = '".$id_okrs_nuevo."' WHERE id_resultado = '".$id_resultado."' ";
+        $sentencia_actividades = "UPDATE Okrs_Actividades SET id_okrs = '".$id_okrs_nuevo."' WHERE id_resultado = '".$id_resultado."' ";
+        $sentencia_comentarios = "UPDATE Okrs_Comentarios SET id_okrs = '".$id_okrs_nuevo."' WHERE id_resultado = '".$id_resultado."' "; 
+        $sentencia_comentarios_iniciativas = "UPDATE Okrs_Comentarios_Iniciativas SET id_okrs = '".$id_okrs_nuevo."' WHERE id_resultado = '".$id_resultado."' ";
+        $sentencia_documentos = "UPDATE Okrs_Documentos SET id_okrs = '".$id_okrs_nuevo."' WHERE id_resultado = '".$id_resultado."' ";
+        $sentencia_iniciativas = "UPDATE Okrs_Iniciativas SET id_okrs = '".$id_okrs_nuevo."' WHERE id_resultado = '".$id_resultado."' ";
+        $sentencia_iniciativas_restaura = "UPDATE Okrs_Iniciativas_punto_restauracion SET id_okrs = '".$id_okrs_nuevo."' WHERE id_resultado = '".$id_resultado."' ";
+
+        /*
+        mysqli_query($connect_okrs, $sentencia_documento_resultados);
+        mysqli_query($connect_okrs, $sentencia_actividades);
+        mysqli_query($connect_okrs, $sentencia_comentarios);
+        mysqli_query($connect_okrs, $sentencia_comentarios_iniciativas);
+        mysqli_query($connect_okrs, $sentencia_documentos);
+        mysqli_query($connect_okrs, $sentencia_iniciativas);
+        mysqli_query($connect_okrs, $sentencia_iniciativas_restaura);
+        */
+
+        //echo $id_okr_anterior;
+        //echo "<br>";
+
+        /*
+        echo $sentencia_documento_resultados;
+        echo "<br>";
+        echo $sentencia_actividades;
+        echo "<br>";
+        */
+
+        
+ 
+
+      
+
+        $accion = "MOVER";
+        $descripcion = 'Se mueve el resultado clave '.$id_resultado.' : '.$data["descripcion"].' del Okrs '.$id_okr_anterior.' al '.$id_okrs_nuevo;
+        
+        $nodo = array(
+            "accion" => $accion, 
+            "descripcion" => $descripcion, 
+            "id_okrs_nuevo" => $id_okrs_nuevo, 
+            "id_okr_anterior" => $id_okr_anterior, 
+            "id_resultado" => $id_resultado, 
+            "tipo" => $dataOkrData["tipo"]
+        );
+       
+
+        return $nodo;
+    }
+
+    //MOVER OKRS
+    //ESTA FUNCION MUEVE LOS RESULTADOS CLAVES Y TODAS SUS RELACIONES A OTROS OKRS
+    public function DuplicarResultadoClave($id_resultado){
+
+        global $connect_okrs;
+
+        //DATOS RESULTADO CLAVE
+        $sentencia_resultado = "SELECT * FROM Okrs_Resultados WHERE id = '".$id_resultado."' ";
+        $query = mysqli_query($connect_okrs, $sentencia_resultado);
+        $data = mysqli_fetch_array($query);
+
+        $queryOkrData = mysqli_query($connect_okrs, "SELECT * FROM Okrs WHERE id = '".$data["id_okrs"]."' ");
+        $dataOkrData = mysqli_fetch_array($queryOkrData);
+
+        //TABLAS
+        /*
+        Documentos_Resultados
+        Okrs_Actividades
+        Okrs_Comentarios
+        Okrs_Comentarios_Iniciativas
+        Okrs_Documentos
+        Okrs_Iniciativas
+        Okrs_Iniciativas_punto_restauracion
+        */
+
+        $id_okrs = $data["id_okrs"];
+
+        $sentencia_resultados =  "
+            INSERT INTO Okrs_Resultados(
+                id_empresa,
+                id_okrs,
+                id_okrs_padre,
+                id_empleado,
+                responsables,
+                descripcion,
+                avance,
+                fecha_inicia,
+                fecha_entrega,
+                tendencia,
+                medicion,
+                meta,
+                meta_minimo,
+                meta_maximo,
+                periodo,
+                estado,
+                orden,
+                created_at,
+                updated_at
+            )
+            VALUES(
+                id_empresa,
+                '".$data["id_okrs"]."',
+                '".$data["id_okrs_padre"]."',
+                '".$data["id_empleado"]."',
+                responsables,
+                descripcion,
+                avance,
+                fecha_inicia,
+                fecha_entrega,
+                tendencia,
+                medicion,
+                meta,
+                meta_minimo,
+                meta_maximo,
+                periodo,
+                estado,
+                orden,
+                created_at,
+                updated_at
+            )
+        ";
+
+
+        
+
+        /*
+        mysqli_query($connect_okrs, $sentencia_documento_resultados);
+        mysqli_query($connect_okrs, $sentencia_actividades);
+        mysqli_query($connect_okrs, $sentencia_comentarios);
+        mysqli_query($connect_okrs, $sentencia_comentarios_iniciativas);
+        mysqli_query($connect_okrs, $sentencia_documentos);
+        mysqli_query($connect_okrs, $sentencia_iniciativas);
+        mysqli_query($connect_okrs, $sentencia_iniciativas_restaura);
+        */
+
+        
+
+        
+ 
+
+      
+
+        $accion = "DUPLICAR";
+        $descripcion = 'Se duplica el resultado clave '.$id_resultado.' : '.$data["descripcion"].' del Okrs '.$id_okrs;
+        
+        $nodo = array(
+            "accion" => $accion, 
+            "descripcion" => $descripcion, 
+            "id_okrs" => $id_okrs, 
+            "id_resultado" => $id_resultado, 
+            "tipo" => $dataOkrData["tipo"]
+        );
+       
+
+        return $nodo;
     }
 }

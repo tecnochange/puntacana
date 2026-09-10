@@ -101,12 +101,11 @@ if ($promedio_general > 0) {
 //PARA RETORNAR UN COLOR
 function RetornarColor($valor)
 {
-
     $valor = ($valor * 100) / 5; //VALOR CONVERTIDO A PORCENTAJE
     $valor = round($valor);
 
-    global $connect_valentina;
-    $queryEI = mysqli_query($connect_valentina, "SELECT * FROM Escala_Medicion WHERE id_empresa = " . $_SESSION["id_empresa"] . "");
+    global $connect_admin;
+    $queryEI = mysqli_query($connect_admin, "SELECT * FROM Escala_Medicion WHERE id_empresa = " . $_SESSION["id_empresa"] . "");
     $dataEI = mysqli_fetch_array($queryEI);
 
     $color = '';
@@ -127,6 +126,7 @@ function RetornarColor($valor)
     }
     return $color;
 }
+
 
 //DATOS PROCESADOS
 $array_niveles_resumen = array();
@@ -240,6 +240,25 @@ array_multisort($aux, SORT_DESC, $array_niveles_resumen);
         .left_col {
             display: none;
         }
+    }
+
+    .base_barras{
+        width: 100px;
+        display: inline-grid;
+        text-align: center;
+    }
+
+    .barra_vertical{
+        width: 40px;
+        height: 200px;
+        background-color: #E9E9E9;
+        margin: 0 auto;
+        border-radius: 8px 8px 0px 0px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+    .vertical{
+        width: 100%;
     }
 </style>
 
@@ -451,17 +470,16 @@ array_multisort($aux, SORT_DESC, $array_niveles_resumen);
                                 if ($competencia["promedio"] > 0) {
 
                                     echo '
-                                    <td align="center" valign="bottom"  width="' . $ancho . '%" >
+                                    <div class="base_barras">
 
-                                        <div style="font-size: 11px">' . $competencia["porcentaje"] . '%<div>
-                                        <div style="width: 60px; height:200px; background-color: #E9E9E9">
-                                            <div style="height: ' . (100 - $competencia["porcentaje"]) . '%; width: 60px;">
-                                            </div>
-                                            <div style="height: ' . $competencia["porcentaje"] . '%; width: 60px; background-color: ' . $color_compt . '">
-                                            </div>
+                                        <div style="font-size: 11px"><b>' . $competencia["porcentaje"] . '%</b></div>
+                                        <div class="barra_vertical" >
+                                            <div class="vertical" style="height: '.(100 - $competencia["porcentaje"]).'%; "></div>
+                                            <div class="vertical" style="height: '.$competencia["porcentaje"].'%; background-color: '.$color_compt. '"></div>
                                         </div>
                                         <div class="nombre_comp_barras">' . $competencia["nombre"] . '</div>
-                                    </td>
+
+                                    </div>
                                     ';
                                 }
                             }

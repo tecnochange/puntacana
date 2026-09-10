@@ -39,7 +39,7 @@ class Vicepresidencias {
                                     }
 
                                     $foto_img = '
-                                        <img src="https://goforagile.com/recursos/'.$dataEmple["foto"].'" class="foto_miniaturas" title="'.$dataEmple["nombre"].'">
+                                        <img src="https://puntacana.goforagile.com/recursos/'.$dataEmple["foto"].'" class="foto_miniaturas" title="'.$dataEmple["nombre"].'">
                                     
                                     ';
 

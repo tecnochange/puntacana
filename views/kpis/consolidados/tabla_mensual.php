@@ -107,6 +107,26 @@ if( $kpis["abril"] == "" ){ $abril_lectura = ' readonly '; }
 if( $kpis["mayo"] == "" ){ $mayo_lectura = ' readonly '; }
 if( $kpis["junio"] == "" ){ $junio_lectura = ' readonly '; }
 
+
+
+//MESES HABILITADOS
+if( $meses_habilitados["julio"] == "" ){ $julio_lectura = ' readonly '; }
+if( $meses_habilitados["agosto"] == ""){ $agosto_lectura = ' readonly '; }
+if( $meses_habilitados["septiembre"] == ""){ $septiembre_lectura = ' readonly '; }
+if( $meses_habilitados["octubre"] == ""){ $octubre_lectura = ' readonly '; }
+
+
+if( $meses_habilitados["noviembre"] == ""){ $noviembre_lectura = ' readonly '; }
+if( $meses_habilitados["diciembre"] == "" ){ $diciembre_lectura = ' readonly '; }
+if( $meses_habilitados["enero"] == "" ){ $enero_lectura = ' readonly '; }
+if( $meses_habilitados["febrero"] == "" ){ $febrero_lectura = ' readonly '; }
+
+
+if( $meses_habilitados["marzo"] == "" ){ $marzo_lectura = ' readonly '; }
+if( $meses_habilitados["abril"] == "" ){ $abril_lectura = ' readonly '; }
+if( $meses_habilitados["mayo"] == "" ){ $mayo_lectura = ' readonly '; }
+if( $meses_habilitados["junio"] == "" ){ $junio_lectura = ' readonly '; }
+
 ?>
 
 <div class="table-responsive">
@@ -195,6 +215,26 @@ if( $kpis["junio"] == "" ){ $junio_lectura = ' readonly '; }
 
             <td><?= $meta_formato; ?></td>
         </tr>
+
+        <?php if($_SESSION["anio_fill"] >= 2027){ ?>
+        <tr>
+            <td>MÍNIMO ESPERADO</td>
+            <td><?= $kpis["julio_min"]; ?></td>
+            <td><?= $kpis["agosto_min"]; ?></td>
+            <td><?= $kpis["septiembre_min"]; ?></td>
+            <td><?= $kpis["octubre_min"]; ?></td>
+            <td><?= $kpis["noviembre_min"]; ?></td>
+            <td><?= $kpis["diciembre_min"]; ?></td>
+            <td><?= $kpis["enero_min"]; ?></td>
+            <td><?= $kpis["febrero_min"]; ?></td>
+            <td><?= $kpis["marzo_min"]; ?></td>
+            <td><?= $kpis["abril_min"]; ?></td>
+            <td><?= $kpis["mayo_min"]; ?></td>
+            <td><?= $kpis["junio_min"]; ?></td>
+
+            <td></td>
+        </tr>
+        <?php } ?>
 
         <tr>
             <td>SEGUIMIENTO</td>        

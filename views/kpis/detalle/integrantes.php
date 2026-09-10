@@ -249,7 +249,7 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
                             ?>
 
                             <tr>
-                                <td><img src="<?= 'https://goforagile.com/recursos/' . $integrante_foto; ?>" width="40" height="40" class="foto_miniaturas" title="<?= $integrante["nombre"]; ?>" onclick="FichaEmpleado('<?= $integrante['id_colaborador']; ?>')"></td>
+                                <td><img src="<?= $recursos_local . $integrante_foto; ?>" width="40" height="40" class="foto_miniaturas" title="<?= $integrante["nombre"]; ?>" onclick="FichaEmpleado('<?= $integrante['id_colaborador']; ?>')"></td>
                                 <td><?= $integrante["nombre"]; ?></td>
                                 <td><?= $integrante["cargo"]; ?></td>
                                 <td><?= $integrante["vicepresidencia"]; ?></td>
@@ -284,10 +284,11 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
                 </table>
             </div>
 
-            <div class="row">
+            <?php if($user_log["permiso_administrador_kpis"] || $VALIDAR_ROOT["crear"] ){ ?>
+            <div class="row" >
                 <div class="col-md-6 mb-2">
                     <a href="<?php echo $url; ?>?pg=kpis/detalle/detalle_kpi&id=<?php echo $_SESSION["id_kpi_edit"]; ?>">
-                        <button type="button" class="btn btn-success w-100">
+                        <button type="button" class="btn btn-success w-100" >
                             << Anterior
                                 </button>
                     </a>
@@ -300,6 +301,8 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
                     </a>
                 </div>
             </div>
+            <?php } ?>
+            
         </div>
     </div>
 </div>
@@ -307,6 +310,7 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
 <script>
     var api = '<?php echo $url; ?>api/okrs/';
 
+/*
     function SeleccionarTodos(element, tipo) {
 
         const tabla = $('#tablaEmpleados').DataTable();
@@ -327,6 +331,48 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
                     delete seleccionados[id];
                 }
             });
+        }
+
+        actualizarBoton();
+    }
+        */
+
+
+    function SeleccionarTodos(element, tipo) {
+
+        const tabla = $('#tablaEmpleados').DataTable();
+
+        // Solo filas visibles (filtradas y de la página actual)
+        const filas = tabla.rows({
+            search: 'applied',
+            page: 'current'
+        }).nodes();
+
+        if ($(element).is(':checked')) {
+
+            $(`input.chk-rol[data-tipo="${tipo}"]`, filas).each(function() {
+
+                $(this).prop('checked', true);
+
+                const empleadoId = $(this).data('id');
+                seleccionados[empleadoId] = tipo;
+
+            });
+
+        } else {
+
+            $(`input.chk-rol[data-tipo="${tipo}"]`, filas).each(function() {
+
+                $(this).prop('checked', false);
+
+                const empleadoId = $(this).data('id');
+
+                if (seleccionados[empleadoId] == tipo) {
+                    delete seleccionados[empleadoId];
+                }
+
+            });
+
         }
 
         actualizarBoton();
@@ -432,7 +478,7 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
                 areaSelect.classList.add("d-none");
 
                 $("#area").val(<?php echo $data["area_proceso"]; ?>);
-                ObtenerColaboradoresArea(<?php echo $data["area_macro"]; ?>, <?php echo $data["area_proceso"]; ?>);
+                ObtenerColaboradoresArea(<?php echo $data["area_macro"]; ?>, <?php echo $data["area_proceso"]; ?>, <?php echo $data["subproceso"]; ?>);
                 
                 
 

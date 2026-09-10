@@ -3,7 +3,7 @@
         <div class="profile_img" style="text-align: center;">
             <?php
             if ($dtEmpresa["logo"] != "") {
-                echo '<img loading="lazy" src="https://goforagile.com/recursos/' . $dtEmpresa["logo"] . '" style="width: auto; max-height: 60px;" class="profile_img">';
+                echo '<img loading="lazy" src="' . $recursos_local . $dtEmpresa["logo"] . '" style="width: auto; max-height: 60px;" class="profile_img">';
             } else {
                 echo '<img loading="lazy" src="' . $url . 'img/logo_agile_marker.png" style="width: auto; max-height: 50px;" class="profile_img">';
             }

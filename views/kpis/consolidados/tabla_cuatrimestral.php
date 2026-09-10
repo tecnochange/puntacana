@@ -25,6 +25,15 @@ if (!$kpis["avance_3"] || empty($kpis["avance_3"]) || trim($kpis["avance_3"]) ==
     $accion_correctiva++;
 }
 $read_only_kpis = "";
+
+
+//MESES HABILITADOS
+if( $meses_habilitados["julio"] == "" ){ $julio_lectura = ' readonly '; }
+
+if( $meses_habilitados["noviembre"] == ""){ $noviembre_lectura = ' readonly '; }
+
+if( $meses_habilitados["marzo"] == "" ){ $marzo_lectura = ' readonly '; }
+
 ?>
 
 <table class="table table-bordered">
@@ -58,12 +67,22 @@ $read_only_kpis = "";
         <td><?= $kpis["meta"]; ?></td>
 
     </tr>
+    <?php if($_SESSION["anio_fill"] >= 2027){ ?>
+    <tr>
+        <td>MÍNIMO ESPERADO</td>
+        <td><?= $kpis["julio_min"]; ?></td>
+        <td><?= $kpis["noviembre_min"]; ?></td>
+        <td><?= $kpis["marzo_min"]; ?></td>
+
+        <td></td>
+    </tr>
+    <?php } ?>
     <tr>
         <td>SEGUIMIENTO</td>
 
-        <td> <input type="text" class="form-control" value="<?= $kpis["avance_7"]; ?>" name="avance_7" onkeyup="return NumerosDecimales(this)" <?= $read_only_kpis; ?> > </td>
-        <td> <input type="text" class="form-control" value="<?= $kpis["avance_11"]; ?>" name="avance_11" onkeyup="return NumerosDecimales(this)" <?= $read_only_kpis; ?> > </td>
-        <td> <input type="text" class="form-control" value="<?= $kpis["avance_3"]; ?>" name="avance_3" onkeyup="return NumerosDecimales(this)" <?= $read_only_kpis; ?> > </td>
+        <td> <input type="text" class="form-control" value="<?= $kpis["avance_7"]; ?>" name="avance_7" onkeyup="return NumerosDecimales(this)" <?= $read_only_kpis; ?>  <?= $julio_lectura; ?> > </td>
+        <td> <input type="text" class="form-control" value="<?= $kpis["avance_11"]; ?>" name="avance_11" onkeyup="return NumerosDecimales(this)" <?= $noviembre_lectura; ?>  <?= $julio_lectura; ?>  > </td>
+        <td> <input type="text" class="form-control" value="<?= $kpis["avance_3"]; ?>" name="avance_3" onkeyup="return NumerosDecimales(this)" <?= $marzo_lectura; ?>  <?= $julio_lectura; ?> > </td>
 
         <td> 
             <?php if($kpis["avance_plano_kpis"] != 0){ ?>

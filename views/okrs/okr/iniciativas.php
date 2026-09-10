@@ -187,7 +187,7 @@ if (isset($_GET["id_iniciativa"]) && !empty($_GET["id_iniciativa"])) {
                                         $responsableData = $OkrsServicios->Empleado($id_responsable); //OBTENER DATOS DEL RESPONSABLE
                                         $foto_responsable = !empty($responsableData["foto"]) ? $responsableData["foto"] : "img_default.jpg"; //FOTO DEL RESPONSABLE
                                         ?>
-                                        <img src="<?= 'https://goforagile.com/recursos/' . $foto_responsable; ?>" width="35" height="35" class="rounded-circle" title="<?= $responsableData["nombre"]; ?>">
+                                        <img src="<?= $recursos_local . $foto_responsable; ?>" width="35" height="35" class="rounded-circle" title="<?= $responsableData["nombre"]; ?>">
                                     <?php endfor; ?>
                                 </td>
                                 <td class="text-center"><?= $item["aprobacion"] == '1' ? 'Aprobado' : 'Pendiente por aprobación'; ?></td>

@@ -41,7 +41,7 @@
                                     $fotoRespIni = !empty($respDataIni["foto"]) ? $respDataIni["foto"] : "img_default.jpg";
                                     $modalId = "modal_responsable_" . $respDataIni["id"];
                                 ?>
-                                    <img src="https://goforagile.com/recursos/<?= $fotoRespIni; ?>"
+                                    <img src="<?= $recursos_local . $fotoRespIni; ?>"
                                         width="32" height="32"
                                         class="rounded-circle mb-1"
                                         title="<?= $respDataIni["nombre"]; ?>"

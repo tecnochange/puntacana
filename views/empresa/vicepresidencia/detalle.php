@@ -195,7 +195,7 @@ $data = mysqli_fetch_array($query);
                                             }
 
                                             $foto_img = '
-                                                <img src="https://goforagile.com/recursos/'.$dataEmple["foto"].'" class="foto_miniaturas" title="'.$dataEmple["nombre"].'">
+                                                <img src="'. $recursos_local . $dataEmple["foto"].'" class="foto_miniaturas" title="'.$dataEmple["nombre"].'">
                                             
                                             ';
 

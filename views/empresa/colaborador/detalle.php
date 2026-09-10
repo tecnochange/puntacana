@@ -219,7 +219,7 @@ if ($_POST["enviar_bienvenida"]) {
                                 <?php if (!empty($data["foto"])): ?>
                                     <div id="foto_cargada" class="col-1">
                                         <?php $foto = !empty($data["foto"]) ? $data["foto"] : "img_default.jpg"; ?>
-                                        <img src="https://goforagile.com/recursos/<?= $foto ?>" class="mt-4 foto_miniaturas" onclick="FichaEmpleado(<?= $data['id'] ?>)">
+                                        <img src="<?= $recursos_local . $foto ?>" class="mt-4 foto_miniaturas" onclick="FichaEmpleado(<?= $data['id'] ?>)">
 
                                         <!-- BOTÓN ELIMINAR FOTO -->
                                         <span class="text-danger" style="cursor: pointer;" onclick="eliminarFoto(<?= $data['id'] ?>)"><i class="bi bi-trash3-fill" style="position:relative; top:10%; right:0;" title="Eliminar Foto"></i></span>

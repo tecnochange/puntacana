@@ -1013,7 +1013,23 @@ $nombre_ciclo = $dataCicloVal["anio"] . " - " . $dataCicloVal["nombre"];
                     <?php if ($permitir_col) { ?>
 						<div class="col" style="background-color: #212529;color: white;text-align:center;"><?php echo number_format($total_colaborador, 1); ?>%</div>
 					<?php } ?>
-                    <div class="col" style="background-color: #212529;color: white;text-align:center;">TOTAL</div>
+
+
+                    <?php
+                        if($PROMEDIO_GLOBAL_REPORTE > 0 ){
+                            $PROMEDIO_GLOBAL_REPORTE = $PROMEDIO_GLOBAL_REPORTE/count($COMPETENCIAS);
+                            $PROMEDIO_GLOBAL_REPORTE = round($PROMEDIO_GLOBAL_REPORTE,1);
+                        }
+
+                        $color_general = RetornarColor( round($PROMEDIO_GLOBAL_REPORTE,1), $rangos);
+
+                        if($tipo_ponderacion == '180'){
+                            $PROMEDIO_GLOBAL_REPORTE = number_format($total_jefe, 1);
+                            $color_general = RetornarColor( round($PROMEDIO_GLOBAL_REPORTE,1), $rangos);
+                        }
+                    ?>
+
+                    <div class="col" style="background-color: #212529;color: white;text-align:center;"><?php echo $PROMEDIO_GLOBAL_REPORTE; ?>%</div>
 
 
 
@@ -1041,24 +1057,26 @@ $nombre_ciclo = $dataCicloVal["anio"] . " - " . $dataCicloVal["nombre"];
 																														?>%</div> -->
 						<div class="col" style="background-color: #212529;color: white;text-align:center; display: none"><?php echo number_format($total_jefe, 1); ?>%</div>
 					<?php }
-					$color_general = RetornarColor($total_jefe, $rangos); ?>
+					//$color_general = RetornarColor($total_jefe, $rangos); ?>
 
                     <?php
+/*
                         if($PROMEDIO_GLOBAL_REPORTE > 0 ){
                             $PROMEDIO_GLOBAL_REPORTE = $PROMEDIO_GLOBAL_REPORTE/count($COMPETENCIAS);
                         }
 
                         $color_general = RetornarColor($promedio_general_evaluacion_porcentaje, $rangos);
+                        */
                     ?>
 
 					<script>
 						$(document).ready(function() {
-							$("#porcentajeTotal").html('<div class="progreso-bar-container" style="--i:<?php echo $promedio_general_evaluacion_porcentaje; ?>;--clr:<?php echo $color_general; ?>">' +
-								'<div class="progreso-bar objetivo-okr"> <?php echo $promedio_general_evaluacion_porcentaje; ?>% ' +
-								'<progreso id="objetivo-okr" min="0" value="<?php echo $promedio_general_evaluacion_porcentaje; ?>"></progreso>' +
+							$("#porcentajeTotal").html('<div class="progreso-bar-container" style="--i:<?php echo $PROMEDIO_GLOBAL_REPORTE; ?>;--clr:<?php echo $color_general; ?>">' +
+								'<div class="progreso-bar objetivo-okr"> <?php echo $PROMEDIO_GLOBAL_REPORTE; ?>% ' +
+								'<progreso id="objetivo-okr" min="0" value="<?php echo $PROMEDIO_GLOBAL_REPORTE; ?>"></progreso>' +
 								'</div>' +
 								'</div>' +
-								'<div style="margin-top: 10px; margin-bottom: 20px">Resultado Total</div>'
+								'<div style="margin-top: 10px; margin-bottom: 20px">Resultado Total....</div>'
 							);
 						});
 					</script>

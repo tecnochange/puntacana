@@ -932,7 +932,9 @@ class Kpis
         $query = mysqli_query($connect_admin, $sentencia);
         while ($data = mysqli_fetch_assoc($query)) {
 
+            
             $resultados = $this->kpis_empleado($data["id_empleado"], $id_empresa, $anio);
+
 
             $data["asignados"] = $resultados["cantidad"];
             $data["progreso"] = $resultados["avance_general"];
@@ -1024,7 +1026,7 @@ class Kpis
         $query = mysqli_query($connect_kpis, $sentencia);
         while ($data = mysqli_fetch_assoc($query)) {
 
-            $avance = $this->AvanceKPI($data["id"]);
+            $avance = $this->AvanceKPI_2($data["id"]);
 
             $avance_kpis += $avance;
             $contador_kpis++;

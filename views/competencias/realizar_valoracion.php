@@ -398,7 +398,7 @@ function ValidarEvaluaciones($id_evaluado, $id_jefe, $id_empresa){
 
                                 if(!$permitir_jefe["validacion"]){
                                     $txt_estado = "Otros evaluadores en curso ".$permitir_jefe["terminadas"]."/".$permitir_jefe["evaluaciones"]; 
-                                    $bt_editar = '';
+                                    //$bt_editar = '';
                                 }
                                 else{
                                     //$txt_estado = "Pendiente"; 

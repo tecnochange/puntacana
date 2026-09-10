@@ -16,7 +16,7 @@ $modalId = "modal_responsable_" . $responsableData["id"];
             </div>
 
             <div class="modal-body text-center">
-                <img src="https://goforagile.com/recursos/<?= $foto ?>" 
+                <img src="<?= $recursos_local . $foto ?>" 
                     style="width:100px;height:100px;border-radius:50%;object-fit:cover;">
                 
                 <div class="mt-3 text-start">

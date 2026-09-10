@@ -62,7 +62,7 @@
     }
 
     // 🔹 Obtener colaboradores
-    function ObtenerColaboradoresArea(id_vicepresidencia, id_area) {
+    function ObtenerColaboradoresArea(id_vicepresidencia, id_area, id_subproceso) {
         $.ajax({
             url: api + "lista_integrantes.php",
             type: "POST",
@@ -70,9 +70,21 @@
             data: {
                 id_empresa: idEmpresa,
                 id_vicepresidencia: id_vicepresidencia, 
-                id_area: id_area
+                id_area: id_area, 
+                id_subproceso: id_subproceso
             },
             success: function(data) {
+
+                console.log(data);
+
+                // Validar si el arreglo está vacío
+                if (!Array.isArray(data) || data.length === 0) {
+                    alert("No se encontraron colaboradores.");
+                    $("#tablaEmpleados_contenedor").addClass("d-none"); // Opcional
+                    return;
+                }
+
+                
                 $("#tablaEmpleados_contenedor").removeClass("d-none");
                 listaEmpleados = data;
                 renderTablaEmpleados(listaEmpleados);
@@ -104,7 +116,7 @@
                 empleado.foto = empleado.foto ? empleado.foto : "/img_default.jpg";
                 $tbody.append(`
                 <tr data-id="${empleado.id}">
-                    <td><img src="https://goforagile.com/recursos/${empleado.foto}" width="40" height="40" class="foto_miniaturas" onclick="FichaEmpleado('${empleado.id}')"></td>
+                    <td><img src="https://puntacana.goforagile.com/recursos/${empleado.foto}" width="40" height="40" class="foto_miniaturas" onclick="FichaEmpleado('${empleado.id}')"></td>
                     <td>${empleado.nombre}</td>
                     <td>${empleado.nombre_cargo}</td>
                     <td align="center">
@@ -129,8 +141,8 @@
                 url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
             },
             lengthMenu: [
-                [10, 25, 50, 100, -1],
-                [10, 25, 50, 100, "Mostrar Todos"]
+                [100, 200, 500, -1],
+                [100, 200, 500, "Mostrar Todos"]
             ]
         });
 

@@ -87,9 +87,9 @@ class KpisCrud
             $avance_1 = $request["avance_1"];
             $avance_2 = $request["avance_1"];
             $avance_3 = $request["avance_1"];
-            $avance_4 = $request["avance_3"];
-            $avance_5 = $request["avance_3"];
-            $avance_6 = $request["avance_3"];
+            $avance_4 = $request["avance_4"];
+            $avance_5 = $request["avance_4"];
+            $avance_6 = $request["avance_4"];
             $avance_7 = $request["avance_7"];
             $avance_8 = $request["avance_7"];
             $avance_9 = $request["avance_7"];

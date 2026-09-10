@@ -76,7 +76,7 @@ foreach($vicepresidencias_listas as $vicepresidencia){
                                         foreach($vicepresidencia["array_lideres"] as $lider){
                                             if($lider["id"]){
                                                 $min_lider .= '
-                                                <img src="https://goforagile.com/recursos/'.$lider["foto"].'"
+                                                <img src="'.$recursos_local . $lider["foto"].'"
                                                     width="32" height="32"
                                                     class="foto_miniaturas mb-1"
                                                     title="'.$lider["nombre"].'"
@@ -142,7 +142,7 @@ foreach($vicepresidencias_listas as $vicepresidencia){
                                                     $min_lider_area = 'Sin asignar';
                                                     if($lider["id"]){
                                                         $min_lider_area = '
-                                                        <img src="https://goforagile.com/recursos/'.$lider["foto"].'"
+                                                        <img src="'.$recursos_local . $lider["foto"].'"
 																width="32" height="32"
 																class="foto_miniaturas mb-1"
 																title="'.$lider["nombre"].'" 
@@ -236,7 +236,7 @@ foreach($vicepresidencias_listas as $vicepresidencia){
 											$fotoLider = !empty($responsableData["foto"]) ? $responsableData["foto"] : "img_default.jpg";
 											$modalId = "modal_responsable_" . $responsableData["id"];
 										?>
-											<img src="https://goforagile.com/recursos/<?= $fotoLider; ?>"
+											<img src="<?= $recursos_local . $fotoLider; ?>"
 												width="32" height="32"
 												class="foto_miniaturas mb-1"
 												title="<?= $responsableData["nombre"]; ?>"

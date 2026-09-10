@@ -94,7 +94,7 @@ while ($data = mysqli_fetch_array($query)) {
         $queryComp = mysqli_query($connect_valoracion, "SELECT * FROM Competencias WHERE id = '" . $dataNivel["id_competencia"] . "'  ");
         $dataComp = mysqli_fetch_array($queryComp);
 
-        $competencia_list .= $dataComp["nombre"] . "<br>";
+        $competencia_list .= $dataComp["nombre"] . "\n\r";
 
         $text_nivel = '';
         foreach ($arrayNiveles as &$nivel) {
@@ -102,7 +102,7 @@ while ($data = mysqli_fetch_array($query)) {
                 $text_nivel = $nivel["1"];
             }
         }
-        $nivel_list .= $text_nivel . "<br>";
+        $nivel_list .= $text_nivel . "\n\r";
 
         $text_tipo = '';
         foreach ($arrayTipos as &$tipo) {
@@ -111,7 +111,7 @@ while ($data = mysqli_fetch_array($query)) {
                 $text_tipo = $tipo["1"];
             }
         }
-        $tipo_list .= $text_tipo . "<br>";
+        $tipo_list .= $text_tipo . "\n\r";
     }
 
     $dataPerfil[] = [

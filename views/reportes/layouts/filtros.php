@@ -45,7 +45,6 @@
 
             <div class="col-md-3 text-end ">
                 <button type="submit" class="btn btn-success ">Filtrar</button>
-                <button type="button" class="btn btn-danger" onclick="ResetFiltros();">Resetear Filtros</button>
             </div> 
 
             

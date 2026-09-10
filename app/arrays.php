@@ -115,6 +115,7 @@ $Array_Anio = array(
 	array("2024","2024"),
 	array("2025","2025"), 
     array("2026","2026"), 
+    array("2027","2027"), 
 );
 
 $Array_Nivel_Cargo = array(
@@ -379,6 +380,7 @@ $Array_Anio_Desempenio = array(
 	array("2024","2024"),
 	array("2025","2025"),
 	array("2026","2026"), 
+    array("2027","2027"), 
 );
 
 $Array_tipo_kpi_PC1 = array(

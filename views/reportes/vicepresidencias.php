@@ -6,10 +6,100 @@
 </script>
 
 <?php
+
+function ObtenerOkrsVicepresidencias($id_vicepresidencia, $anio){
+    global $connect_admin;
+    $total = 0;
+    $cantidad = 0;
+    $sentecia = "SELECT * FROM Datos_Sincronizados WHERE anio = '".$anio."' AND id_vicepresidencia = '".$id_vicepresidencia."' ";
+    $query = mysqli_query($connect_admin, $sentecia);
+    while($data = mysqli_fetch_array($query)){
+        $total += $data["okrs"];
+        $cantidad++;
+    }
+
+    $resultado = 0;
+    if($total > 0){
+        $resultado = $total/$cantidad;
+    }
+
+    return $resultado; 
+}
+
+//VICEPRESIDECIAS
+include("app/models/estructura/Vicepresidencias.php");
+$ClassVicepresidencias = new Vicepresidencias();
+$vicepresidencias_listas = $ClassVicepresidencias->vicepresidencias_lista(NULL);
+
 include("app/models/okrs/OkrsServicios.php");
 $ClassOkrServicios = new OkrsServicios();
-$vicepresidencias_listas = $ClassOkrServicios->reporte_lista_vicepresidencias($user_log["id_empresa"]);
+
 ?>
+
+
+<div class="container">
+    <div class="card mb-3">
+        <div class="card-body">
+            <h3>CONSOLIDADO PRIMER NIVEL ORGANIZACIONAL (ALTA DIRECCIÓN) AÑO <?php echo $_SESSION["anio_fill"]; ?></h3>
+        </div>
+    </div>
+
+    <?php include("views/reportes/layouts/filtros.php"); ?>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table" id="vicepresidencias_table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Líder</th>
+                        <th>OKRs Asignados</th>
+                        <th>Progreso</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    foreach($vicepresidencias_listas as $vicepresidencia){ 
+
+                        $data = $ClassOkrServicios->okrs_vicepresidencias($user_log["id_empresa"], $vicepresidencia["id"]);
+                        //$okrs_filtro = $okrs_organizacion;
+                        $datos_consolidado = $ClassOkrServicios->datos_consolidado_okrs($user_log["id_empresa"], $data);
+
+                        echo '
+                            <tr>
+                                <td>'.$vicepresidencia["nombre"].'</td>
+                                <td>'.$vicepresidencia["lideres"].'</td>
+                                <td>'.$datos_consolidado["cantidad_okrs"].'</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: '.$datos_consolidado["promedio_general"].'%;  background-color:'.$datos_consolidado["color_general"].'; color: #000000; ">
+                                            '.$datos_consolidado["promedio_general"].'%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="?pg=reportes/vicepresidencia/detalle&id='.$vicepresidencia["id"].'" type="button" class="btn btn-success btn-sm" title="Vista rápida de los OKRs">
+                                        <i class="bx bx-show"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        ';
+
+                    }
+  
+                    ?>
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+
+</div>
+
+
+
 
 <style>
     /* Margen debajo de la barra de herramientas (botones) */
@@ -22,77 +112,7 @@ $vicepresidencias_listas = $ClassOkrServicios->reporte_lista_vicepresidencias($u
 	}
 </style>
 
-<div class="container-fluid pb-4" style="max-width: 90%; margin: 0 auto;">
-    <div class="card mb-3">
-        <div class="card-body">
-            <h3>CONSOLIDADO PRIMER NIVEL ORGANIZACIONAL (ALTA DIRECCIÓN) AÑO <?php echo $_SESSION["anio_fill"]; ?></h3>
-        </div>
-    </div>
 
-    <?php include("views/reportes/layouts/filtros.php"); ?>
-
-    <div class="card">
-        <div class="card-body">
-
-            <table id="vicepresidencias_table" class="table">
-
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Líder</th>
-                        <th>OKRs Asignados</th>
-                        <th>Progreso</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <?php foreach ($vicepresidencias_listas as $vicepresidencia): ?>
-                        <tr>
-                            <td><?php echo $vicepresidencia["nombre"]; ?></td>
-                            <td>
-                                <?php
-                                $min_lider = '';
-                                foreach ($vicepresidencia["array_lideres"] as $lider) {
-                                    if ($lider["id"]) {
-                                        $foto = isset($lider["foto"]) && !empty($lider["foto"]) ? $lider["foto"] : 'img_default.jpg';
-                                        $min_lider .= '
-                                                <img src="https://goforagile.com/recursos/' . $foto . '"
-                                                    width="32" height="32"
-                                                    class="foto_miniaturas mb-1"
-                                                    title="' . $lider["nombre"] . '"
-                                                    style="cursor:pointer;" 
-                                                    onclick="FichaEmpleado(' . $lider["id"] . ')">
-                                                ';
-                                    }
-                                }
-
-                                if ($min_lider == '') {
-                                    $min_lider = 'Sin asignar';
-                                }
-
-                                echo $min_lider;
-                                ?>
-                            </td>
-                            <td></td>
-                            <td>
-                                <div class="progress">
-                                    <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <a href="?pg=reportes/vicepresidencia/detalle&id=<?= $vicepresidencia["id"]; ?>" type="button" class="btn btn-success btn-sm" title="Vista rápida de los OKRs">
-                                    <i class="bx bx-show"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-
-        </div>
-    </div>
-</div>
 
 <!-- CSS de DataTables + Botones -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">

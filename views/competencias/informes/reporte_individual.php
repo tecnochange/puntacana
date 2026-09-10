@@ -1,4 +1,9 @@
 <?php
+include("app/models/competencias/Competencias.php");
+$ClassCompetencias = new Competencias();
+$dataCicloVal = $ClassCompetencias->Ciclo($user_log["id_empresa"], $_SESSION["anio_ciclo"]);
+
+
 $array_equipo = array();
 $sentenciavalidarPermiso =  "SELECT * FROM Lideres WHERE id_empresa = '" . $user_log['id_empresa'] . "' AND id_jefe = " . $user_log['id'] . " AND  id_empleado = '".$_GET["e"]."'
 ";
@@ -2091,6 +2096,7 @@ $color_general = RetornarColor($porcentaje_general, $rangos);
                                                     <?php
                                                     //REGLAS PARA EL JEFE
                                                     $permitir_jefe = ValidarEvaluaciones($id_evaluado, $user_log["id"], 1);
+
 
                                                     if(!$permitir_jefe["validacion"]){
                                                             $txt_estado = "Otros evaluadores en curso ".$permitir_jefe["terminadas"]."/".$permitir_jefe["evaluaciones"]; 

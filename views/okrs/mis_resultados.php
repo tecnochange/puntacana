@@ -9,6 +9,13 @@ $(document).ready(function() {
 <?php
 include("app/models/okrs/OkrsServicios.php");
 $ClassOkrsServicios = new OkrsServicios();
+
+if($_POST["mover_okrs"]){
+    $respuesta = $ClassOkrsServicios->MoverResultadoClave($_POST["id_resultado_mover"], $_POST["id_okrs_nuevo"]);
+    GuardarAuditoriaOkrs( $user_log["id_empresa"], $user_log["id"], $respuesta["accion"], $respuesta["descripcion"], $respuesta["id_okr_anterior"], 0, $respuesta["id_resultado"], $respuesta["tipo"] );
+}
+
+
 $mis_resultados_clave = $ClassOkrsServicios->mis_resultados_clave($user_log["id_empresa"], $user_log["id"], $user_log["id_area"], $_SESSION["anio_fill"]);
 
 $datos_consolidado = $ClassOkrsServicios->datos_consolidado_okrs($user_log["id_empresa"], $mis_resultados_clave);
@@ -21,6 +28,8 @@ $datos_consolidado = $ClassOkrsServicios->datos_consolidado_okrs($user_log["id_e
 </script>
 
 <?php include("views/okrs/componentes/modal_ficha_okrs.php"); ?>
+<?php include("views/okrs/componentes/modal_mover_resultado_clave.php"); ?>
+<?php include("views/okrs/componentes/modal_duplicar_resultado_clave.php"); ?>
 
 <div class="container-fluid pb-4" style="max-width: 90%; margin: 0 auto;">
 
@@ -206,5 +215,56 @@ $datos_consolidado = $ClassOkrsServicios->datos_consolidado_okrs($user_log["id_e
 
     }
 
+</script>
+
+<script>
+    function FichaMoverResultado(id_resultado){
+        console.log(id_resultado);
+        $("#modal_mover_okrs").modal("show");
+        $("#id_resultado_mover").val(id_resultado);
+        jQuery.ajax({
+                url: api + "lista_okrs_mover.php",
+                type: 'post',
+                data: {
+                    id_empresa: '<?php echo $user_log["id_empresa"] ?>', 
+                    anio: '<?php echo $_SESSION["anio_fill"] ?>',
+                },
+                })
+                .done(function(resp) {
+                    $("#id_okrs_nuevo").html(resp);
+                })
+                .fail(function(resp) {
+                    console.log(resp);
+                })
+                .always(function(resp) {}
+        );
+        
+    }
+
+    function FichaDuplicarResultado(id_resultado){
+        console.log(id_resultado);
+        $("#modal_duplicar_okrs").modal("show");
+        
+
+        jQuery.ajax({
+                url: api + "ficha_resultado_duplicar.php",
+                type: 'post',
+                data: {
+                    id_empresa: '<?php echo $user_log["id_empresa"] ?>', 
+                    anio: '<?php echo $_SESSION["anio_fill"] ?>', 
+                    id_resultado: id_resultado
+                },
+                })
+                .done(function(resp) {
+                    $("#cont_ficha_resultado_duplicar").html(resp);
+                })
+                .fail(function(resp) {
+                    console.log(resp);
+                })
+                .always(function(resp) {}
+        );
+        
+        
+    }
 </script>
 

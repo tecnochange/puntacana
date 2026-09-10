@@ -1,6 +1,6 @@
 <div id="logo_header">
 	<a href="<?php echo $url; ?>?pg=desempenio/mi_desempenio">
-		<img src="https://goforagile.com/recursos/<?php echo $user_log["logo"]; ?>" style="margin: 5px; height: 50px; padding: 2px;">
+		<img src="<?php echo $recursos_local . $user_log["logo"]; ?>" style="margin: 5px; height: 50px; padding: 2px;">
 	</a>
 
 	<a href="<?php echo $url; ?>?pg=perfil/colaborador/detalle" class="solo_movil">

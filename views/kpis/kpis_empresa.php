@@ -20,6 +20,9 @@ $hoy = date("Y-m-d H:i:s");
 include("app/models/kpis/KpisCrud.php");
 $ClassKpisCrud = new KpisCrud();
 
+//MESES HABILTIADOS KPIS
+$meses_habilitados = MesesHabilitados($user_log["id_empresa"], $_SESSION["anio_fill"]);
+
 if ($_POST["guardar_avance_kpi"]) {
     $ClassKpisCrud->actualizar_avance_Kpis($_POST);
     echo '<script> window.location = "?pg=kpis/kpis_empresa#ref_' . $_POST["id_kpi"] . '"; </script>';
@@ -137,8 +140,9 @@ $datos_consolidado_kpis = $ClassKpisServicios->datos_consolidado_kpis($user_log[
                 $seguimiento_formato = '';
 
                 if ($kpis["unidad_medida"] != 4) {
-                    $meta_formato = round($kpis["meta"], 2);
-                    $seguimiento_formato = round($kpis["avance_plano_kpis"], 2);
+                    $meta_formato = number_format($kpis["meta"], 2,'.', ',');
+                    //$seguimiento_formato = round($kpis["avance_plano_kpis"], 2);
+                    $seguimiento_formato = number_format($kpis["avance_plano_kpis"], 2,'.', ',');
                 } else {
                     $meta_formato = $kpis["meta"];
                     //$seguimiento_formato = $kpis["avance_plano_kpis"];
@@ -159,14 +163,15 @@ $datos_consolidado_kpis = $ClassKpisServicios->datos_consolidado_kpis($user_log[
                     }
                     //SOLO APLICA A LOS DIFERENTES DE HORAS MINUTOS SEGUNDO
                     if ($kpis["unidad_medida"] != 4) {
-                        $meta_formato = $validos ? $suma / $validos : 0;
+                        //$meta_formato = $validos ? $suma / $validos : 0;
                     }
 
                     //ACUMULATIVO
                     if ($kpis["tipo_resultado"] == "3") {
                         foreach ($meses as $mes) {
                             if (!empty($kpis[$mes])) {
-                                $meta_formato = $kpis[$mes]; // Se va actualizando con el último encontrado
+                                //$meta_formato = $kpis[$mes]; // Se va actualizando con el último encontrado
+                                //$meta_formato = number_format($meta_formato, 2,'.', ',');
                             }
                         }
                     }
@@ -186,7 +191,8 @@ $datos_consolidado_kpis = $ClassKpisServicios->datos_consolidado_kpis($user_log[
                     }
 
                     if ($kpis["unidad_medida"] != 4) {
-                        $meta_formato = $validos ? $suma / $validos : 0;
+                        //$meta_formato = $validos ? $suma / $validos : 0;
+                        //$meta_formato = number_format($meta_formato, 2,'.', ',');
                     }
 
                     //ACUMULATIVO
@@ -213,14 +219,14 @@ $datos_consolidado_kpis = $ClassKpisServicios->datos_consolidado_kpis($user_log[
                     }
 
                     if ($kpis["unidad_medida"] != 4) {
-                        $meta_formato = $validos ? $suma / $validos : 0;
+                        ///$meta_formato = $validos ? $suma / $validos : 0;
                     }
 
                     //ACUMULATIVO
                     if ($kpis["tipo_resultado"] == "3") {
                         foreach ($meses as $mes) {
                             if (!empty($kpis[$mes])) {
-                                $meta_formato = $kpis[$mes]; // Se va actualizando con el último encontrado
+                                //$meta_formato = $kpis[$mes]; // Se va actualizando con el último encontrado
                             }
                         }
                     }
@@ -240,14 +246,14 @@ $datos_consolidado_kpis = $ClassKpisServicios->datos_consolidado_kpis($user_log[
                     }
 
                     if ($kpis["unidad_medida"] != 4) {
-                        $meta_formato = $validos ? $suma / $validos : 0;
+                        //$meta_formato = $validos ? $suma / $validos : 0;
                     }
 
                     //ACUMULATIVO
                     if ($kpis["tipo_resultado"] == "3") {
                         foreach ($meses as $mes) {
                             if (!empty($kpis[$mes])) {
-                                $meta_formato = $kpis[$mes]; // Se va actualizando con el último encontrado
+                                //$meta_formato = $kpis[$mes]; // Se va actualizando con el último encontrado
                             }
                         }
                     }
@@ -267,14 +273,14 @@ $datos_consolidado_kpis = $ClassKpisServicios->datos_consolidado_kpis($user_log[
                     }
 
                     if ($kpis["unidad_medida"] != 4) {
-                        $meta_formato = $validos ? $suma / $validos : 0;
+                        //$meta_formato = $validos ? $suma / $validos : 0;
                     }
 
                     //ACUMULATIVO
                     if ($kpis["tipo_resultado"] == "3") {
                         foreach ($meses as $mes) {
                             if (!empty($kpis[$mes])) {
-                                $meta_formato = $kpis[$mes]; // Se va actualizando con el último encontrado
+                                //$meta_formato = $kpis[$mes]; // Se va actualizando con el último encontrado
                             }
                         }
                     }
@@ -294,14 +300,14 @@ $datos_consolidado_kpis = $ClassKpisServicios->datos_consolidado_kpis($user_log[
                     }
 
                     if ($kpis["unidad_medida"] != 4) {
-                        $meta_formato = $validos ? $suma / $validos : 0;
+                        //$meta_formato = $validos ? $suma / $validos : 0;
                     }
 
                     //ACUMULATIVO
                     if ($kpis["tipo_resultado"] == "3") {
                         foreach ($meses as $mes) {
                             if (!empty($kpis[$mes])) {
-                                $meta_formato = $kpis[$mes]; // Se va actualizando con el último encontrado
+                                //$meta_formato = $kpis[$mes]; // Se va actualizando con el último encontrado
                             }
                         }
                     }
@@ -343,7 +349,7 @@ $datos_consolidado_kpis = $ClassKpisServicios->datos_consolidado_kpis($user_log[
                             <div class="col-md-2 d-flex align-items-center text-center fs-6">
                                 <div>
                                     <b>Meta:</b> <br>
-                                    <b><?= number_format($meta_formato, 2); ?></b>
+                                    <b><?= $meta_formato; ?></b>
                                 </div>
                             </div>
 
@@ -531,8 +537,17 @@ $datos_consolidado_kpis = $ClassKpisServicios->datos_consolidado_kpis($user_log[
     function NumerosDecimales(element) {
         let valor = $(element).val();
 
-        // Permitir solo números, punto y dos puntos
-        valor = valor.replace(/[^0-9.:]/g, '');
+        // Permitir números, punto, dos puntos y signo negativo
+        valor = valor.replace(/[^0-9.:-]/g, '');
+
+        // Permitir solo un signo negativo y únicamente al inicio
+        valor = valor.replace(/(?!^)-/g, '');
+
+        // Permitir solo un punto decimal
+        const partes = valor.split('.');
+        if (partes.length > 2) {
+            valor = partes.shift() + '.' + partes.join('');
+        }
 
         $(element).val(valor);
         return valor;

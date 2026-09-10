@@ -33,7 +33,7 @@ $ClassOkrs = new OkrsServicios_2();
             <h3>DESEMPEÑO DE LA COMPAÑIA POR PERIODO</h3>
         </div>
         <div class="card-body">
-            <?php $valor = 25; ?>
+            <?php $valor = 55; ?>
             <?php include("views/reportes/layouts/objetivos_desempenio.php"); ?>
         </div>
     </div>
@@ -43,7 +43,7 @@ $ClassOkrs = new OkrsServicios_2();
     </div>
 
 
-    <div class="row">
+    <div class="row" style="display:none" >
         <div class="col-md-4">
             <div class="card mb-3">
                 <div class="card-header">

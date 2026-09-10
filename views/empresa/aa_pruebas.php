@@ -36,6 +36,14 @@ while($dataAreas = mysqli_fetch_array($qryAreas)){
 }
 
 
+//AREAS
+$array_subproceso = [];
+$qrySubproceso = mysqli_query($connect_admin, "SELECT * FROM Estructura_Empresa ");
+while($dataSubproceso = mysqli_fetch_array($qrySubproceso)){ 
+    $array_subproceso[$dataSubproceso["id"]] = $dataSubproceso;
+}
+
+
 
 
 //CARGOS PARA CAMBIAR
@@ -86,6 +94,7 @@ while($dataCargosPlataforma = mysqli_fetch_array($qryCargosPlataforma)){
 
             <td>Vicepresidencia</td>
             <td>Área</td>
+            <td>Subproceso</td>
 
             <td>Equipo</td>
             <td>Pertencen</td>
@@ -1008,8 +1017,8 @@ while($dataCargosPlataforma = mysqli_fetch_array($qryCargosPlataforma)){
         echo $contador_cambios;
         */
 
-
-        
+        /*
+        //VALIDAR KPIS Y COLABORADORES KPIS
         $contador = 0;
         $qry = mysqli_query($connect_kpis, "SELECT * FROM Kpis WHERE id_empresa = 1 AND anio = 2026 "); //
         while($data = mysqli_fetch_array($qry)){ 
@@ -1018,6 +1027,7 @@ while($dataCargosPlataforma = mysqli_fetch_array($qryCargosPlataforma)){
             $dataVice = $array_vicepresidencias[$data["area_macro"]];
 
             $dataArea = $array_areas[$data["area_proceso"]];
+            $dataSub = $array_subproceso[$data["subproceso"]];
 
             $contador_equipo = 0;
             $pertenecen = 0;
@@ -1026,14 +1036,30 @@ while($dataCargosPlataforma = mysqli_fetch_array($qryCargosPlataforma)){
             while($dataEquipo = mysqli_fetch_array($qryEquipo)){ 
 
                 $dataEmpleado = $array_colaboradores[$dataEquipo["id_colaborador"]];
-                if($dataEmpleado["area"] == $data["area_proceso"] ){
-                    $pertenecen ++;
+
+                if($data["subproceso"] != "" ){
+                    if($dataEmpleado["area"] == $data["area_proceso"] && $dataEmpleado["unidad_organizativa"] == $data["subproceso"] ){
+                        $pertenecen ++;
+                    }
+                    else{
+                        $no_pertenece++;
+                        $sentencia_eliminar = "DELETE FROM Kpis_Colaborador WHERE id_empresa = 1 AND id = '".$dataEquipo["id"]."' "; 
+                        //mysqli_query($connect_kpis, $sentencia_eliminar);
+                    }
+
+                    $contador_equipo++;
                 }
                 else{
-                    $no_pertenece++;
-                }
 
-                $contador_equipo++;
+                    if($dataEmpleado["area"] == $data["area_proceso"]){
+                        $pertenecen ++;
+                    }
+                    else{
+                        $no_pertenece++;
+                    }
+
+                    $contador_equipo++;
+                }
             }
 
             $para_valida = '';
@@ -1044,23 +1070,28 @@ while($dataCargosPlataforma = mysqli_fetch_array($qryCargosPlataforma)){
                 $para_validar = "Se_debe_validar";
             }
 
-            echo '
-            <tr>
-                <td>'.$data["id"].'</td>
-                <td>'.$data["anio"].'</td>
-                <td>'.$data["objetivo_indicador"].'</td>
-                <td>'.$data["indicador"].'</td>
+            //if($para_validar != ""){
 
-                <td>'.$dataVice["nombre"].'</td>
-                <td>'.$dataArea["nombre"].'</td>
+                echo '
+                <tr>
+                    <td>'.$data["id"].'</td>
+                    <td>'.$data["anio"].'</td>
+                    <td>'.$data["objetivo_indicador"].'</td>
+                    <td>'.$data["indicador"].'</td>
 
-                <td>'.$contador_equipo.'</td>
-                <td>'.$pertenecen.'</td>
-                <td>'.$no_pertenece.'</td>
-                <td>'.$para_validar.'</td>
-            </tr>
-            
-            ';
+                    <td>'.$dataVice["nombre"].'</td>
+                    <td>'.$dataArea["nombre"].'</td>
+                    <td>'.$dataSub["unidad_organizativa"].'</td>
+
+                    <td>'.$contador_equipo.'</td>
+                    <td>'.$pertenecen.'</td>
+                    <td>'.$no_pertenece.'</td>
+                    <td>'.$para_validar.'</td>
+                </tr>
+                
+                ';
+
+            //}
 
             $contador++;
 
@@ -1068,6 +1099,7 @@ while($dataCargosPlataforma = mysqli_fetch_array($qryCargosPlataforma)){
 
 
         echo $contador;
+        */
         
 
 
@@ -1173,6 +1205,40 @@ while($dataCargosPlataforma = mysqli_fetch_array($qryCargosPlataforma)){
 
         echo $contador;
         */
+
+
+        ///CASOS ESPECIALES
+        $contador = 1;
+
+        $qry = mysqli_query($connect_valoracion, "SELECT * FROM Evaluadores WHERE anio = 2026 AND id_ciclo = '".$_SESSION["ciclo"]."' GROUP BY id_empleado LIMIT 20  "); //
+        while($data = mysqli_fetch_array($qry)){ 
+
+            $dataEmpleado = $array_colaboradores[$data["id_empleado"]];
+
+            $count_evaluadores = 0;
+            $qryEvaluadores = mysqli_query($connect_valoracion, "SELECT * FROM Evaluadores WHERE anio = 2026 AND id_ciclo = '".$_SESSION["ciclo"]."' AND id_empleado = '".$data["id_empleado"]."' "); //
+            while($dataEvaluadores = mysqli_fetch_array($qryEvaluadores)){ 
+                $count_evaluadores++;
+                
+            }
+                
+
+           
+
+            echo '
+            <tr>
+                <td>'.$contador.'</td>
+                <td>'.$dataEmpleado["nombre"].'</td>
+                <td>'.$count_evaluadores.'</td>
+                <td>'.$para_validar.'</td>
+            </tr>
+            
+            ';
+
+            $contador++;
+
+        }
+
 
         
         ?>

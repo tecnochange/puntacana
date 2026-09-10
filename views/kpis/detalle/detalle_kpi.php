@@ -2,7 +2,19 @@
     $(document).ready(function() {
         $('#menuKpis').collapse();
     });
+
+    function ValidarTipo(tipo){
+        if(tipo == 1){
+            $("#cont_tipo").show();
+        }
+        if(tipo == 2){
+            $("#cont_tipo").hide();
+            $("#ponderado").val("");
+        }
+    }
 </script>
+
+
 
 <?php
 $id = $_GET["id"];
@@ -16,10 +28,27 @@ if($_POST["guardar_formulario"]){
         $sentencia = "";
         //MENSUAL
         if($_POST["frecuencia"] == 1){
+
+            $adicional_min = "
+                enero_min = '".$_POST["enero_min"]."', 
+                febrero_min = '".$_POST["febrero_min"]."', 
+                marzo_min = '".$_POST["marzo_min"]."', 
+                abril_min = '".$_POST["abril_min"]."', 
+                mayo_min = '".$_POST["mayo_min"]."', 
+                junio_min = '".$_POST["junio_min"]."', 
+                julio_min = '".$_POST["julio_min"]."', 
+                agosto_min = '".$_POST["agosto_min"]."', 
+                septiembre_min = '".$_POST["septiembre_min"]."', 
+                octubre_min = '".$_POST["octubre_min"]."', 
+                noviembre_min = '".$_POST["noviembre_min"]."', 
+                diciembre_min = '".$_POST["diciembre_min"]."',
+            ";
+
             $sentencia = "
             UPDATE
                 Frecuencia_Kpis
             SET
+                tipo = '".$_POST["frecuencia"]."',
                 enero = '".$_POST["enero"]."',
                 febrero = '".$_POST["febrero"]."',
                 marzo = '".$_POST["marzo"]."',
@@ -31,18 +60,37 @@ if($_POST["guardar_formulario"]){
                 septiembre = '".$_POST["septiembre"]."',
                 octubre = '".$_POST["octubre"]."',
                 noviembre = '".$_POST["noviembre"]."',
-                diciembre = '".$_POST["diciembre"]."',
+                diciembre = '".$_POST["diciembre"]."', 
+                ".$adicional_min."
                 updated_at = '".$hoy."'
             WHERE
                 id_kpi = '".$_POST["id_registro"]."'
             ";
         }
         //BIMESTRAL
-        if($_POST["frecuencia"] == 2){
+        if($_POST["frecuencia"] == 2){ 
+
+            $adicional_min = "
+                enero_min = '".$_POST["enero_min"]."', 
+                febrero_min = '".$_POST["febrero_min"]."', 
+                marzo_min = '".$_POST["marzo_min"]."', 
+                abril_min = '".$_POST["abril_min"]."', 
+                mayo_min = '".$_POST["mayo_min"]."', 
+                junio_min = '".$_POST["junio_min"]."', 
+                julio_min = '".$_POST["julio_min"]."', 
+                agosto_min = '".$_POST["agosto_min"]."', 
+                septiembre_min = '".$_POST["septiembre_min"]."', 
+                octubre_min = '".$_POST["octubre_min"]."', 
+                noviembre_min = '".$_POST["noviembre_min"]."', 
+                diciembre_min = '".$_POST["diciembre_min"]."',
+            ";
+
+
             $sentencia = "
             UPDATE
                 Frecuencia_Kpis
             SET
+                tipo = '".$_POST["frecuencia"]."',
                 enero = '".$_POST["enero"]."',
                 febrero = '".$_POST["febrero"]."',
                 marzo = '".$_POST["marzo"]."',
@@ -54,18 +102,36 @@ if($_POST["guardar_formulario"]){
                 septiembre = '".$_POST["septiembre"]."',
                 octubre = '".$_POST["octubre"]."',
                 noviembre = '".$_POST["noviembre"]."',
-                diciembre = '".$_POST["diciembre"]."',
+                diciembre = '".$_POST["diciembre"]."', 
+                ".$adicional_min."
                 updated_at = '".$hoy."'
             WHERE
                 id_kpi = '".$_POST["id_registro"]."'
             ";
         }
         //TRIMESTRAL
-        if($_POST["frecuencia"] == 3){
+        if($_POST["frecuencia"] == 3){ 
+
+            $adicional_min = "
+                enero_min = '".$_POST["enero_min"]."', 
+                febrero_min = '".$_POST["enero_min"]."', 
+                marzo_min = '".$_POST["enero_min"]."', 
+                abril_min = '".$_POST["abril_min"]."', 
+                mayo_min = '".$_POST["abril_min"]."', 
+                junio_min = '".$_POST["abril_min"]."', 
+                julio_min = '".$_POST["julio_min"]."', 
+                agosto_min = '".$_POST["julio_min"]."', 
+                septiembre_min = '".$_POST["julio_min"]."', 
+                octubre_min = '".$_POST["octubre_min"]."', 
+                noviembre_min = '".$_POST["octubre_min"]."', 
+                diciembre_min = '".$_POST["octubre_min"]."',
+            ";
+
             $sentencia = "
             UPDATE
                 Frecuencia_Kpis
             SET
+                tipo = '".$_POST["frecuencia"]."',
                 enero = '".$_POST["enero"]."',
                 febrero = '".$_POST["enero"]."',
                 marzo = '".$_POST["enero"]."',
@@ -77,18 +143,36 @@ if($_POST["guardar_formulario"]){
                 septiembre = '".$_POST["julio"]."',
                 octubre = '".$_POST["octubre"]."',
                 noviembre = '".$_POST["octubre"]."',
-                diciembre = '".$_POST["octubre"]."',
+                diciembre = '".$_POST["octubre"]."', 
+                ".$adicional_min."
                 updated_at = '".$hoy."'
             WHERE
                 id_kpi = '".$_POST["id_registro"]."'
             ";
         }
         //CUATRIMESTRAL
-        if($_POST["frecuencia"] == 6){
+        if($_POST["frecuencia"] == 6){ 
+
+            $adicional_min = "
+                enero_min = '".$_POST["noviembre_min"]."', 
+                febrero_min = '".$_POST["noviembre_min"]."', 
+                marzo_min = '".$_POST["marzo_min"]."', 
+                abril_min = '".$_POST["marzo_min"]."', 
+                mayo_min = '".$_POST["marzo_min"]."', 
+                junio_min = '".$_POST["marzo_min"]."', 
+                julio_min = '".$_POST["julio_min"]."', 
+                agosto_min = '".$_POST["julio_min"]."', 
+                septiembre_min = '".$_POST["julio_min"]."', 
+                octubre_min = '".$_POST["julio_min"]."', 
+                noviembre_min = '".$_POST["noviembre_min"]."', 
+                diciembre_min = '".$_POST["noviembre_min"]."',
+            ";
+
             $sentencia = "
             UPDATE
                 Frecuencia_Kpis
             SET
+                tipo = '".$_POST["frecuencia"]."',
                 enero = '".$_POST["noviembre"]."',
                 febrero = '".$_POST["noviembre"]."',
                 marzo = '".$_POST["marzo"]."',
@@ -101,6 +185,7 @@ if($_POST["guardar_formulario"]){
                 octubre = '".$_POST["julio"]."',
                 noviembre = '".$_POST["noviembre"]."',
                 diciembre = '".$_POST["noviembre"]."',
+                ".$adicional_min."
                 updated_at = '".$hoy."'
             WHERE
                 id_kpi = '".$_POST["id_registro"]."'
@@ -109,10 +194,26 @@ if($_POST["guardar_formulario"]){
         //SEMESTRAL
         if($_POST["frecuencia"] == 4){ 
 
+            $adicional_min = "
+                enero_min = '".$_POST["enero_min"]."', 
+                febrero_min = '".$_POST["enero_min"]."', 
+                marzo_min = '".$_POST["enero_min"]."', 
+                abril_min = '".$_POST["enero_min"]."', 
+                mayo_min = '".$_POST["enero_min"]."', 
+                junio_min = '".$_POST["enero_min"]."', 
+                julio_min = '".$_POST["julio_min"]."', 
+                agosto_min = '".$_POST["julio_min"]."', 
+                septiembre_min = '".$_POST["julio_min"]."', 
+                octubre_min = '".$_POST["julio_min"]."', 
+                noviembre_min = '".$_POST["julio_min"]."', 
+                diciembre_min = '".$_POST["julio_min"]."',
+            ";
+
             $sentencia = "
             UPDATE
                 Frecuencia_Kpis
             SET
+                tipo = '".$_POST["frecuencia"]."',
                 enero = '".$_POST["enero"]."',
                 febrero = '".$_POST["enero"]."',
                 marzo = '".$_POST["enero"]."',
@@ -125,6 +226,7 @@ if($_POST["guardar_formulario"]){
                 octubre = '".$_POST["julio"]."',
                 noviembre = '".$_POST["julio"]."',
                 diciembre = '".$_POST["julio"]."',
+                ".$adicional_min."
                 updated_at = '".$hoy."'
             WHERE
                 id_kpi = '".$_POST["id_registro"]."'
@@ -133,10 +235,26 @@ if($_POST["guardar_formulario"]){
         //ANUAL
         if($_POST["frecuencia"] == 5){
 
+            $adicional_min = "
+                enero_min = '".$_POST["julio_min"]."', 
+                febrero_min = '".$_POST["julio_min"]."', 
+                marzo_min = '".$_POST["julio_min"]."', 
+                abril_min = '".$_POST["julio_min"]."', 
+                mayo_min = '".$_POST["julio_min"]."', 
+                junio_min = '".$_POST["julio_min"]."', 
+                julio_min = '".$_POST["julio_min"]."', 
+                agosto_min = '".$_POST["julio_min"]."', 
+                septiembre_min = '".$_POST["julio_min"]."', 
+                octubre_min = '".$_POST["julio_min"]."', 
+                noviembre_min = '".$_POST["julio_min"]."', 
+                diciembre_min = '".$_POST["julio_min"]."',
+            ";
+
             $sentencia = "
             UPDATE
                 Frecuencia_Kpis
             SET
+                tipo = '".$_POST["frecuencia"]."',
                 enero = '".$_POST["julio"]."',
                 febrero = '".$_POST["julio"]."',
                 marzo = '".$_POST["julio"]."',
@@ -148,7 +266,8 @@ if($_POST["guardar_formulario"]){
                 septiembre = '".$_POST["julio"]."',
                 octubre = '".$_POST["julio"]."',
                 noviembre = '".$_POST["julio"]."',
-                diciembre = '".$_POST["julio"]."',
+                diciembre = '".$_POST["julio"]."', 
+                ".$adicional_min."
                 updated_at = '".$hoy."'
             WHERE
                 id_kpi = '".$_POST["id_registro"]."'
@@ -161,6 +280,7 @@ if($_POST["guardar_formulario"]){
         $sentencia_upd_kpi = "
         UPDATE Kpis SET 
             tipo_kpi = '".$_POST["tipo_kpi"]."',
+            ponderado = '".$_POST["ponderado"]."',
             anio = '".$_POST["anio"]."',
             area_macro = '".$_POST["area_macro"]."',
             area_proceso = '".$_POST["area_proceso"]."',
@@ -237,7 +357,7 @@ $kpis = $data["array_frecuencias"];
 
                         <div class="col-md-2">
                                         <label for="tipo_kpi">Tipo de KPI *</label>
-                                        <select name="tipo_kpi" id="tipo_kpi" class="form-control form-control-sm" required>
+                                        <select name="tipo_kpi" id="tipo_kpi" class="form-control form-control-sm" required onclick="ValidarTipo(this.value)">
                                             <option value="">Selecciona...</option>
                                             <?php
                                             foreach ($Array_tipo_kpi_PC1 as $tipoKpi) {
@@ -250,6 +370,12 @@ $kpis = $data["array_frecuencias"];
                                             ?>
                                         </select>
                         </div>
+
+                        <div class="col-md-3" id="cont_tipo" style="display:none">
+                            <label >Ponderado Estratégicos *</label>
+                            <input type="text" class="form-control form-control-sm" value="<?= $data["ponderado"]; ?>" name="ponderado" id="ponderado"  >
+                        </div>
+
                         <div class="col-md-1">
                                         <label for="anio">Año *</label>
                                         <select class="form-control form-control-sm" name="anio" id="anio" required>
@@ -402,7 +528,7 @@ $kpis = $data["array_frecuencias"];
                                         </select>
                         </div>
                         <div class="col-md-2">
-                                        <label for="frecuencia">Frecuencia * *</label>
+                                        <label for="frecuencia">Frecuencia *</label>
                                         <select class="form-control" name="frecuencia" id="frecuencia" required onchange="CargarTabla(this.value);">
                                             <option value="">Selecciona...</option>
                                             <?php
@@ -615,6 +741,9 @@ $kpis = $data["array_frecuencias"];
 <script>
 
     $(document).ready(function() {
+        <?php if($data["tipo_kpi"] == 1){ ?>
+        $("#cont_tipo").show();
+        <?php } ?>
         //ValidarMeta()
     });
 
@@ -858,6 +987,7 @@ $kpis = $data["array_frecuencias"];
         ValidarMeta();
     }
 
+    /*
     //FUNCION PARA VALIDAR LAS UNIDADES DE MEDIDA VERSUS LOS FORMATOS
     //FUNCION PARA VALIDAR LAS UNIDADES DE MEDIDA VERSUS LOS FORMATOS
     //FUNCION PARA VALIDAR LAS UNIDADES DE MEDIDA VERSUS LOS FORMATOS
@@ -898,6 +1028,51 @@ $kpis = $data["array_frecuencias"];
         $(element).val(formato);
 
         //return formato;
+    }
+    */
+
+    //FUNCION PARA VALIDAR LAS UNIDADES DE MEDIDA VERSUS LOS FORMATOS
+    function ValidarUnidadMedida(element){
+        let unidad_medida = $("#unidad_medida").val();
+        let valor = $(element).val();
+        let formato = "";
+
+        if (unidad_medida == 1 || unidad_medida == 2 || unidad_medida == 3) {
+
+            // Permitir solo números, punto y signo -
+            valor = valor.replace(/[^0-9.-]/g, '');
+
+            // Permitir únicamente un signo - al inicio
+            valor = valor.replace(/(?!^)-/g, '');
+
+            // Evitar múltiples puntos decimales
+            let partes = valor.split('.');
+            if (partes.length > 2) {
+                valor = partes.shift() + '.' + partes.join('');
+            }
+
+            formato = valor;
+        }
+
+        if (unidad_medida == 4){
+            // Solo números
+            valor = valor.replace(/\D/g, '');
+
+            // Formatear a hh:mm:ss
+            if (valor.length >= 2) {
+                valor = valor.substring(0,2) + ':' + valor.substring(2);
+            }
+            if (valor.length >= 5) {
+                valor = valor.substring(0,5) + ':' + valor.substring(5,7);
+            }
+
+            // Limitar a 8 caracteres (hh:mm:ss)
+            valor = valor.substring(0, 8);
+
+            formato = valor;
+        }
+
+        $(element).val(formato);
     }
 
     var api = '<?php echo $url; ?>api/kpis/';

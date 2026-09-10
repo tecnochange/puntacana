@@ -5,7 +5,7 @@ if ($_SESSION['id_user'] == "") {
 } 
 //SI EL USUARIO ESTÁ LOGUEADO
 else {
-    $route = 'views/competencias/realizar_valoracion.php';
+    $route = 'views/desempenio/mi_desempenio.php';
     $ahora = date("Y-m-d"); 
 
     include("app/models/Users.php");

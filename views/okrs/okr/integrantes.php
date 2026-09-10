@@ -290,7 +290,7 @@ $integrantes_asociados = $OkrsServicios->obtener_integrantes_asociados($user_log
                             ?>
 
                             <tr>
-                                <td><img src="<?= 'https://goforagile.com/recursos/' . $integrante_foto; ?>" width="40" height="40" class="rounded-circle" title="<?= $integrante["empleado"]["nombre"]; ?>"></td>
+                                <td><img src="<?= $recursos_local . $integrante_foto; ?>" width="40" height="40" class="rounded-circle" title="<?= $integrante["empleado"]["nombre"]; ?>"></td>
                                 <td><?= $integrante["empleado"]["nombre"]; ?></td>
                                 <td><?= $integrante["empleado"]["nombre_cargo"]; ?></td>
                                 <td><?= $integrante["empleado"]["nombre_vicepresidencia"]; ?></td>

@@ -15,6 +15,7 @@ include("app/controllers/middleware.php");
     <meta name="csrf-token" content="<?php echo $csrf_token; ?>">
     <title>GO FOR AGILE - OKR Suite By Change Americas</title>
     <link rel="icon" href="<?php echo $url; ?>icon.png">
+    <link rel="manifest" href="/manifest.json">
 
     <!-- ESTILOS -->
     <link rel="stylesheet" href="<?php echo $url; ?>assets/css/bootstrap_5_0_2.css">
@@ -70,13 +71,13 @@ include("app/controllers/middleware.php");
      <?php if( !$_SESSION["emergente"] ){ ?>
       <script>
         $(document).ready(function() {
-                $("#modal_avance_valoracion").modal("show");
+                //$("#modal_avance_valoracion").modal("show");
             
                 // Detectar cuando el primer modal se cierra completamente
                 $('#modal_avance_valoracion').on('hidden.bs.modal', function () {
 
                     // Mostrar el segundo modal
-                    $('#modal_avance_valoracion_2').modal('show');
+                    //$('#modal_avance_valoracion_2').modal('show');
 
                 });
 
@@ -91,6 +92,10 @@ include("app/controllers/middleware.php");
     <?php $_SESSION["emergente"] = true; }  ?>
 
     <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+
         $(document).ready(function() {
 
             $('#sidebarCollapse').on('click', function() {

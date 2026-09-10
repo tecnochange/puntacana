@@ -79,6 +79,18 @@ $read_only_kpis = "";
         <td><?= $kpis["meta"]; ?></td>
 
     </tr>
+    <?php if($_SESSION["anio_fill"] >= 2027){ ?>
+    <tr>
+        <td>MÍNIMO ESPERADO</td>
+        <td><?= $kpis["julio_min"]; ?></td>
+        <td><?= $kpis["septiembre_min"]; ?></td>
+        <td><?= $kpis["noviembre_min"]; ?></td>
+        <td><?= $kpis["enero_min"]; ?></td>
+        <td><?= $kpis["mayo_min"]; ?></td>
+
+        <td></td>
+    </tr>
+    <?php } ?>
     <tr>
         <td>SEGUIMIENTO</td>
 
@@ -96,6 +108,9 @@ $read_only_kpis = "";
             <?php } ?>
         </td>
     </tr>
+
+    
+
     <tr>
         <td>PROGRESO</td> 
 

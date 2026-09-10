@@ -20,6 +20,10 @@ $enero_lectura = '';
 
 if(!$kpis["julio"]){ $julio_lectura = ' readonly '; }
 if(!$kpis["enero"]){ $enero_lectura = ' readonly '; }
+
+//MESES HABILITADOS
+if( $meses_habilitados["julio"] == "" ){ $julio_lectura = ' readonly '; }
+if( $meses_habilitados["enero"] == ""){ $enero_lectura = ' readonly '; }
 ?>
 
 <table class="table table-bordered">
@@ -43,6 +47,14 @@ if(!$kpis["enero"]){ $enero_lectura = ' readonly '; }
         <td><?= $kpis["enero"]; ?></td>
         <td><?= $kpis["meta"]; ?></td>
     </tr>
+    <?php if($_SESSION["anio_fill"] >= 2027){ ?>
+    <tr>
+        <td>MÍNIMO ESPERADO</td>
+        <td><?= $kpis["julio_min"]; ?></td>
+        <td><?= $kpis["enero_min"]; ?></td>
+        <td></td>
+    </tr>
+    <?php } ?>
     <tr>
         <td>SEGUIMIENTO</td>
         <td> 

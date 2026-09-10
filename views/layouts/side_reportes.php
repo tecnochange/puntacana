@@ -46,7 +46,7 @@ $mstrr_2 = false;
     <?php } ?>
 
     <?php if ($VALIDAR_MENU["reportes_individuales_lideres"]) { $mstrr_2 = true; ?>
-        <a href="<?php echo $url; ?>?pg=reportes/lideres">
+        <a href="<?php echo $url; ?>?pg=reportes/individuales">
             <li class="menu_sub_items" id="bt_reportes_lideres">
                 Reporte Individual
             </li>

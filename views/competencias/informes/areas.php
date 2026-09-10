@@ -82,12 +82,11 @@ if ($promedio_general > 0) {
 //PARA RETORNAR UN COLOR
 function RetornarColor($valor)
 {
-
     $valor = ($valor * 100) / 5; //VALOR CONVERTIDO A PORCENTAJE
     $valor = round($valor);
 
-    global $connect_valentina;
-    $queryEI = mysqli_query($connect_valentina, "SELECT * FROM Escala_Medicion WHERE id_empresa = " . $_SESSION["id_empresa"] . "");
+    global $connect_admin;
+    $queryEI = mysqli_query($connect_admin, "SELECT * FROM Escala_Medicion WHERE id_empresa = " . $_SESSION["id_empresa"] . "");
     $dataEI = mysqli_fetch_array($queryEI);
 
     $color = '';
@@ -227,6 +226,25 @@ array_multisort($aux, SORT_DESC, $array_areas_resumen);
         .left_col {
             display: none;
         }
+    }
+
+    .base_barras{
+        width: 100px;
+        display: inline-grid;
+        text-align: center;
+    }
+
+    .barra_vertical{
+        width: 40px;
+        height: 200px;
+        background-color: #E9E9E9;
+        margin: 0 auto;
+        border-radius: 8px 8px 0px 0px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+    .vertical{
+        width: 100%;
     }
 </style>
 
@@ -392,9 +410,8 @@ array_multisort($aux, SORT_DESC, $array_areas_resumen);
                 <div class="card-header text-center">
                     <h2>Resultado Gráfico Consolidado por Competencias</h2>
                 </div>
-                <div class="card-body" style="overflow-x: auto;">
-                    <table width="100%">
-                        <tr>
+                <div class="card-body" style="text-align: center;">
+                    
                             <?php
                             $array_competencias = array();
                             $queryCompetencias = mysqli_query($connect_valoracion, "SELECT * FROM Competencias WHERE id_empresa = '" . $_SESSION['id_empresa'] . "' AND anio = '" . $_SESSION['anio_ciclo'] . "' 
@@ -442,23 +459,21 @@ array_multisort($aux, SORT_DESC, $array_areas_resumen);
 
                                 if ($competencia["promedio"] > 0) {
                                     echo '
-                                    <td align="center" valign="bottom"  width="' . $ancho . '%" >
+                                    <div class="base_barras">
 
-                                        <div style="font-size: 11px">' . $competencia["porcentaje"] . '%<div>
-                                        <div style="width: 60px; height:200px; background-color: #E9E9E9">
-                                            <div style="height: ' . (100 - $competencia["porcentaje"]) . '%; width: 60px;">
-                                            </div>
-                                            <div style="height: ' . $competencia["porcentaje"] . '%; width: 60px; background-color: ' . $color_compt . '">
-                                            </div>
-                                        </div>
-                                        <div class="nombre_comp_barras">' . $competencia["nombre"] . '</div>
-                                    </td>
+                                    <div style="font-size: 11px"><b>' . $competencia["porcentaje"] . '%</b></div>
+                                    <div class="barra_vertical" >
+                                        <div class="vertical" style="height: '.(100 - $competencia["porcentaje"]).'%; "></div>
+                                        <div class="vertical" style="height: '.$competencia["porcentaje"].'%; background-color: '.$color_compt. '"></div>
+                                    </div>
+                                    <div class="nombre_comp_barras">' . $competencia["nombre"] . '</div>
+
+                                </div>
                                     ';
                                 }
                             }
                             ?>
-                        </tr>
-                    </table>
+                        
 
 
                 </div>
