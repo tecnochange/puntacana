@@ -1256,13 +1256,13 @@ class OkrsServicios
         $sentencia =
             "SELECT
             Okrs_Areas.*,
-            goforagile_admin.Vicepresidencia.nombre as nombre_vicepresidencia
+            puntacana_admin.Vicepresidencia.nombre as nombre_vicepresidencia
         FROM
             Okrs_Areas
         LEFT JOIN
-            goforagile_admin.Estructura_Empresa ON Okrs_Areas.id_area = goforagile_admin.Estructura_Empresa.area
+            puntacana_admin.Estructura_Empresa ON Okrs_Areas.id_area = puntacana_admin.Estructura_Empresa.area
         LEFT JOIN
-            goforagile_admin.Vicepresidencia ON goforagile_admin.Vicepresidencia.id = Okrs_Areas.id_vicepresidencia
+            puntacana_admin.Vicepresidencia ON puntacana_admin.Vicepresidencia.id = Okrs_Areas.id_vicepresidencia
         WHERE
             Okrs_Areas.id_empresa = '$id_empresa'
             AND Okrs_Areas.id_okrs = '$id_okrs'
