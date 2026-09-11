@@ -62,7 +62,7 @@ class Competencias
             Empleados.estado,
             Cargos.nombre AS nombre_cargo,
             Areas.nombre AS nombre_area,
-            goforagile_admin.Vicepresidencia.nombre AS nombre_vicepresidencia
+            puntacana_admin.Vicepresidencia.nombre AS nombre_vicepresidencia
         FROM
             Empleados
         LEFT JOIN
@@ -70,9 +70,9 @@ class Competencias
         LEFT JOIN
             Areas ON Areas.id = Empleados.area
         LEFT JOIN
-            goforagile_admin.Estructura_Empresa ON Empleados.area = goforagile_admin.Estructura_Empresa.area
+            puntacana_admin.Estructura_Empresa ON Empleados.area = puntacana_admin.Estructura_Empresa.area
         LEFT JOIN
-            goforagile_admin.Vicepresidencia ON goforagile_admin.Vicepresidencia.id = goforagile_admin.Estructura_Empresa.vicepresidencia
+            puntacana_admin.Vicepresidencia ON puntacana_admin.Vicepresidencia.id = puntacana_admin.Estructura_Empresa.vicepresidencia
         WHERE
             Empleados.id = '" . $id . "'
         ";
