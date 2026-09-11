@@ -509,8 +509,8 @@ function OkrsUsuario($id_empleado, $id_empresa, $connect_okrs, $filtro_periodo)
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		" . $resultado . "
 		WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 		" . $filtro_usuario . "
@@ -631,8 +631,8 @@ function OkrsUsuarioPaginacion($id_empleado, $id_empresa, $connect_okrs, $inicio
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		" . $resultado . "
 		WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 		" . $filtro_usuario . "
@@ -655,8 +655,8 @@ function OkrsUsuarioPaginacion($id_empleado, $id_empresa, $connect_okrs, $inicio
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		" . $resultado . "
 		WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 		" . $filtro_usuario . "
@@ -756,8 +756,8 @@ function OkrsUsuarioIndividual($id_empleado, $id_empresa, $connect_okrs, $filtro
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		" . $resultado . "
 		WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
  		AND CONCAT(',', Okrs_Resultados.responsables, ',' ) LIKE '%,".$_SESSION['id_user'].",%'
@@ -854,8 +854,8 @@ function OkrsUsuarioIndividualPaginacion($id_empleado, $id_empresa, $connect_okr
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		" . $resultado . "
 		WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
  		AND CONCAT(',',Okrs_Resultados.responsables,',') LIKE '%," . $_SESSION["id_user"]. ",%'
@@ -877,8 +877,8 @@ function OkrsUsuarioIndividualPaginacion($id_empleado, $id_empresa, $connect_okr
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		" . $resultado . "
 		WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 		AND CONCAT(',',Okrs_Resultados.responsables,',') LIKE '%," . $_SESSION["id_user"]. ",%'
@@ -974,8 +974,8 @@ function OkrsUsuarioIndividualP($id_empleado, $id_empresa, $limit, $connect_okrs
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		" . $resultado . "
 		WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 		AND Okrs_Equipos.id_empleado = '" . $id_empleado . "'
@@ -1089,8 +1089,8 @@ function OkrsUsuarioCelula($id_empleado, $id_empresa, $connect_okrs, $filtro_per
 				LEFT JOIN Okrs_Areas AS OA ON OA.id_okrs = OE.id_okrs
 				LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = O.id
 				LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = OE.id_okrs
-				LEFT JOIN goforagile_admin.Empleados AS E ON E.id = OE.id_empleado
-				LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = O.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS E ON E.id = OE.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = O.id_empleado
 				WHERE EV.id_empresa = $id_empresa
 				$filtro
 				$filtro_usuario
@@ -1200,8 +1200,8 @@ function OkrsUsuarioCelulaPaginacion($id_empleado, $id_empresa, $connect_okrs, $
 				LEFT JOIN Okrs_Areas AS OA ON OA.id_okrs = OE.id_okrs
 				LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = O.id
 				LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = OE.id_okrs
-				LEFT JOIN goforagile_admin.Empleados AS E ON E.id = OE.id_empleado
-				LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = O.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS E ON E.id = OE.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = O.id_empleado
 				WHERE EV.id_empresa = $id_empresa
 
 				" . $filtro . "
@@ -1229,8 +1229,8 @@ function OkrsUsuarioCelulaPaginacion($id_empleado, $id_empresa, $connect_okrs, $
 				LEFT JOIN Okrs O ON O.id = OE.id_okrs
 				LEFT JOIN Okrs_Areas AS OA ON OA.id_okrs = OE.id_okrs
 				LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = O.id
-				LEFT JOIN goforagile_admin.Empleados AS E ON E.id = OE.id_empleado
-				LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = O.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS E ON E.id = OE.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = O.id_empleado
 				WHERE EV.id_empresa = $id_empresa
 
 				" . $filtro . "
@@ -1335,8 +1335,8 @@ function OkrsUsuarioIniciativas($id_empleado, $id_empresa, $connect_okrs, $filtr
 		LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Iniciativas ON Okrs_Iniciativas.id_resultado = Okrs_Resultados.id
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		$resultado
 		WHERE Okrs_Equipos.id_empresa = $id_empresa
 		AND Okrs_Equipos.id_empleado = $id_empleado
@@ -1440,8 +1440,8 @@ function OkrsUsuarioIniciativasPagina($id_empleado, $id_empresa, $connect_okrs, 
 		LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Iniciativas ON Okrs_Iniciativas.id_resultado = Okrs_Resultados.id
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		$resultado
 		WHERE Okrs_Equipos.id_empresa = $id_empresa
 		AND Okrs_Equipos.id_empleado = $id_empleado
@@ -1465,8 +1465,8 @@ function OkrsUsuarioIniciativasPagina($id_empleado, $id_empresa, $connect_okrs, 
 		LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Iniciativas ON Okrs_Iniciativas.id_resultado = Okrs_Resultados.id
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		$resultado
 		WHERE Okrs_Equipos.id_empresa = $id_empresa
 		AND Okrs_Equipos.id_empleado = $id_empleado
@@ -1964,7 +1964,7 @@ function OkrsPorNJConsolidados($id_nj, $request, $connect_okrs, $filtro_kr, $fil
 		FROM Okrs_Equipos
 		LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Resultados AS ORE ON ORE.id_okrs = Okrs.id
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
 		WHERE Okrs_Equipos.id_empresa = '" . $_SESSION["id_empresa"] . "' $filtro AND Okrs.anio = '" . $_SESSION["anio_fill"] . "' AND Empleados.nivel_jerarquico = $id_nj $filtro
 		GROUP BY Okrs.id ORDER BY Okrs.objetivo_okr ASC");
 
@@ -1978,8 +1978,8 @@ function OkrsPorNJConsolidados($id_nj, $request, $connect_okrs, $filtro_kr, $fil
 	// LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 	// LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 	// LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-	// LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-	// LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+	// LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+	// LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 	// WHERE Okrs_Equipos.id_empresa = " . $_SESSION["id_empresa"] . "
 	// AND Okrs.anio = ".$_SESSION["anio_fill"]."
 	// AND Empleados.nivel_jerarquico = $id_nj
@@ -2113,7 +2113,7 @@ function OkrsEmpresaReporteConsolidado($id_empresa, $connect_okrs)
 		FROM Okrs_Equipos
 		LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
 		WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 		" . $filtro . "
 		GROUP BY Okrs.id
@@ -2214,8 +2214,8 @@ function OkrOrganizacional($id_okr, $id_empresa, $connect_okrs)
 		FROM Okrs_Equipos
 		LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 		AND Okrs_Equipos.id_okrs = '" . $id_okr . "'
 		AND Okrs.tipo = 1
@@ -2595,8 +2595,8 @@ function OkrsReporteUsuario($id_empleado, $id_empresa, $connect_okrs, $filtro)
 		LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		WHERE Okrs_Equipos.id_empresa = $id_empresa
 		AND Okrs_Equipos.id_empleado = $id_empleado
 		AND (Okrs_Resultados.responsables LIKE '%," . $id_empleado . "%' OR Okrs_Resultados.responsables LIKE '%" . $id_empleado . ",%' OR Okrs_Resultados.responsables IN ('" . $id_empleado . "'))
@@ -2662,8 +2662,8 @@ function OkrsReporteUsuarioReporte($id_empleado, $id_empresa, $connect_okrs, $fi
 		LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		WHERE Okrs_Equipos.id_empresa = $id_empresa
 		AND Okrs_Equipos.id_empleado = $id_empleado
 		AND (Okrs_Resultados.responsables LIKE '%," . $id_empleado . "%' OR Okrs_Resultados.responsables LIKE '%" . $id_empleado . ",%' OR Okrs_Resultados.responsables IN ('" . $id_empleado . "'))
@@ -3123,7 +3123,7 @@ function OkrsPorVicepresidenciaConsolidados($id_vicepresidencia, $request, $conn
 		FROM Okrs_Equipos
 		LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
 		WHERE Okrs_Equipos.id_empresa = '" . $_SESSION["id_empresa"] . "' $filtro_rol AND Okrs.anio = '" . $_SESSION["anio_fill"] . "' AND Okrs_Vicepresidencia.id_vicepresidencia = $id_vicepresidencia AND Okrs.tipo = 1
 		GROUP BY Okrs.id ORDER BY Okrs.objetivo_okr ASC");
 
@@ -3131,7 +3131,7 @@ function OkrsPorVicepresidenciaConsolidados($id_vicepresidencia, $request, $conn
 	// 	FROM Okrs_Equipos
 	// 	LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 	// 	LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
-	// 	LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+	// 	LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
 	// 	WHERE Okrs_Equipos.id_empresa = '" . $_SESSION["id_empresa"] . "' $filtro_rol AND Okrs.anio = '" . $_SESSION["anio_fill"] . "' AND Okrs_Areas.id_vicepresidencia = $id_vicepresidencia
 	// 	GROUP BY Okrs.id ORDER BY Okrs.objetivo_okr ASC";
 	$total = mysqli_num_rows($query);
@@ -3175,8 +3175,8 @@ function OkrsConsolidadoCompetencia($id_empleado, $id_empresa, $connect_okrs)
 				LEFT JOIN Okrs O ON O.id = OE.id_okrs
 				LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = OE.id_okrs
 				LEFT JOIN Okrs_Areas AS OA ON OA.id_okrs = OE.id_okrs
-				LEFT JOIN goforagile_admin.Empleados AS E ON E.id = OE.id_empleado
-				LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = O.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS E ON E.id = OE.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = O.id_empleado
 				WHERE EV.id_empresa = $id_empresa
 				AND OE.id_empleado = $id_empleado
 				AND O.anio = " . $_SESSION["periodo_desempenio_fill"] . "
@@ -3241,8 +3241,8 @@ function OkrsConsolidadoCompetenciaReporte($id_empleado, $id_empresa, $periodo_d
 				LEFT JOIN Okrs O ON O.id = OE.id_okrs
 				LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = OE.id_okrs
 				LEFT JOIN Okrs_Areas AS OA ON OA.id_okrs = OE.id_okrs
-				LEFT JOIN goforagile_admin.Empleados AS E ON E.id = OE.id_empleado
-				LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = O.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS E ON E.id = OE.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = O.id_empleado
 				WHERE EV.id_empresa = '$id_empresa'
 				AND OE.id_empleado = $id_empleado
 				AND O.anio = '" . $periodo_desempenio_fill . "'
@@ -3311,8 +3311,8 @@ function OkrsMiDesempenio($id_empleado, $id_empresa, $connect_okrs)
 				LEFT JOIN Okrs O ON O.id = OE.id_okrs
 				LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = OE.id_okrs
 				LEFT JOIN Okrs_Areas AS OA ON OA.id_okrs = OE.id_okrs
-				LEFT JOIN goforagile_admin.Empleados AS E ON E.id = OE.id_empleado
-				LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = O.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS E ON E.id = OE.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = O.id_empleado
 				WHERE EV.id_empresa = $id_empresa
 				AND EV.id_empleado = $id_empleado
 				AND OE.id_empleado = $id_empleado
@@ -3384,8 +3384,8 @@ function OkrsReporteUsuarioConsolidado($id_empleado, $id_empresa, $connect_okrs,
 		LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 		AND Okrs_Equipos.id_empleado = '" . $id_empleado . "'
 		AND (Okrs_Resultados.responsables LIKE '%," . $id_empleado . "%' OR Okrs_Resultados.responsables LIKE '%" . $id_empleado . ",%' OR Okrs_Resultados.responsables IN ('" . $id_empleado . "'))
@@ -3499,8 +3499,8 @@ function OkrsReporteUsuarioHomeLider($id_empleado, $id_empresa, $connect_okrs, $
 		LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 		AND Okrs_Equipos.id_empleado = '" . $id_empleado . "'
 		AND (Okrs_Resultados.responsables LIKE '%," . $id_empleado . "%' OR Okrs_Resultados.responsables LIKE '%" . $id_empleado . ",%' OR Okrs_Resultados.responsables IN ('" . $id_empleado . "'))
@@ -3608,8 +3608,8 @@ function IniciativasReporteUsuarioHomeLider($id_empleado, $id_empresa, $connect_
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Iniciativas ON Okrs_Iniciativas.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 		AND Okrs_Equipos.id_empleado = '" . $id_empleado . "'
 		AND (Okrs_Iniciativas.responsables LIKE '%," . $id_empleado . "%' OR Okrs_Iniciativas.responsables LIKE '%" . $id_empleado . ",%' OR Okrs_Iniciativas.responsables IN (" . $id_empleado . "))
@@ -3672,7 +3672,7 @@ function OkrsPorUsuarioConsolidado($id_user, $connect_okrs, $filtro_kr, $filtro)
 		FROM Okrs_Equipos
 		LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Resultados AS ORE ON ORE.id_okrs = Okrs.id
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
 		WHERE Okrs_Equipos.id_empresa = '" . $_SESSION["id_empresa"] . "' AND Okrs.anio = '" . $_SESSION["anio_fill"] . "' AND Empleados.id = $id_user $filtro_kr
 		GROUP BY Okrs.id ORDER BY Okrs.objetivo_okr ASC");
 
@@ -3724,8 +3724,8 @@ function OkrArea($id, $id_empresa, $connect_okrs, $filtro_periodo)
 	LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 	LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 	LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-	LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-	LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+	LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+	LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 	WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 	AND Okrs_Areas.id_area = '" . $id . "'
 	AND Okrs.anio = '" . $_SESSION["anio_fill"] . "'
@@ -3825,8 +3825,8 @@ function OkrAreaGestion($id, $id_empresa, $connect_okrs, $connect_valentina, $fi
 	// LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 	// LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 	// LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-	// LEFT JOIN goforagile_admin.Empleados AS E ON E.id = Okrs_Equipos.id_empleado
-	// LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+	// LEFT JOIN puntacana_admin.Empleados AS E ON E.id = Okrs_Equipos.id_empleado
+	// LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 	// WHERE EV.id_empresa = '" . $id_empresa . "'
 	// 	AND (Okrs_Areas.id_area = '" . $id . "' OR Okrs_Vicepresidencia.id_vicepresidencia = " . $id_vp . ")
 	// 	AND Okrs.anio = '" . $_SESSION["anio_fill"] . "'
@@ -3871,8 +3871,8 @@ LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-LEFT JOIN goforagile_admin.Empleados AS E ON E.id = Okrs_Equipos.id_empleado
-LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+LEFT JOIN puntacana_admin.Empleados AS E ON E.id = Okrs_Equipos.id_empleado
+LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 WHERE EV.id_empresa = '" . $id_empresa . "'
 	$complemento
 	AND Okrs.anio = '" . $_SESSION["anio_fill"] . "'
@@ -3953,8 +3953,8 @@ function OkrAreaGestionFiltro($id, $id_empresa, $connect_okrs, $filtro_periodo)
 	LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 	LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 	LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-	LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-	LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+	LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+	LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 	WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 	AND Okrs_Areas.id_area = '" . $id . "'
 	AND Okrs.anio = '" . $_SESSION["anio_fill"] . "'
@@ -4015,7 +4015,7 @@ function OkrsPorVPConsolidados($id_vp, $request, $connect_okrs)
 		FROM Okrs_Equipos
 		LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
 		WHERE Okrs_Equipos.id_empresa = '" . $_SESSION["id_empresa"] . "' AND Okrs.anio = '" . $_SESSION["anio_fill"] . "' AND Okrs_Vicepresidencia.id_vicepresidencia = $id_vp AND Okrs.tipo = 1
 		GROUP BY Okrs.id ORDER BY Okrs.objetivo_okr ASC");
 
@@ -4070,8 +4070,8 @@ function OkrVP($id, $id_empresa, $connect_okrs, $filtro_periodo)
 	LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 	LEFT JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
 	LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-	LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-	LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+	LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+	LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 	WHERE Okrs_Equipos.id_empresa = '" . $id_empresa . "'
 	AND Okrs_Vicepresidencia.id_vicepresidencia = '" . $id . "'
 	AND Okrs.tipo = 1
@@ -4736,8 +4736,8 @@ function OkrsReporteUsuarioConsolidados($id_empleado, $id_empresa, $connect_okrs
 		LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		WHERE Okrs_Equipos.id_empresa = $id_empresa
 		AND Okrs_Equipos.id_empleado = $id_empleado
 		AND Okrs.anio = " . $_SESSION["anio_fill"] . "
@@ -4778,8 +4778,8 @@ function OkrsReporteUsuarioConsolidadosJson($id_empleado, $id_empresa, $anioFill
 		LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
 		LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = Okrs_Equipos.id_okrs
-		LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-		LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+		LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		WHERE Okrs_Equipos.id_empresa = $id_empresa
 		AND Okrs_Equipos.id_empleado = $id_empleado
 		AND Okrs.anio = " . $anioFill . "
