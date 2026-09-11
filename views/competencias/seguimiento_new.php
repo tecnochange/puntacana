@@ -61,7 +61,7 @@ SELECT
     Empleados.nombre, Empleados.documento, Empleados.correo 
 FROM
     Evaluadores 
-    LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Evaluadores.id_empleado
+    LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Evaluadores.id_empleado
 WHERE
     Evaluadores.id_ciclo = '". $_SESSION['ciclo']."' AND Evaluadores.anio = '". $_SESSION['anio_ciclo']."'  AND Empleados.estado = 1 
     ORDER BY Empleados.nombre ASC;
