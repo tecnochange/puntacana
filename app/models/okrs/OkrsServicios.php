@@ -705,7 +705,7 @@ class OkrsServicios
             $filtros .= " AND Okrs.anio = '" . $_SESSION["anio_fill"] . "' ";
         }
         if ($_SESSION["vicepresidencias_fill"]) {
-            $filtros .= " AND goforagile_admin.Estructura_Empresa.vicepresidencia = '" . $_SESSION["vicepresidencias_fill"] . "' ";
+            $filtros .= " AND puntacana_admin.Estructura_Empresa.vicepresidencia = '" . $_SESSION["vicepresidencias_fill"] . "' ";
         }
         if ($_SESSION["objetivos_fill"]) {
             $filtros .= " AND Okrs.objetivos_estrategicos = '" . $_SESSION["objetivos_fill"] . "' ";
@@ -750,8 +750,8 @@ class OkrsServicios
             Okrs_Equipos
         LEFT JOIN Okrs ON Okrs.id = Okrs_Equipos.id_okrs 
         LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs_Equipos.id_okrs
-        LEFT JOIN goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
-        LEFT JOIN goforagile_admin.Estructura_Empresa ON Okrs_Areas.id_area = goforagile_admin.Estructura_Empresa.area
+        LEFT JOIN puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+        LEFT JOIN puntacana_admin.Estructura_Empresa ON Okrs_Areas.id_area = puntacana_admin.Estructura_Empresa.area
         LEFT JOIN Roles_Okrs ON Roles_Okrs.id_rol = Okrs_Equipos.tipo
         LEFT JOIN Okrs_Resultados ON Okrs.id = Okrs_Resultados.id_okrs
         WHERE
