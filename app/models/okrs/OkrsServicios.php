@@ -893,7 +893,7 @@ class OkrsServicios
             $filtros .= " AND Okrs.anio = '" . $_SESSION["anio_fill"] . "' ";
         }
         if ($_SESSION["vicepresidencias_fill"]) {
-            $filtros .= " AND goforagile_admin.Estructura_Empresa.vicepresidencia = '" . $_SESSION["vicepresidencias_fill"] . "' ";
+            $filtros .= " AND puntacana_admin.Estructura_Empresa.vicepresidencia = '" . $_SESSION["vicepresidencias_fill"] . "' ";
         }
         if ($_SESSION["objetivos_fill"]) {
             $filtros .= " AND Okrs.objetivos_estrategicos = '" . $_SESSION["objetivos_fill"] . "' ";
