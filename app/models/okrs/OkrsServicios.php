@@ -2599,8 +2599,8 @@ class OkrsServicios
             Cargos.nombre AS nombre_cargo,
             Areas.id AS id_area,
             Areas.nombre AS nombre_area,
-            goforagile_admin.Vicepresidencia.nombre AS nombre_vicepresidencia,
-            goforagile_okrs.Roles_Okrs.nombre_rol AS rol
+            puntacana_admin.Vicepresidencia.nombre AS nombre_vicepresidencia,
+            puntacana_okrs.Roles_Okrs.nombre_rol AS rol
         FROM
             Empleados
         LEFT JOIN
@@ -2608,11 +2608,11 @@ class OkrsServicios
         LEFT JOIN
             Areas ON Areas.id = Empleados.area
         LEFT JOIN
-            goforagile_admin.Estructura_Empresa ON Empleados.area = goforagile_admin.Estructura_Empresa.area
+            puntacana_admin.Estructura_Empresa ON Empleados.area = puntacana_admin.Estructura_Empresa.area
         LEFT JOIN
-            goforagile_admin.Vicepresidencia ON goforagile_admin.Vicepresidencia.id = goforagile_admin.Estructura_Empresa.vicepresidencia
+            puntacana_admin.Vicepresidencia ON puntacana_admin.Vicepresidencia.id = puntacana_admin.Estructura_Empresa.vicepresidencia
         LEFT JOIN
-            goforagile_okrs.Roles_Okrs ON goforagile_okrs.Roles_Okrs.id = Empleados.role
+            puntacana_okrs.Roles_Okrs ON puntacana_okrs.Roles_Okrs.id = Empleados.role
         WHERE
             Empleados.id = '$id'
         LIMIT 1
