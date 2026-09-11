@@ -260,7 +260,7 @@ function ValidarEvaluaciones($id_evaluado, $id_jefe, $id_empresa){
                             Evaluadores.*
                         FROM
                             Evaluadores
-                        INNER JOIN goforagile_admin.Empleados E ON E.id = Evaluadores.id_empleado
+                        INNER JOIN puntacana_admin.Empleados E ON E.id = Evaluadores.id_empleado
                         WHERE
                             Evaluadores.id_evaluador = '" . $user_log["id"] . "' AND Evaluadores.anio = '" . $dataCicloVal["anio"] . "' AND Evaluadores.id_ciclo = '" . $dataCicloVal["id"] . "' AND Evaluadores.tipo != 1
                         ORDER BY
