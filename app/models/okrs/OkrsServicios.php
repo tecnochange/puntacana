@@ -1152,14 +1152,14 @@ class OkrsServicios
         SELECT
             Okrs.*,
             Okrs_Areas.id_area AS id_area,
-            goforagile_admin.Estructura_Empresa.vicepresidencia AS id_vicepresidencia,
+            puntacana_admin.Estructura_Empresa.vicepresidencia AS id_vicepresidencia,
             OE.objetivo AS nombre_objetivo_estrategico
         FROM
             Okrs
         LEFT JOIN
             Okrs_Areas ON Okrs_Areas.id_okrs = Okrs.id
         LEFT JOIN
-            goforagile_admin.Estructura_Empresa ON Okrs_Areas.id_area = goforagile_admin.Estructura_Empresa.area
+            puntacana_admin.Estructura_Empresa ON Okrs_Areas.id_area = puntacana_admin.Estructura_Empresa.area
         LEFT JOIN
             Objetivos_estrategicos OE ON OE.id = Okrs.objetivos_estrategicos
         WHERE
