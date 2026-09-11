@@ -9,7 +9,7 @@ $sql = "SELECT
         FROM
             Comentarios_Plan_Accion
         LEFT JOIN
-            goforagile_admin.Empleados AS Empleados ON Empleados.id = Comentarios_Plan_Accion.id_empleado  
+            puntacana_admin.Empleados AS Empleados ON Empleados.id = Comentarios_Plan_Accion.id_empleado  
         WHERE
             Comentarios_Plan_Accion.id_plan = '$id_plan_accion'
         ORDER BY
