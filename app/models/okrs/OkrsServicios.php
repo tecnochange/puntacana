@@ -1883,9 +1883,9 @@ class OkrsServicios
 		LEFT
             JOIN Okrs_Vicepresidencia ON Okrs_Vicepresidencia.id_okrs = Okrs.id
         LEFT JOIN
-            goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
+            puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Equipos.id_empleado
         LEFT JOIN
-            goforagile_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
+            puntacana_admin.Empleados AS EO ON EO.id = Okrs.id_empleado
 		WHERE
             Okrs_Equipos.id_empresa = '" . $id_empresa . "' AND Okrs.anio = '" . $anio . "' 
             ".$filtros."
