@@ -97,7 +97,7 @@ class OkrsServicios
             $filtros .= " AND Okrs.anio = '" . $_SESSION["anio_fill"] . "' ";
         }
         if ($_SESSION["vicepresidencias_fill"]) {
-            $filtros .= " AND goforagile_admin.Estructura_Empresa.vicepresidencia = '" . $_SESSION["vicepresidencias_fill"] . "' ";
+            $filtros .= " AND puntacana_admin.Estructura_Empresa.vicepresidencia = '" . $_SESSION["vicepresidencias_fill"] . "' ";
         }
         if ($_SESSION["objetivos_fill"]) {
             $filtros .= " AND Okrs.objetivos_estrategicos = '" . $_SESSION["objetivos_fill"] . "' ";
@@ -123,16 +123,16 @@ class OkrsServicios
             Okrs.objetivo_okr AS objetivo,
             Okrs.id_empleado AS id_empleado_owner,
             Okrs.tipo AS tipo_okrs,
-            goforagile_admin.Estructura_Empresa.vicepresidencia AS id_vicepresidencia,
-            goforagile_admin.Areas.nombre AS nombre_area,
-            goforagile_admin.Empleados.unidad_organizativa AS id_unidad_organizativa,
-            goforagile_admin.Estructura_Empresa.unidad_organizativa AS nombre_unidad_organizativa
+            puntacana_admin.Estructura_Empresa.vicepresidencia AS id_vicepresidencia,
+            puntacana_admin.Areas.nombre AS nombre_area,
+            puntacana_admin.Empleados.unidad_organizativa AS id_unidad_organizativa,
+            puntacana_admin.Estructura_Empresa.unidad_organizativa AS nombre_unidad_organizativa
         FROM
             Okrs
         LEFT JOIN Okrs_Areas ON Okrs_Areas.id_okrs = Okrs.id
-        LEFT JOIN goforagile_admin.Areas ON Okrs_Areas.id_area = goforagile_admin.Areas.id
-        LEFT JOIN goforagile_admin.Empleados ON Okrs.id_empleado = goforagile_admin.Empleados.id
-        LEFT JOIN goforagile_admin.Estructura_Empresa ON Okrs_Areas.id_area = goforagile_admin.Estructura_Empresa.area
+        LEFT JOIN puntacana_admin.Areas ON Okrs_Areas.id_area = puntacana_admin.Areas.id
+        LEFT JOIN puntacana_admin.Empleados ON Okrs.id_empleado = puntacana_admin.Empleados.id
+        LEFT JOIN puntacana_admin.Estructura_Empresa ON Okrs_Areas.id_area = puntacana_admin.Estructura_Empresa.area
         WHERE
             Okrs.id_empresa = '" . $id_empresa . "'  
             " . $filtros . " 
