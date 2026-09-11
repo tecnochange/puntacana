@@ -124,11 +124,11 @@ class Competencias
         $sentencia =
             "SELECT
             Evaluadores.*,
-            goforagile_admin.Empleados.estado as empleado_estado
+            puntacana_admin.Empleados.estado as empleado_estado
         FROM
             Evaluadores
         LEFT JOIN
-            goforagile_admin.Empleados ON Empleados.id = Evaluadores.id_empleado
+            puntacana_admin.Empleados ON Empleados.id = Evaluadores.id_empleado
         WHERE
             Evaluadores.id_empresa = '$id_empresa' AND Evaluadores.anio = '$anio' AND Evaluadores.id_ciclo = '$id_ciclo'
         ";
