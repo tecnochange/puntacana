@@ -13,8 +13,8 @@ function OkrsConsolidadoCompetencia($id_empleado, $id_empresa, $connect_okrs)
 				LEFT JOIN Okrs O ON O.id = OE.id_okrs
 				LEFT JOIN Okrs_Resultados ON Okrs_Resultados.id_okrs = OE.id_okrs
 				LEFT JOIN Okrs_Areas AS OA ON OA.id_okrs = OE.id_okrs				
-				LEFT JOIN goforagile_admin.Empleados AS E ON E.id = OE.id_empleado
-				LEFT JOIN goforagile_admin.Empleados AS EO ON EO.id = O.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS E ON E.id = OE.id_empleado
+				LEFT JOIN puntacana_admin.Empleados AS EO ON EO.id = O.id_empleado
 				WHERE EV.id_empresa = $id_empresa
 				AND OE.id_empleado = $id_empleado
 				AND O.anio = ".$_SESSION["periodo_desempenio"]."
