@@ -11,7 +11,7 @@ $sql = "SELECT
         FROM
             Okrs_Comentarios_Iniciativas
         LEFT JOIN
-            goforagile_admin.Empleados AS Empleados ON Empleados.id = Okrs_Comentarios_Iniciativas.id_empleado  
+            puntacana_admin.Empleados AS Empleados ON Empleados.id = Okrs_Comentarios_Iniciativas.id_empleado  
         WHERE
             Okrs_Comentarios_Iniciativas.id_okrs = '$id_okr'
             AND Okrs_Comentarios_Iniciativas.id_resultado = '$id_resultado'
