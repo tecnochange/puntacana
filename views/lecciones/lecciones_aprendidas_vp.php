@@ -372,16 +372,16 @@ $dataSM73 = mysqli_fetch_array($querySM73);
                             </thead>
                             <tbody>
                                 <?php
-                                $queryVP = mysqli_query($connect_valentina, "SELECT * FROM Vicepresidencia WHERE id_empresa = '" . $_SESSION['id_empresa'] . "'  AND estado = 1 $filtro_VP $areasMacro ORDER BY nombre");
+                                $queryVP = mysqli_query($connect_admin, "SELECT * FROM Vicepresidencia WHERE id_empresa = '" . $_SESSION['id_empresa'] . "'  AND estado = 1 $filtro_VP $areasMacro ORDER BY nombre");
                                 $contador = 0;
                                 while ($dataVP = mysqli_fetch_array($queryVP)) {
                                     $nombre_lider = '';
 
-                                    $queryLideres = mysqli_query($connect_valentina, "SELECT * FROM Lideres_Vicepresidencia WHERE id_vicepresidencia = '" . $dataVP["id"] . "'");
+                                    $queryLideres = mysqli_query($connect_admin, "SELECT * FROM Lideres_Vicepresidencia WHERE id_vicepresidencia = '" . $dataVP["id"] . "'");
 
                                     if (mysqli_num_rows($queryLideres) > 0) {
                                         while ($dataLideres = mysqli_fetch_array($queryLideres)) {
-                                            $queryEmple = mysqli_query($connect_valentina, "SELECT * FROM Empleados WHERE id = '" . $dataLideres["id_lider"] . "' ");
+                                            $queryEmple = mysqli_query($connect_admin, "SELECT * FROM Empleados WHERE id = '" . $dataLideres["id_lider"] . "' ");
                                             $dataEmple = mysqli_fetch_array($queryEmple);
 
                                             if (!$dataEmple["foto"]) {
