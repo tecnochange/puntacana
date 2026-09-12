@@ -21,10 +21,10 @@
 																<td>' . $value["nombre_lider"] . '</td>
 																<td align="center">' . $value["contador"] . '</td>
 																<td align="end"><button type="button" class="btn btn-primary btn-sm bt_editar" onClick="VerCelula(' . $value["id"] . ','.$_SESSION["id_user"].')" data-bs-toggle="tooltip" title="Vista rápida célula">
-                                                                    <i class="fa fa-users"></i>
+                                                                    <i class="bx bx-group"></i>
                                                                 </button>
                                                                 <a class="btn btn-black btn-sm bt_editar" href="' . $url . '?pg=lecciones_aprendidas/detalle/info_area&id=' . $value["id"] . '" title="Vista rápida del área" id="vistaAreas" style="float: right;">
-																<i class="fa fa-eye" style="font-size: 1.3rem;"></i>
+																<i class="bx bx-show" style="font-size: 1.3rem;"></i>
 																</a></td>
 																</tr>';
                             }

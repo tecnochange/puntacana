@@ -335,7 +335,7 @@ $dataSM74 = mysqli_fetch_array($querySM74);
             <div class="card-header" style="background-color: #FFFFFF !important;">
                 <div class="row">
                     <div class="col-md-12" style="text-align: start !important;">
-                        <h4><i class="fas fa-book" id="iconCabecera"></i>&nbsp;&nbsp;|&nbsp;&nbsp;<?php echo $dataSM74["nombre"]; ?></h4>
+                        <h4><i class="bx bx-book" id="iconCabecera"></i>&nbsp;&nbsp;|&nbsp;&nbsp;<?php echo $dataSM74["nombre"]; ?></h4>
                     </div>
                 </div>
             </div>
@@ -438,8 +438,8 @@ $dataSM74 = mysqli_fetch_array($querySM74);
                 divComentario.scrollIntoView();
             }
         }
-        divElement.scrollIntoView(false);
-        divComentario.scrollIntoView(false);
+        if (divElement) divElement.scrollIntoView(false);
+        if (divComentario) divComentario.scrollIntoView(false);
 
     });
     window.location.hash = "";
@@ -479,7 +479,7 @@ $dataSM74 = mysqli_fetch_array($querySM74);
             ],
         });
 
-        var swiper = new Swiper('.swiper-container', {
+        var swiper = (typeof Swiper === "undefined") ? null : new Swiper('.swiper-container', {
             autoHeight: true, //enable auto height
             pagination: {
                 el: '.swiper-pagination',

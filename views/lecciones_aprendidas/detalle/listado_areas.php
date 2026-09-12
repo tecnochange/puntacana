@@ -58,7 +58,7 @@ while ($dataInt = mysqli_fetch_array($queryInt)) {
             if (!$dataEmple["foto"]) {
                 $dataEmple["foto"] = "img_default.jpg";
             }
-            $listado_lideres .= '<a data-bs-toggle="tooltip" href="javascript:Profile(' . $dataLideres["id_lider"] . ',1)" class="dropdown-item" id="profileOkr"><img data-src="' . $url . '/recursos/' . $dataEmple["foto"] . '" class="lazyload foto_min" title="' . $dataEmple["nombre"] . '" style="width: 35px !important;height: 35px !important;"></a>';
+            $listado_lideres .= '<a data-bs-toggle="tooltip" href="javascript:Profile(' . $dataLideres["id_lider"] . ',1)" class="dropdown-item" id="profileOkr"><img src="' . $url . '/recursos/' . $dataEmple["foto"] . '" class="lazyload foto_min" title="' . $dataEmple["nombre"] . '" style="width: 35px !important;height: 35px !important;"></a>';
         }
     } else {
         $listado_lideres = 'Sin Asignar';

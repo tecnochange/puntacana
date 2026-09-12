@@ -387,7 +387,7 @@ $dataSM73 = mysqli_fetch_array($querySM73);
                                             if (!$dataEmple["foto"]) {
                                                 $dataEmple["foto"] = "img_default.jpg";
                                             }
-                                            $nombre_lider .= '<a data-bs-toggle="tooltip" href="javascript:Profile(' . $dataLideres["id_lider"] . ',1)" class="dropdown-item" id="profileOkr"><img data-src="' . $url . '/recursos/' . $dataEmple["foto"] . '" class="lazyload foto_min" title="' . $dataEmple["nombre"] . '" style="width: 35px !important;height: 35px !important;"></a>';
+                                            $nombre_lider .= '<a data-bs-toggle="tooltip" href="javascript:Profile(' . $dataLideres["id_lider"] . ',1)" class="dropdown-item" id="profileOkr"><img src="' . $url . '/recursos/' . $dataEmple["foto"] . '" class="lazyload foto_min" title="' . $dataEmple["nombre"] . '" style="width: 35px !important;height: 35px !important;"></a>';
                                         }
                                     } else {
                                         $nombre_lider = 'Sin Asignar';
@@ -403,10 +403,10 @@ $dataSM73 = mysqli_fetch_array($querySM73);
                                         $contador = 0;
                                     }
                                     $acciones = '<button type="button" class="btn btn-primary btn-sm bt_editar" onClick="VerCelula(' . $dataVP["id"] . ','.$_SESSION["id_user"].')" data-bs-toggle="tooltip" title="Vista rápida célula">
-                                                                    <i class="fa fa-users"></i>
+                                                                    <i class="bx bx-group"></i>
                                                                 </button>
                                                                 <a class="btn btn-black btn-sm bt_editar" href="' . $url . '?pg=lecciones_aprendidas/detalle/info_vp&id=' . $dataVP["id"] . '" title="Vista rápida del área" id="vistaAreas" style="float: right;">
-																<i class="fa fa-eye" style="font-size: 1.3rem;"></i>
+																<i class="bx bx-show" style="font-size: 1.3rem;"></i>
 																</a>';
                                 ?>
                                     <tr>
@@ -447,8 +447,8 @@ $dataSM73 = mysqli_fetch_array($querySM73);
                 divComentario.scrollIntoView();
             }
         }
-        divElement.scrollIntoView(false);
-        divComentario.scrollIntoView(false);
+        if (divElement) divElement.scrollIntoView(false);
+        if (divComentario) divComentario.scrollIntoView(false);
 
     });
     window.location.hash = "";
@@ -488,7 +488,7 @@ $dataSM73 = mysqli_fetch_array($querySM73);
             ],
         });
 
-        var swiper = new Swiper('.swiper-container', {
+        var swiper = (typeof Swiper === "undefined") ? null : new Swiper('.swiper-container', {
             autoHeight: true, //enable auto height
             pagination: {
                 el: '.swiper-pagination',
