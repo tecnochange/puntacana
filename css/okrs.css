@@ -1,0 +1,232 @@
+.semi-donut {
+  --percentage: 0;
+  --fill: #ff0;
+  width: 250px;
+  height: 125px;
+  position: relative;
+  color: #fff;
+  font-size: 2.2rem;
+  font-weight: 600;
+  overflow: hidden;
+  color: black;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  box-sizing: border-box;
+
+  &:after {
+    content: '';
+    width: 250px;
+    height: 250px;
+    border: 35px solid;
+    border-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.15) var(--fill) var(--fill);
+    position: absolute;
+    border-radius: 50%;
+    left: 0;
+    top: 0;
+    box-sizing: border-box;
+    transform: rotate(calc(1deg * (-45 + var(--percentage) * 1.8)));
+    animation: fillAnimation 1s ease-in;
+  }
+}
+
+@keyframes fillAnimation {
+  0% {
+    transform: rotate(-45deg);
+  }
+
+  50% {
+    transform: rotate(135deg);
+  }
+}
+
+@keyframes fillGraphAnimation {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: rotate(180deg);
+  }
+}
+
+.card-header {
+  border-bottom: none;
+  background-color: white !important;
+}
+
+.cohete {
+  float: right;
+  margin-top: -15px;
+  margin-right: -15px;
+  background-color: #ffffff;
+  padding: 3px;
+  border-radius: 20px;
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+  width: 22px;
+  display: none;
+}
+
+.progreso-bar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.progreso-bar::before {
+  counter-reset: percentage var(--i);
+  content: counter(percentage) '%';
+}
+
+.objetivo-okr {
+  background:
+    radial-gradient(closest-side, white 77%, transparent 80% 100%),
+    conic-gradient(var(--clr) calc(var(--i) * 1%), #e9ecef 0);
+  animation: objetivo-okr-progreso 2s 1 forwards;
+  font-size: 1.1rem;
+}
+
+.objetivo-okr::before {
+  animation: objetivo-okr-progreso 2s 1 forwards;
+}
+
+.progreso {
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}
+
+.sub_periodo {
+  font-size: 12px;
+  color: #a3a3a3;
+  margin-top: 4px;
+}
+
+#pie_progreso {
+  text-align: -moz-center;
+  text-align: -webkit-center;
+  width: 20%;
+}
+
+#pie_progreso_consolidado {
+  text-align: -moz-center;
+  text-align: -webkit-center;
+
+}
+
+
+.progresos {
+  padding: 0px;
+  background-color: #ffffff !important;
+  height: 70px;
+  width: 100%;
+}
+
+.progreso-bar-consolidado {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.progreso-bar-consolidado::before {
+  counter-reset: percentage var(--i);
+  content: counter(percentage) '%';
+}
+
+.objetivo-okr-consolidado {
+  background:
+    radial-gradient(closest-side, white 77%, transparent 80% 100%),
+    conic-gradient(var(--clr) calc(var(--i) * 1%), #e9ecef 0);
+  animation: objetivo-okr-progreso 2s 1 forwards;
+  font-size: 2.3rem;
+}
+
+.objetivo-okr-consolidado::before {
+  animation: objetivo-okr-progreso 2s 1 forwards;
+}
+
+.sub_periodo_objetivo {
+  font-size: 13px;
+  color: #000000;
+  margin-top: 4px;
+}
+
+#resultadoOkr {
+  display: none;
+}
+
+#buscador_resultado::placeholder {
+  color: #006dbd;
+}
+
+#boton_accion {
+  background-color: transparent !important;
+  color: #2d2d2d !important;
+  padding: 5px;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: -5px;
+  border-color: transparent !important;
+}
+
+#boton_accion:focus {
+  box-shadow: none !important;
+}
+
+#menu_acciones,
+#menu_acciones>li>a {
+  font-size: 14px !important;
+  color: black !important;
+}
+
+.nav-tabs {
+  color: black !important;
+}
+
+#profileOkr {
+  display: contents !important;
+}
+
+#profileOkr:hover {
+  color: transparent !important;
+  background-color: transparent !important;
+}
+
+#profileOkr:active {
+  color: transparent !important;
+  background-color: transparent !important;
+}
+
+.avatar {
+  font-size: 15px;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: gray;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar::after{
+  content: attr(data-label);  
+}
+
+.avatar4::after{
+  content: attr(data-label);  
+}
+
+#avatarOrks {
+  width: 50px !important;
+  height: 50px !important;
+  cursor: pointer;
+}

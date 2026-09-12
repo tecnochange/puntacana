@@ -1,0 +1,157 @@
+.item_filtro {
+    width: 24.1%;
+    display: inline-table;
+    border: 1px solid #e3e1e1;
+    margin-bottom: 3px;
+    padding: 15px 5px;
+    border-radius: 5px;
+}
+
+.sub_cat_iconos {
+    display: block;
+}
+
+.iconos_dash {
+    font-size: 40px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .sub_cat_iconos {
+        display: none;
+    }
+}
+
+.card-header {
+    text-align: center;
+    opacity: 0.7;
+
+}
+
+#header_comentario {
+    background-color: white !important;
+    text-align: left !important;
+    color:black !important;
+    opacity: 1 !important;
+}
+
+.card-body p {
+
+    font-size: 0.8rem;
+    margin-bottom: 0px !important;
+}
+
+.card-footer {
+    background-color: white !important;
+}
+
+.accordion-button:focus {
+    border-color: white !important;
+    box-shadow: none !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #ffffff !important;
+}
+
+.accordion-body {
+    font-size: 14px;
+}
+
+.accordion-header {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+
+.foto_min {
+    width: 40px !important;
+    height: 40px !important;
+}
+
+.accordion-item {
+    margin-bottom: 8px !important;
+}
+
+.accordion-button {
+    padding: 0.7rem !important;
+    font-size: 13px;
+}
+
+.accordion-header button {
+    margin-bottom: 0px !important;
+    margin-right: 0px !important;
+}
+
+.accordion-item:not(:first-of-type) {
+    border-top: 1px solid rgba(0, 0, 0, .125) !important;
+}
+
+.botones_img {
+    box-shadow: 1px 1px 12px rgba(0, 0, 0, 0.2);
+    transition: 0.5s all;
+    cursor: pointer;
+}
+
+.botones_img:hover {
+    transform: scale(1.02);
+}
+
+.visible {
+    display: block;
+}
+
+.parrafo_card a {
+    color: #003CFF;
+}
+
+.miniatura_home {
+    width: 60px;
+    height: 60px;
+    background-size: cover;
+    border-radius: 100px;
+    border: 2px solid #5c349e;
+}
+
+.parrafo_card {
+    padding: 10px 15px;
+}
+
+.bt_option_card {
+    background-color: #efefef;
+    cursor: pointer;
+}
+
+.bt_option_card:hover {
+    background-color: #cccccc;
+}
+
+.swiper-container {
+    width: 100%;
+    height: auto;
+}
+
+.swiper-slide {
+    text-align: center;
+    font-size: 18px;
+    background: #fff;
+}
+
+
+.comentarios_item {
+    padding: 5px 15px;
+    border: 1px solid #e4e4e4;
+    margin: 5px 15px;
+}
+
+.comentario_fecha {
+    font-size: 10px;
+}
+
+#stop,
+#continue,
+#start {
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 0px !important;
+}

@@ -1,0 +1,58 @@
+.dataTables_paginate a:before {
+    content: none !important;
+}
+#btnAccion:before{
+    content: none !important;
+}
+.small-box {
+    border-radius: .25rem;
+    box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
+    display: block;
+    margin-bottom: 20px;
+    position: relative;
+    color: white !important;
+}
+
+.small-box>.inner {
+    padding: 10px;
+}
+
+.small-box .icon {
+    color: rgba(0, 0, 0, .15);
+    z-index: 0;
+}
+
+.col-lg-2 .small-box h3,
+.col-md-2 .small-box h3,
+.col-xl-2 .small-box h3 {
+    font-size: 2.2rem;
+    color: black;
+}
+
+.small-box p {
+    font-size: 1rem;
+    color: black;
+}
+
+.small-box>.small-box-footer {
+    background-color: rgba(0, 0, 0, .1);
+    color: rgba(255, 255, 255, .8);
+    display: block;
+    padding: 3px 0;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    z-index: 10;
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: colum;
+    gap: 1rem;
+}
+
+@media (max-width: 800px) {
+    .flex-container {
+        flex-direction: column;
+    }
+}
