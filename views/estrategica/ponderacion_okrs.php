@@ -131,7 +131,7 @@ foreach ($Array_Anio as $value) {
 if (!isset($data["ponderacion"])) {
     foreach ($count_anios as $periodo) {
         if ($data["anio"] == $periodo["anio"]) {
-            mysqli_query($connect_okrs, "UPDATE Objetivos_estrategicos SET ponderacion = " . $periodo["porcentaje"] . " WHERE id_empresa = '" . $user_log['id_empresa'] . "' AND anio = " . $data["anio"] . "");
+            if ($_POST["guardar_ponderacion"] != "") mysqli_query($connect_okrs, "UPDATE Objetivos_estrategicos SET ponderacion = " . $periodo["porcentaje"] . " WHERE id_empresa = '" . $user_log['id_empresa'] . "' AND anio = " . $data["anio"] . "");
             $ponderacion = $periodo["porcentaje"];
         }
     }
@@ -357,7 +357,7 @@ $dataSM25 = mysqli_fetch_array($querySM25);
                                                     $ponderacionOrganizacional = $dataOrganizacional["ponderacion"];
                                                 } else {
 
-                                                    mysqli_query($connect_okrs, "UPDATE Okrs SET ponderacion = '$ponderacionOrganizacional', updated_at = '$hoy' WHERE id = " . $dataOrganizacional['id'] . "");
+                                                    if ($_POST["guardar_ponderacion"] != "") mysqli_query($connect_okrs, "UPDATE Okrs SET ponderacion = '$ponderacionOrganizacional', updated_at = '$hoy' WHERE id = " . $dataOrganizacional['id'] . "");
                                                 }
                                                 $resultado_desempenio = round(($ponderacionOrganizacional * $a_por) / 100, 2);
                                                 if (is_nan($resultado_desempenio)) {
