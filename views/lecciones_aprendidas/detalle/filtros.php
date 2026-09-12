@@ -41,7 +41,7 @@
                                 <?php
 
                                 while ($dataAreaLecciones = mysqli_fetch_array($queryAreaLecciones)) {
-                                    $queryAreasL = mysqli_query($connect_valentina, "SELECT * FROM Areas WHERE id_empresa = '" . $dtEmpleado["id_empresa"] . "' AND id = " . $dataAreaLecciones["area"] . "");
+                                    $queryAreasL = mysqli_query($connect_admin, "SELECT * FROM Areas WHERE id_empresa = '" . $dtEmpleado["id_empresa"] . "' AND id = " . $dataAreaLecciones["area"] . "");
                                     $dataAreas = mysqli_fetch_array($queryAreasL);
                                     if ($_SESSION["area_lA"] ==  $dataAreaLecciones["area"]) {
                                         echo '<option value="' . $dataAreas["id"] . '" selected>' . $dataAreas["nombre"] . '</option>';

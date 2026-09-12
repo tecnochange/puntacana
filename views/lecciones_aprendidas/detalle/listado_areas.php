@@ -10,9 +10,9 @@ if ($_SESSION["role_plataforma"] == 2 || $_SESSION["role_plataforma"] == 3) {
     }else{
         $areas = "AND area IN ($areasSearch)";
     }
-    $queryInt = mysqli_query($connect_valentina, "SELECT DISTINCT(area) AS area FROM Estructura_Empresa WHERE id_empresa = '" . $_SESSION['id_empresa'] . "'  AND estado = 1 AND vicepresidencia = '" . $dataVP["id"] . "' $areas ORDER BY area ");
+    $queryInt = mysqli_query($connect_admin, "SELECT DISTINCT(area) AS area FROM Estructura_Empresa WHERE id_empresa = '" . $_SESSION['id_empresa'] . "'  AND estado = 1 AND vicepresidencia = '" . $dataVP["id"] . "' $areas ORDER BY area ");
 }else{
-    $queryInt = mysqli_query($connect_valentina, "SELECT DISTINCT(area) AS area FROM Estructura_Empresa WHERE id_empresa = '" . $_SESSION['id_empresa'] . "'  AND estado = 1 AND vicepresidencia = '" . $dataVP["id"] . "' $filtro_area ORDER BY area ");
+    $queryInt = mysqli_query($connect_admin, "SELECT DISTINCT(area) AS area FROM Estructura_Empresa WHERE id_empresa = '" . $_SESSION['id_empresa'] . "'  AND estado = 1 AND vicepresidencia = '" . $dataVP["id"] . "' $filtro_area ORDER BY area ");
 }
 
 
@@ -21,14 +21,14 @@ $contador = $prueba = $contVP = 0;
 while ($dataInt = mysqli_fetch_array($queryInt)) {
 
     if ($_SESSION["role_plataforma"] == 1) {
-        $resultado = CargaLeccionesAdmin($connect_clima, $connect_valentina, $filtro_la, $filtro_kr, $filtro_claves, $filtro_area, $filtro_vp);
+        $resultado = CargaLeccionesAdmin($connect_clima, $connect_admin, $filtro_la, $filtro_kr, $filtro_claves, $filtro_area, $filtro_vp);
     } else if ($_SESSION["role_plataforma"] == 2) {
-        $resultado = CargaLeccionesLider($connect_clima, $connect_valentina, $filtro_la, $filtro_kr, $filtro_claves, $filtro_area, $filtro_vp, $_SESSION["id_user"]);
+        $resultado = CargaLeccionesLider($connect_clima, $connect_admin, $filtro_la, $filtro_kr, $filtro_claves, $filtro_area, $filtro_vp, $_SESSION["id_user"]);
     } else {
-        $resultado = CargaLeccionesColaborador($connect_clima, $connect_valentina, $filtro_la, $filtro_kr, $filtro_claves, $filtro_area, $filtro_vp, $_SESSION["id_user"]);
+        $resultado = CargaLeccionesColaborador($connect_clima, $connect_admin, $filtro_la, $filtro_kr, $filtro_claves, $filtro_area, $filtro_vp, $_SESSION["id_user"]);
     }
 
-    $queryArea = mysqli_query($connect_valentina, "SELECT * FROM Areas WHERE id = " . $dataInt["area"] . "");
+    $queryArea = mysqli_query($connect_admin, "SELECT * FROM Areas WHERE id = " . $dataInt["area"] . "");
     $dataArea = mysqli_fetch_array($queryArea);
 
     $arrayCol[$contVP]['id'] = $dataInt["area"];
@@ -48,11 +48,11 @@ while ($dataInt = mysqli_fetch_array($queryInt)) {
 
     $listado_lideres = '';
 
-    $queryLideres = mysqli_query($connect_valentina, "SELECT * FROM Lideres_Area WHERE id_area = '" . $dataInt["area"] . "'");
+    $queryLideres = mysqli_query($connect_admin, "SELECT * FROM Lideres_Area WHERE id_area = '" . $dataInt["area"] . "'");
 
     if (mysqli_num_rows($queryLideres) > 0) {
         while ($dataLideres = mysqli_fetch_array($queryLideres)) {
-            $queryEmple = mysqli_query($connect_valentina, "SELECT * FROM Empleados WHERE id = '" . $dataLideres["id_lider"] . "' ");
+            $queryEmple = mysqli_query($connect_admin, "SELECT * FROM Empleados WHERE id = '" . $dataLideres["id_lider"] . "' ");
             $dataEmple = mysqli_fetch_array($queryEmple);
 
             if (!$dataEmple["foto"]) {
