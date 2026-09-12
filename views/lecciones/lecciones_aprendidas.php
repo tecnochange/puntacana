@@ -56,7 +56,7 @@ if (is_numeric($_SESSION['area']) || $_SESSION['area'] > 0) {
     $area = $_SESSION['area'];
 } else {
 
-    $queryAreas = mysqli_query($connect_valentina, "SELECT * FROM Areas WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND nombre = '" . $_SESSION["area"] . "'");
+    $queryAreas = mysqli_query($connect_admin, "SELECT * FROM Areas WHERE id_empresa = '" . $_SESSION["id_empresa"] . "' AND nombre = '" . $_SESSION["area"] . "'");
     while ($areas = mysqli_fetch_array($queryAreas)) {
         $area = $areas["id"];
     }
@@ -237,7 +237,7 @@ switch ($contFiltro) {
 }
 
 
-global $connect_valentina;
+global $connect_admin;
 global $connect_okrs;
 
 include("views/okrs_equipos/functions.php");
@@ -296,11 +296,11 @@ if ($_SESSION["role_plataforma"] == 1) {
 
 
 if ($_SESSION["role_plataforma"] == 1) {
-    $resultado = CargaLeccionesAdmin($connect_clima, $connect_valentina, $filtro_la, $filtro_kr, $filtro_claves, $filtro_area, $filtro_vp);
+    $resultado = CargaLeccionesAdmin($connect_clima, $connect_admin, $filtro_la, $filtro_kr, $filtro_claves, $filtro_area, $filtro_vp);
 } else if ($_SESSION["role_plataforma"] == 2) {
-    $resultado = CargaLeccionesLider($connect_clima, $connect_valentina, $filtro_la, $filtro_kr, $filtro_claves, $filtro_area, $filtro_vp, $_SESSION["id_user"]);
+    $resultado = CargaLeccionesLider($connect_clima, $connect_admin, $filtro_la, $filtro_kr, $filtro_claves, $filtro_area, $filtro_vp, $_SESSION["id_user"]);
 } else {
-    $resultado = CargaLeccionesColaborador($connect_clima, $connect_valentina, $filtro_la, $filtro_kr, $filtro_claves, $filtro_area, $filtro_vp, $_SESSION["id_user"]);
+    $resultado = CargaLeccionesColaborador($connect_clima, $connect_admin, $filtro_la, $filtro_kr, $filtro_claves, $filtro_area, $filtro_vp, $_SESSION["id_user"]);
 }
 
 // print_r($resultado);
@@ -323,7 +323,7 @@ function ConvertirLink($entrada)
     return $string;
 }
 
-$querySM74 = mysqli_query($connect_valentina, "SELECT * FROM Submenu_Empresa WHERE id_empresa = " . $_SESSION["id_empresa"] . " AND estado = 1 AND id_menu = 7 AND id_submenu = 44");
+$querySM74 = mysqli_query($connect_admin, "SELECT * FROM Submenu_Empresa WHERE id_empresa = " . $_SESSION["id_empresa"] . " AND estado = 1 AND id_menu = 7 AND id_submenu = 44");
 $dataSM74 = mysqli_fetch_array($querySM74);
 ?>
 <link rel="stylesheet" href="<?php echo $url; ?>css/okrs.css">
@@ -367,7 +367,7 @@ $dataSM74 = mysqli_fetch_array($querySM74);
                 <div id="accordionLA" class="accordion-icons" role="tablist">
                     <?php
                     if ($_SESSION["role_plataforma"] == 1) {
-                        $queryVP = mysqli_query($connect_valentina, "SELECT * FROM Vicepresidencia WHERE id_empresa = '" . $_SESSION['id_empresa'] . "'  AND estado = 1 ORDER BY nombre ");
+                        $queryVP = mysqli_query($connect_admin, "SELECT * FROM Vicepresidencia WHERE id_empresa = '" . $_SESSION['id_empresa'] . "'  AND estado = 1 ORDER BY nombre ");
                     } else {
                         $id_vp_values = array_column($resultado, 'id_vp');
                         $id_area_values = array_column($resultado, 'area');
@@ -377,7 +377,7 @@ $dataSM74 = mysqli_fetch_array($querySM74);
 
                         $vicepresidencias = implode(', ', $id_vp_unique);
                         $areas = implode(', ', $id_area_unique);
-                        $queryVP = mysqli_query($connect_valentina, "SELECT * FROM Vicepresidencia WHERE id_empresa = '" . $_SESSION['id_empresa'] . "' AND estado = 1 AND id IN($vicepresidencias) ORDER BY nombre ");
+                        $queryVP = mysqli_query($connect_admin, "SELECT * FROM Vicepresidencia WHERE id_empresa = '" . $_SESSION['id_empresa'] . "' AND estado = 1 AND id IN($vicepresidencias) ORDER BY nombre ");
                     }
                     $contVP = 0;
                     while ($dataVP = mysqli_fetch_array($queryVP)) {
