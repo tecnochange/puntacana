@@ -1557,7 +1557,7 @@ function array_sort($array, $on, $order = SORT_ASC)
 	return $new_array;
 }
 
-function EscalaColor($porcentaje, $id_empresa, $connect_valentina)
+function EscalaColorEquipos($porcentaje, $id_empresa, $connect_valentina)
 {
 
 	$queryEscala = mysqli_query($connect_valentina, "SELECT * FROM Escala_Medicion WHERE id_empresa = $id_empresa");
