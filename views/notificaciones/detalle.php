@@ -29,7 +29,7 @@ $registro = $notificacion ? notificacionesRegistroVisible($notificacion['tipo_re
         <?php [$estadoTexto, $estadoClase] = notificacionesEstadoVisible($notificacion['estado']); ?>
         <div class="card">
             <div class="card-header d-flex align-items-center gap-2">
-                <i class="bx <?= $e($notificacion['icono'] ?: NOTIFICACIONES_ICONO_POR_DEFECTO) ?> fs-3" style="color: <?= $e($notificacion['color']) ?>"></i>
+                <i class="bx <?= notificacionesIconoSeguro($notificacion['icono']) ?> fs-3" style="color: <?= notificacionesColorSeguro($notificacion['color']) ?>"></i>
                 <h4 class="mb-0 flex-grow-1"><?= $e($notificacion['titulo']) ?></h4>
                 <span class="badge <?= $estadoClase ?>"><?= $e($estadoTexto) ?></span>
             </div>
