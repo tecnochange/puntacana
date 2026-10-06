@@ -14,6 +14,16 @@ function notificacionesEscapar(?string $texto): string
     return htmlspecialchars((string) $texto, ENT_QUOTES, 'UTF-8');
 }
 
+/** "kr #123" si la notificación trae registro; vacío si no. */
+function notificacionesRegistroVisible(?string $tipoRegistro, $idRegistro): string
+{
+    if ($idRegistro === null) {
+        return '';
+    }
+    $tipo = $tipoRegistro !== null && $tipoRegistro !== '' ? "$tipoRegistro " : '';
+    return $tipo . '#' . (int) $idRegistro;
+}
+
 /** [texto, clase del badge] de un estado. */
 function notificacionesEstadoVisible(string $estado): array
 {

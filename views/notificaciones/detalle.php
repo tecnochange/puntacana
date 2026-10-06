@@ -9,6 +9,7 @@ $notificacion = MarcarLeida::ejecutar($connect_admin, (int) $user_log['id_empres
 
 $e = 'notificacionesEscapar';
 $fecha = fn (?string $valor, string $formato) => $valor ? (new DateTimeImmutable($valor))->format($formato) : '';
+$registro = $notificacion ? notificacionesRegistroVisible($notificacion['tipo_registro'], $notificacion['id_registro']) : '';
 ?>
 
 <div class="container-fluid" style="max-width: 900px; margin: 0 auto;">
@@ -38,6 +39,10 @@ $fecha = fn (?string $valor, string $formato) => $valor ? (new DateTimeImmutable
                 <dl class="row small mb-0">
                     <dt class="col-sm-3">Tipo</dt>
                     <dd class="col-sm-9"><?= $e($notificacion['tipo_nombre']) ?></dd>
+                    <?php if ($registro !== ''): ?>
+                        <dt class="col-sm-3">Registro</dt>
+                        <dd class="col-sm-9"><?= $e($registro) ?></dd>
+                    <?php endif; ?>
                     <dt class="col-sm-3">Recibida</dt>
                     <dd class="col-sm-9"><?= $e($fecha($notificacion['created_at'], 'd/m/Y H:i')) ?></dd>
                     <?php if ($notificacion['fecha_limite']): ?>

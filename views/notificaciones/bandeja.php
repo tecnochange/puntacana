@@ -28,6 +28,7 @@ function notificacionesPresentar(array $fila, DateTimeImmutable $hoy): array
         'color' => $fila['color'] ?: '',
         'leida' => $fila['fecha_lectura'] !== null,
         'creada' => (new DateTimeImmutable($fila['created_at']))->format('d/m/Y H:i'),
+        'registro' => notificacionesRegistroVisible($fila['tipo_registro'], $fila['id_registro']),
         'fecha_limite' => $fechaLimite ? $fechaLimite->format('d/m/Y') : '',
         'plazo' => $plazo,
         'plazo_clase' => $venceProntoOVencida ? 'text-danger' : 'text-muted',
@@ -53,6 +54,9 @@ function notificacionesPintarLista(array $items, string $vacio, bool $mostrarEst
             echo '<div class="small">' . notificacionesEscapar($n['cuerpo']) . '</div>';
         }
         echo '<div class="small text-muted mt-1">' . notificacionesEscapar($n['creada']);
+        if ($n['registro'] !== '') {
+            echo ' · Registro: ' . notificacionesEscapar($n['registro']);
+        }
         if ($n['fecha_limite'] !== '') {
             echo ' · Fecha límite: ' . notificacionesEscapar($n['fecha_limite']);
         }

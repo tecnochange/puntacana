@@ -101,7 +101,7 @@ final class DestinatariosRepositorio
     {
         return $this->consulta->filas(
             'SELECT e.id, e.codigo, e.titulo, e.cuerpo, e.estado, e.fecha_limite, e.created_at,
-                    e.clase, t.icono, t.color, d.fecha_lectura
+                    e.tipo_registro, e.id_registro, e.clase, t.icono, t.color, d.fecha_lectura
              FROM Notificaciones_Destinatarios d
              JOIN Notificaciones_Eventos e ON e.id = d.id_evento
              JOIN Notificaciones_Tipos t ON t.id = e.id_tipo
@@ -118,7 +118,7 @@ final class DestinatariosRepositorio
     {
         return $this->consulta->fila(
             'SELECT e.id, e.codigo, e.titulo, e.cuerpo, e.url, e.estado, e.fecha_limite, e.created_at,
-                    e.clase, t.nombre AS tipo_nombre, t.icono, t.color, d.fecha_lectura
+                    e.tipo_registro, e.id_registro, e.clase, t.nombre AS tipo_nombre, t.icono, t.color, d.fecha_lectura
              FROM Notificaciones_Destinatarios d
              JOIN Notificaciones_Eventos e ON e.id = d.id_evento
              JOIN Notificaciones_Tipos t ON t.id = e.id_tipo

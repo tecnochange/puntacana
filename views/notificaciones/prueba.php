@@ -16,6 +16,8 @@ $exito = false;
 
 $seEnvioFormulario = $esAdministrador && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generar_prueba']);
 if ($seEnvioFormulario) {
+    $tipoRegistro = trim((string) ($_POST['tipo_registro'] ?? '')) ?: null;
+    $idRegistro = ($_POST['id_registro'] ?? '') !== '' ? (int) $_POST['id_registro'] : null;
     try {
         $idEvento = GenerarNotificacion::ejecutar(
             $connect_admin,
@@ -27,6 +29,8 @@ if ($seEnvioFormulario) {
                 'mensaje' => trim((string) ($_POST['mensaje'] ?? '')),
             ],
             url: '?pg=notificaciones/bandeja',
+            tipoRegistro: $tipoRegistro,
+            idRegistro: $idRegistro,
         );
         $exito = $idEvento !== null;
         $mensaje = $exito
@@ -66,6 +70,16 @@ $e = 'notificacionesEscapar';
                     <div class="mb-3">
                         <label class="form-label" for="prueba_mensaje">Mensaje</label>
                         <textarea class="form-control" id="prueba_mensaje" name="mensaje" rows="3" maxlength="500">Si ves esto, el módulo de notificaciones funciona.</textarea>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label" for="prueba_tipo_registro">Tipo de registro (opcional)</label>
+                            <input type="text" class="form-control" id="prueba_tipo_registro" name="tipo_registro" maxlength="40" placeholder="kr, kpi, iniciativa...">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label" for="prueba_id_registro">Id del registro (opcional)</label>
+                            <input type="number" class="form-control" id="prueba_id_registro" name="id_registro" min="1">
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary">Generar</button>
                     <a href="?pg=notificaciones/bandeja" class="btn btn-outline-secondary">Ir a mi bandeja</a>
