@@ -1,11 +1,16 @@
 <?php
 namespace Notificaciones\Dominio;
 
-enum ClaseNotificacion: string
+final class ClaseNotificacion
 {
     /** Algo por hacer: queda pendiente en la bandeja y vence con su fecha límite. */
-    case TAREA = 'tarea';
+    const TAREA = 'tarea';
 
     /** Informativa: solo leída o no leída. */
-    case AVISO = 'aviso';
+    const AVISO = 'aviso';
+
+    public static function esValida(string $clase): bool
+    {
+        return in_array($clase, [self::TAREA, self::AVISO], true);
+    }
 }

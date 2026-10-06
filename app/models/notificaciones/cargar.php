@@ -1,11 +1,11 @@
 <?php
 // Autoload del módulo de Notificaciones. Solo atiende el namespace Notificaciones\,
 // así no interfiere con las clases globales del proyecto.
-// Requiere PHP 8.1 o superior (enums y propiedades readonly).
+// Compatible con PHP 7.2 (la versión del servidor).
 
 const NOTIFICACIONES_PREFIJO_NAMESPACE = 'Notificaciones\\';
 
-spl_autoload_register(function (string $clase): void {
+spl_autoload_register(function (string $clase) {
     $esDelModulo = strncmp($clase, NOTIFICACIONES_PREFIJO_NAMESPACE, strlen(NOTIFICACIONES_PREFIJO_NAMESPACE)) === 0;
     if (!$esDelModulo) {
         return;

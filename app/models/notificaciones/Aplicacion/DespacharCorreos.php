@@ -42,23 +42,38 @@ final class DespacharCorreos
     private const VENTANA_POR_DEFECTO = '07-19';
     private const HORA_RESUMEN_POR_DEFECTO = '7';
 
-    private EventosRepositorio $eventos;
-    private DestinatariosRepositorio $bandejas;
-    private EnviosRepositorio $envios;
-    private EmpleadosLector $empleados;
-    private TiposRepositorio $tipos;
-    private ConfiguracionRepositorio $configuraciones;
+    /** @var EnviadorCorreo */
+    private $enviador;
+    /** @var string */
+    private $urlBase;
+    /** @var DateTimeImmutable */
+    private $ahora;
+    /** @var EventosRepositorio */
+    private $eventos;
+    /** @var DestinatariosRepositorio */
+    private $bandejas;
+    /** @var EnviosRepositorio */
+    private $envios;
+    /** @var EmpleadosLector */
+    private $empleados;
+    /** @var TiposRepositorio */
+    private $tipos;
+    /** @var ConfiguracionRepositorio */
+    private $configuraciones;
 
-    private array $cacheConfiguracion = [];
-    private array $cacheTipos = [];
-    private array $contadores = ['vencidas' => 0, 'enviados' => 0, 'fallidos' => 0, 'omitidos' => 0];
+    /** @var array */
+    private $cacheConfiguracion = [];
+    /** @var array */
+    private $cacheTipos = [];
+    /** @var array */
+    private $contadores = ['vencidas' => 0, 'enviados' => 0, 'fallidos' => 0, 'omitidos' => 0];
 
-    private function __construct(
-        mysqli $conexion,
-        private EnviadorCorreo $enviador,
-        private string $urlBase,
-        private DateTimeImmutable $ahora,
-    ) {
+    private function __construct(mysqli $conexion, EnviadorCorreo $enviador, string $urlBase, DateTimeImmutable $ahora)
+    {
+        $this->enviador = $enviador;
+        $this->urlBase = $urlBase;
+        $this->ahora = $ahora;
+
         $consulta = new Consulta($conexion);
         $this->eventos = new EventosRepositorio($consulta);
         $this->bandejas = new DestinatariosRepositorio($consulta);
@@ -71,7 +86,7 @@ final class DespacharCorreos
     /** $urlBase: raíz del portal, p. ej. https://puntacana.goforagile.com/ */
     public static function ejecutar(mysqli $conexion, EnviadorCorreo $enviador, string $urlBase, ?DateTimeImmutable $ahora = null): array
     {
-        $despacho = new self($conexion, $enviador, rtrim($urlBase, '/') . '/', $ahora ?? new DateTimeImmutable());
+        $despacho = new self($conexion, $enviador, rtrim($urlBase, '/') . '/', $ahora ?: new DateTimeImmutable());
         return $despacho->correr();
     }
 
@@ -80,10 +95,12 @@ final class DespacharCorreos
         $this->contadores['vencidas'] = $this->eventos->marcarTareasVencidas($this->ahora);
         $this->bandejas->limpiarAvisosDeCerradas();
 
-        $empresasHabilitadas = array_values(array_filter(
-            $this->bandejas->empresasConAvisoPendiente($this->ahora),
-            fn (int $idEmpresa) => $this->puedeEnviarAhora($this->configuracion($idEmpresa))
-        ));
+        $empresasHabilitadas = [];
+        foreach ($this->bandejas->empresasConAvisoPendiente($this->ahora) as $idEmpresa) {
+            if ($this->puedeEnviarAhora($this->configuracion($idEmpresa))) {
+                $empresasHabilitadas[] = $idEmpresa;
+            }
+        }
 
         $inmediatos = $this->bandejas->conAvisoPendiente($this->ahora, ModoCorreo::INMEDIATO, $empresasHabilitadas, self::LIMITE_POR_CORRIDA);
         foreach ($inmediatos as $fila) {
@@ -95,10 +112,12 @@ final class DespacharCorreos
             $this->enviarInmediato($fila, $tipo, $this->configuracion((int) $fila['id_empresa']));
         }
 
-        $empresasEnHoraDeResumen = array_values(array_filter(
-            $empresasHabilitadas,
-            fn (int $idEmpresa) => $this->esHoraDeResumen($this->configuracion($idEmpresa))
-        ));
+        $empresasEnHoraDeResumen = [];
+        foreach ($empresasHabilitadas as $idEmpresa) {
+            if ($this->esHoraDeResumen($this->configuracion($idEmpresa))) {
+                $empresasEnHoraDeResumen[] = $idEmpresa;
+            }
+        }
         $paraResumen = [];
         $resumenes = $this->bandejas->conAvisoPendiente($this->ahora, ModoCorreo::RESUMEN_DIARIO, $empresasEnHoraDeResumen, self::LIMITE_RESUMEN_POR_CORRIDA);
         foreach ($resumenes as $fila) {
@@ -129,7 +148,10 @@ final class DespacharCorreos
         $idEmpleado = (int) $fila['id_empleado'];
         $empleado = $this->empleados->paraEnvio($idEmpleado, $idEmpresa);
 
-        $motivo = $this->motivoCaducado($fila) ?? $this->motivoOmisionPersona($configuracion, $idEmpleado, $empleado);
+        $motivo = $this->motivoCaducado($fila);
+        if ($motivo === null) {
+            $motivo = $this->motivoOmisionPersona($configuracion, $idEmpleado, $empleado);
+        }
         if ($motivo !== null) {
             $this->omitir($fila, $motivo);
             return;
@@ -197,7 +219,7 @@ final class DespacharCorreos
     private function reclamar(array $fila, ?TipoNotificacion $tipo): bool
     {
         $avisosDados = (int) $fila['cantidad_avisos'] + 1;
-        $siguiente = $tipo?->siguienteAviso($this->ahora, $avisosDados, $this->fechaLimite($fila));
+        $siguiente = $tipo === null ? null : $tipo->siguienteAviso($this->ahora, $avisosDados, $this->fechaLimite($fila));
         return $this->bandejas->reclamarAviso((int) $fila['id'], $fila['proximo_aviso'], $siguiente, $this->ahora);
     }
 
@@ -249,7 +271,7 @@ final class DespacharCorreos
             $estado,
             $this->ahora,
             $resultado->idMensaje,
-            $resultado->error,
+            $resultado->error
         );
         $this->contadores[$resultado->exitoso ? 'enviados' : 'fallidos']++;
     }
@@ -296,31 +318,28 @@ final class DespacharCorreos
     private function configuracion(int $idEmpresa): array
     {
         if (!isset($this->cacheConfiguracion[$idEmpresa])) {
-            $valor = fn (string $clave, string $porDefecto = '') => $this->configuraciones->valor($idEmpresa, $clave, $porDefecto);
-
-            [$inicio, $fin] = array_map('intval', explode('-', $valor('ventana_envio', self::VENTANA_POR_DEFECTO)) + [1 => 0]);
-            $listaPrueba = array_map('intval', array_filter(array_map('trim', explode(',', $valor('lista_prueba'))), 'strlen'));
+            $ventana = explode('-', $this->configuraciones->valor($idEmpresa, 'ventana_envio', self::VENTANA_POR_DEFECTO));
+            $listaPrueba = array_filter(array_map('trim', explode(',', $this->configuraciones->valor($idEmpresa, 'lista_prueba'))), 'strlen');
 
             $this->cacheConfiguracion[$idEmpresa] = [
-                'modo' => ModoOperacion::tryFrom($valor('modo')) ?? ModoOperacion::APAGADO,
-                'lista_prueba' => $listaPrueba,
-                'hora_resumen' => (int) $valor('hora_resumen', self::HORA_RESUMEN_POR_DEFECTO),
-                'ventana_inicio' => $inicio,
-                'ventana_fin' => $fin,
+                'modo' => ModoOperacion::desdeValor($this->configuraciones->valor($idEmpresa, 'modo')),
+                'lista_prueba' => array_map('intval', $listaPrueba),
+                'hora_resumen' => (int) $this->configuraciones->valor($idEmpresa, 'hora_resumen', self::HORA_RESUMEN_POR_DEFECTO),
+                'ventana_inicio' => (int) $ventana[0],
+                'ventana_fin' => isset($ventana[1]) ? (int) $ventana[1] : 0,
             ];
         }
         return $this->cacheConfiguracion[$idEmpresa];
     }
 
-    /** NULL si el código ya no existe en el enum o su tipo está inactivo o mal configurado. */
+    /** NULL si el código ya no está en CodigoNotificacion o su tipo está inactivo o mal configurado. */
     private function tipo(string $codigo, int $idEmpresa): ?TipoNotificacion
     {
         $llave = "$idEmpresa|$codigo";
         if (!array_key_exists($llave, $this->cacheTipos)) {
-            $codigoEnum = CodigoNotificacion::tryFrom($codigo);
             try {
-                $this->cacheTipos[$llave] = $codigoEnum ? $this->tipos->buscarActivo($codigoEnum, $idEmpresa) : null;
-            } catch (ErrorNotificacion) {
+                $this->cacheTipos[$llave] = CodigoNotificacion::existe($codigo) ? $this->tipos->buscarActivo($codigo, $idEmpresa) : null;
+            } catch (ErrorNotificacion $error) {
                 $this->cacheTipos[$llave] = null;
             }
         }

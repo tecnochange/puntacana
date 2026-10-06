@@ -1,13 +1,21 @@
 <?php
 namespace Notificaciones\Aplicacion;
 
+/** Resultado de un envío. De solo lectura por convención. */
 final class ResultadoEnvio
 {
-    private function __construct(
-        public readonly bool $exitoso,
-        public readonly ?string $idMensaje,
-        public readonly ?string $error,
-    ) {
+    /** @var bool */
+    public $exitoso;
+    /** @var string|null */
+    public $idMensaje;
+    /** @var string|null */
+    public $error;
+
+    private function __construct(bool $exitoso, ?string $idMensaje, ?string $error)
+    {
+        $this->exitoso = $exitoso;
+        $this->idMensaje = $idMensaje;
+        $this->error = $error;
     }
 
     public static function exitoso(string $idMensaje): self

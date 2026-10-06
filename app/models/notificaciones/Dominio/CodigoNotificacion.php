@@ -1,26 +1,39 @@
 <?php
 namespace Notificaciones\Dominio;
 
+use Notificaciones\Dominio\Excepciones\CodigoDesconocido;
+
 /**
- * Catálogo de notificaciones. Cada caso es un código que debe existir también
- * como fila en Notificaciones_Tipos (ahí vive su configuración).
+ * Catálogo de notificaciones. Cada constante es un código que debe existir
+ * también como fila en Notificaciones_Tipos (ahí vive su configuración).
  *
- * Agregar una notificación nueva = un caso aquí, sus campos() y su fila en la BD.
- * El valor del caso no se cambia nunca: es la llave contra la BD.
+ * Agregar una notificación nueva = una constante aquí, sus campos en CAMPOS y
+ * su fila en la BD. El valor de una constante no se cambia nunca: es la llave
+ * contra la BD.
  */
-enum CodigoNotificacion: string
+final class CodigoNotificacion
 {
-    case PRUEBA = 'general.prueba';
+    const PRUEBA = 'general.prueba';
 
     /**
-     * Datos que acepta este código en GenerarNotificacion::ejecutar(), y por lo
+     * Datos que acepta cada código en GenerarNotificacion::ejecutar(), y por lo
      * tanto los únicos {{marcadores}} que sus plantillas pueden usar (además de
      * Plantilla::CAMPOS_BASE).
      */
-    public function campos(): array
+    private const CAMPOS = [
+        self::PRUEBA => ['titulo', 'mensaje'],
+    ];
+
+    public static function existe(string $codigo): bool
     {
-        return match ($this) {
-            self::PRUEBA => ['titulo', 'mensaje'],
-        };
+        return array_key_exists($codigo, self::CAMPOS);
+    }
+
+    public static function campos(string $codigo): array
+    {
+        if (!self::existe($codigo)) {
+            throw new CodigoDesconocido("El código '$codigo' no está en CodigoNotificacion.");
+        }
+        return self::CAMPOS[$codigo];
     }
 }

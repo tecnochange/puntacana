@@ -6,19 +6,22 @@ use DateTimeImmutable;
 /** Bitácora de correos. No guarda direcciones ni cuerpos. */
 final class EnviosRepositorio
 {
-    public const ENVIADO = 'enviado';
-    public const FALLIDO = 'fallido';
-    public const OMITIDO_MODO = 'omitido_modo';
-    public const OMITIDO_INACTIVO = 'omitido_inactivo';
-    public const OMITIDO_SIN_CORREO = 'omitido_sin_correo';
-    public const OMITIDO_CADUCADO = 'omitido_caducado';
-    public const OMITIDO_TIPO = 'omitido_tipo';
+    const ENVIADO = 'enviado';
+    const FALLIDO = 'fallido';
+    const OMITIDO_MODO = 'omitido_modo';
+    const OMITIDO_INACTIVO = 'omitido_inactivo';
+    const OMITIDO_SIN_CORREO = 'omitido_sin_correo';
+    const OMITIDO_CADUCADO = 'omitido_caducado';
+    const OMITIDO_TIPO = 'omitido_tipo';
 
-    private const FORMATO_FECHA = 'Y-m-d H:i:s';
     private const LARGO_MAXIMO_ERROR = 500;
 
-    public function __construct(private Consulta $consulta)
+    /** @var Consulta */
+    private $consulta;
+
+    public function __construct(Consulta $consulta)
     {
+        $this->consulta = $consulta;
     }
 
     public function registrar(
@@ -29,9 +32,9 @@ final class EnviosRepositorio
         string $estado,
         DateTimeImmutable $ahora,
         ?string $idMensajeProveedor = null,
-        ?string $error = null,
+        ?string $error = null
     ): void {
-        $fecha = $ahora->format(self::FORMATO_FECHA);
+        $fecha = Consulta::fecha($ahora);
         $fechaEnvio = $estado === self::ENVIADO ? $fecha : null;
         $this->consulta->ejecutar(
             'INSERT INTO Notificaciones_Envios

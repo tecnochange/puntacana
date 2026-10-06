@@ -21,8 +21,8 @@ final class ConsultarBandeja
 
         $bandeja = ['pendientes' => [], 'avisos' => [], 'historial' => [], 'no_leidas' => 0];
         foreach ($filas as $fila) {
-            $estaAbierta = $fila['estado'] === EstadoNotificacion::ABIERTA->value;
-            $esTarea = $fila['clase'] === ClaseNotificacion::TAREA->value;
+            $estaAbierta = $fila['estado'] === EstadoNotificacion::ABIERTA;
+            $esTarea = $fila['clase'] === ClaseNotificacion::TAREA;
 
             if (!$estaAbierta) {
                 $bandeja['historial'][] = $fila;

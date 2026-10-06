@@ -6,8 +6,12 @@ final class ConfiguracionRepositorio
 {
     private const EMPRESA_POR_DEFECTO = 0;
 
-    public function __construct(private Consulta $consulta)
+    /** @var Consulta */
+    private $consulta;
+
+    public function __construct(Consulta $consulta)
     {
+        $this->consulta = $consulta;
     }
 
     public function valor(int $idEmpresa, string $clave, string $porDefecto = ''): string

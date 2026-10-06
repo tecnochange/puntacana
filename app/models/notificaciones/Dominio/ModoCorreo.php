@@ -1,11 +1,16 @@
 <?php
 namespace Notificaciones\Dominio;
 
-enum ModoCorreo: string
+final class ModoCorreo
 {
     /** Un correo por notificación, en la siguiente corrida del cron. */
-    case INMEDIATO = 'inmediato';
+    const INMEDIATO = 'inmediato';
 
     /** Se agrupa con las demás del día en un solo correo por persona. */
-    case RESUMEN_DIARIO = 'resumen_diario';
+    const RESUMEN_DIARIO = 'resumen_diario';
+
+    public static function esValido(string $modo): bool
+    {
+        return in_array($modo, [self::INMEDIATO, self::RESUMEN_DIARIO], true);
+    }
 }

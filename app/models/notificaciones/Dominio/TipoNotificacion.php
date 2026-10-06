@@ -6,54 +6,71 @@ use Notificaciones\Dominio\Excepciones\TipoMalConfigurado;
 
 /**
  * Configuración de un tipo, ya validada contra su código. Si una fila de
- * Notificaciones_Tipos no cuadra con el enum, no se construye.
+ * Notificaciones_Tipos no cuadra con CodigoNotificacion, no se construye.
+ * Las propiedades son de solo lectura por convención: nada las modifica
+ * después de desdeFila().
  */
 final class TipoNotificacion
 {
-    private function __construct(
-        public readonly int $id,
-        public readonly CodigoNotificacion $codigo,
-        public readonly string $nombre,
-        public readonly ClaseNotificacion $clase,
-        public readonly ?int $diasAnticipacion,
-        public readonly ?int $recordarCadaDias,
-        public readonly ?int $maxRecordatorios,
-        public readonly bool $notificarAutor,
-        public readonly bool $canalPlataforma,
-        public readonly bool $canalCorreo,
-        public readonly ModoCorreo $modoCorreo,
-        public readonly ?string $correoAsunto,
-        public readonly ?string $correoCuerpo,
-        public readonly string $plataformaTitulo,
-        public readonly ?string $plataformaCuerpo,
-    ) {
+    /** @var int */
+    public $id;
+    /** @var string */
+    public $codigo;
+    /** @var string */
+    public $nombre;
+    /** @var string ClaseNotificacion::* */
+    public $clase;
+    /** @var int|null */
+    public $diasAnticipacion;
+    /** @var int|null */
+    public $recordarCadaDias;
+    /** @var int|null */
+    public $maxRecordatorios;
+    /** @var bool */
+    public $notificarAutor;
+    /** @var bool */
+    public $canalPlataforma;
+    /** @var bool */
+    public $canalCorreo;
+    /** @var string ModoCorreo::* */
+    public $modoCorreo;
+    /** @var string|null */
+    public $correoAsunto;
+    /** @var string|null */
+    public $correoCuerpo;
+    /** @var string */
+    public $plataformaTitulo;
+    /** @var string|null */
+    public $plataformaCuerpo;
+
+    private function __construct()
+    {
     }
 
-    public static function desdeFila(array $fila, CodigoNotificacion $codigo): self
+    public static function desdeFila(array $fila, string $codigo): self
     {
-        $clase = ClaseNotificacion::tryFrom((string) $fila['clase']);
-        $modoCorreo = ModoCorreo::tryFrom((string) $fila['modo_correo']);
-        if ($clase === null || $modoCorreo === null) {
-            throw new TipoMalConfigurado("Tipo '{$codigo->value}': clase o modo_correo inválidos.");
+        $clase = (string) $fila['clase'];
+        $modoCorreo = (string) $fila['modo_correo'];
+        if (!ClaseNotificacion::esValida($clase) || !ModoCorreo::esValido($modoCorreo)) {
+            throw new TipoMalConfigurado("Tipo '$codigo': clase o modo_correo inválidos.");
         }
 
-        $tipo = new self(
-            (int) $fila['id'],
-            $codigo,
-            (string) $fila['nombre'],
-            $clase,
-            self::enteroNoNegativo($fila['dias_anticipacion'], 'dias_anticipacion', $codigo),
-            self::enteroNoNegativo($fila['recordar_cada_dias'], 'recordar_cada_dias', $codigo),
-            self::enteroNoNegativo($fila['max_recordatorios'], 'max_recordatorios', $codigo),
-            (bool) $fila['notificar_autor'],
-            (bool) $fila['canal_plataforma'],
-            (bool) $fila['canal_correo'],
-            $modoCorreo,
-            $fila['correo_asunto'],
-            $fila['correo_cuerpo'],
-            (string) $fila['plataforma_titulo'],
-            $fila['plataforma_cuerpo'],
-        );
+        $tipo = new self();
+        $tipo->id = (int) $fila['id'];
+        $tipo->codigo = $codigo;
+        $tipo->nombre = (string) $fila['nombre'];
+        $tipo->clase = $clase;
+        $tipo->diasAnticipacion = self::enteroNoNegativo($fila['dias_anticipacion'], 'dias_anticipacion', $codigo);
+        $tipo->recordarCadaDias = self::enteroNoNegativo($fila['recordar_cada_dias'], 'recordar_cada_dias', $codigo);
+        $tipo->maxRecordatorios = self::enteroNoNegativo($fila['max_recordatorios'], 'max_recordatorios', $codigo);
+        $tipo->notificarAutor = (bool) $fila['notificar_autor'];
+        $tipo->canalPlataforma = (bool) $fila['canal_plataforma'];
+        $tipo->canalCorreo = (bool) $fila['canal_correo'];
+        $tipo->modoCorreo = $modoCorreo;
+        $tipo->correoAsunto = $fila['correo_asunto'];
+        $tipo->correoCuerpo = $fila['correo_cuerpo'];
+        $tipo->plataformaTitulo = (string) $fila['plataforma_titulo'];
+        $tipo->plataformaCuerpo = $fila['plataforma_cuerpo'];
         $tipo->validarPlantillas();
         return $tipo;
     }
@@ -90,30 +107,30 @@ final class TipoNotificacion
     /** Las plantillas solo pueden usar los campos del código y los base. */
     private function validarPlantillas(): void
     {
-        $permitidos = array_merge($this->codigo->campos(), Plantilla::CAMPOS_BASE);
+        $permitidos = array_merge(CodigoNotificacion::campos($this->codigo), Plantilla::CAMPOS_BASE);
         $usados = array_merge(
             Plantilla::marcadores($this->correoAsunto),
             Plantilla::marcadores($this->correoCuerpo),
             Plantilla::marcadores($this->plataformaTitulo),
-            Plantilla::marcadores($this->plataformaCuerpo),
+            Plantilla::marcadores($this->plataformaCuerpo)
         );
         $noPermitidos = array_diff($usados, $permitidos);
         if ($noPermitidos) {
-            throw new TipoMalConfigurado("Tipo '{$this->codigo->value}': marcadores no permitidos: " . implode(', ', $noPermitidos));
+            throw new TipoMalConfigurado("Tipo '{$this->codigo}': marcadores no permitidos: " . implode(', ', $noPermitidos));
         }
         if ($this->canalCorreo && ($this->correoAsunto === null || $this->correoCuerpo === null)) {
-            throw new TipoMalConfigurado("Tipo '{$this->codigo->value}': tiene correo activo pero sin asunto o cuerpo.");
+            throw new TipoMalConfigurado("Tipo '{$this->codigo}': tiene correo activo pero sin asunto o cuerpo.");
         }
     }
 
-    private static function enteroNoNegativo(mixed $valor, string $columna, CodigoNotificacion $codigo): ?int
+    private static function enteroNoNegativo($valor, string $columna, string $codigo): ?int
     {
         if ($valor === null || $valor === '') {
             return null;
         }
         $entero = (int) $valor;
         if ($entero < 0) {
-            throw new TipoMalConfigurado("Tipo '{$codigo->value}': $columna no puede ser negativo.");
+            throw new TipoMalConfigurado("Tipo '$codigo': $columna no puede ser negativo.");
         }
         return $entero;
     }

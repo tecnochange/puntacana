@@ -3,15 +3,17 @@ namespace Notificaciones\Infraestructura\BaseDatos;
 
 use DateTimeImmutable;
 use Notificaciones\Dominio\EstadoNotificacion;
-use Notificaciones\Dominio\ModoCorreo;
 
 final class DestinatariosRepositorio
 {
-    private const FORMATO_FECHA = 'Y-m-d H:i:s';
     private const LIMITE_BANDEJA = 500;
 
-    public function __construct(private Consulta $consulta)
+    /** @var Consulta */
+    private $consulta;
+
+    public function __construct(Consulta $consulta)
     {
+        $this->consulta = $consulta;
     }
 
     public function insertar(int $idEmpresa, int $idEvento, int $idEmpleado, ?DateTimeImmutable $proximoAviso, DateTimeImmutable $ahora): void
@@ -20,7 +22,7 @@ final class DestinatariosRepositorio
             'INSERT INTO Notificaciones_Destinatarios (id_empresa, id_evento, id_empleado, proximo_aviso, created_at)
              VALUES (?, ?, ?, ?, ?)',
             'iiiss',
-            [$idEmpresa, $idEvento, $idEmpleado, $proximoAviso?->format(self::FORMATO_FECHA), $ahora->format(self::FORMATO_FECHA)]
+            [$idEmpresa, $idEvento, $idEmpleado, Consulta::fecha($proximoAviso), Consulta::fecha($ahora)]
         );
     }
 
@@ -30,17 +32,18 @@ final class DestinatariosRepositorio
         $filas = $this->consulta->filas(
             'SELECT DISTINCT id_empresa FROM Notificaciones_Destinatarios WHERE proximo_aviso <= ?',
             's',
-            [$hasta->format(self::FORMATO_FECHA)]
+            [Consulta::fecha($hasta)]
         );
         return array_map('intval', array_column($filas, 'id_empresa'));
     }
 
     /**
-     * Correos pendientes de esas empresas y ese modo, cuya notificación sigue
-     * abierta. Se filtra en SQL para que lo que hoy no se puede enviar (otra
-     * empresa apagada, resúmenes esperando su hora) no ocupe el cupo de la corrida.
+     * Correos pendientes de esas empresas y ese modo (ModoCorreo::*), cuya
+     * notificación sigue abierta. Se filtra en SQL para que lo que hoy no se
+     * puede enviar (otra empresa apagada, resúmenes esperando su hora) no ocupe
+     * el cupo de la corrida.
      */
-    public function conAvisoPendiente(DateTimeImmutable $hasta, ModoCorreo $modo, array $idsEmpresa, int $limite): array
+    public function conAvisoPendiente(DateTimeImmutable $hasta, string $modoCorreo, array $idsEmpresa, int $limite): array
     {
         if (!$idsEmpresa) {
             return [];
@@ -58,7 +61,7 @@ final class DestinatariosRepositorio
              LIMIT ?",
             'sss' . str_repeat('i', count($idsEmpresa)) . 'i',
             array_merge(
-                [$hasta->format(self::FORMATO_FECHA), EstadoNotificacion::ABIERTA->value, $modo->value],
+                [Consulta::fecha($hasta), EstadoNotificacion::ABIERTA, $modoCorreo],
                 $idsEmpresa,
                 [$limite]
             )
@@ -72,13 +75,13 @@ final class DestinatariosRepositorio
      */
     public function reclamarAviso(int $id, string $proximoAvisoLeido, ?DateTimeImmutable $siguienteAviso, DateTimeImmutable $ahora): bool
     {
-        $fecha = $ahora->format(self::FORMATO_FECHA);
+        $fecha = Consulta::fecha($ahora);
         $afectadas = $this->consulta->ejecutar(
             'UPDATE Notificaciones_Destinatarios
              SET proximo_aviso = ?, cantidad_avisos = cantidad_avisos + 1, ultimo_aviso = ?, updated_at = ?
              WHERE id = ? AND proximo_aviso = ?',
             'sssis',
-            [$siguienteAviso?->format(self::FORMATO_FECHA), $fecha, $fecha, $id, $proximoAvisoLeido]
+            [Consulta::fecha($siguienteAviso), $fecha, $fecha, $id, $proximoAvisoLeido]
         );
         return $afectadas === 1;
     }
@@ -92,7 +95,7 @@ final class DestinatariosRepositorio
              SET d.proximo_aviso = NULL
              WHERE d.proximo_aviso IS NOT NULL AND e.estado <> ?',
             's',
-            [EstadoNotificacion::ABIERTA->value]
+            [EstadoNotificacion::ABIERTA]
         );
     }
 
@@ -130,7 +133,7 @@ final class DestinatariosRepositorio
 
     public function marcarLeida(int $idEmpresa, int $idEmpleado, int $idEvento, DateTimeImmutable $ahora): void
     {
-        $fecha = $ahora->format(self::FORMATO_FECHA);
+        $fecha = Consulta::fecha($ahora);
         $this->consulta->ejecutar(
             'UPDATE Notificaciones_Destinatarios
              SET fecha_lectura = ?, updated_at = ?
@@ -142,7 +145,7 @@ final class DestinatariosRepositorio
 
     public function marcarTodasLeidas(int $idEmpresa, int $idEmpleado, DateTimeImmutable $ahora): int
     {
-        $fecha = $ahora->format(self::FORMATO_FECHA);
+        $fecha = Consulta::fecha($ahora);
         return $this->consulta->ejecutar(
             'UPDATE Notificaciones_Destinatarios
              SET fecha_lectura = ?, updated_at = ?

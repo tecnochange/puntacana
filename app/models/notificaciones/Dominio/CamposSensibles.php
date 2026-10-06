@@ -22,7 +22,7 @@ final class CamposSensibles
         foreach ($nombresCampos as $nombre) {
             $nombreNormalizado = strtolower((string) $nombre);
             foreach (self::PALABRAS_PROHIBIDAS as $palabra) {
-                if (str_contains($nombreNormalizado, $palabra)) {
+                if (strpos($nombreNormalizado, $palabra) !== false) {
                     throw new CampoNoPermitido("El campo '$nombre' es sensible y no se puede usar en notificaciones.");
                 }
             }

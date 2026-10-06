@@ -8,7 +8,9 @@ use Notificaciones\Aplicacion\MarcarLeida;
 $notificacion = MarcarLeida::ejecutar($connect_admin, (int) $user_log['id_empresa'], (int) $user_log['id'], (int) ($_GET['id'] ?? 0));
 
 $e = 'notificacionesEscapar';
-$fecha = fn (?string $valor, string $formato) => $valor ? (new DateTimeImmutable($valor))->format($formato) : '';
+$fecha = function (?string $valor, string $formato) {
+    return $valor ? (new DateTimeImmutable($valor))->format($formato) : '';
+};
 $registro = $notificacion ? notificacionesRegistroVisible($notificacion['tipo_registro'], $notificacion['id_registro']) : '';
 ?>
 

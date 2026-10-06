@@ -1,16 +1,16 @@
 <?php
 namespace Notificaciones\Dominio;
 
-enum EstadoNotificacion: string
+final class EstadoNotificacion
 {
-    case ABIERTA = 'abierta';
-    case COMPLETADA = 'completada';
-    case VENCIDA = 'vencida';
-    case CANCELADA = 'cancelada';
+    const ABIERTA = 'abierta';
+    const COMPLETADA = 'completada';
+    const VENCIDA = 'vencida';
+    const CANCELADA = 'cancelada';
 
     /** Estados a los que un llamador puede cerrar una notificación; VENCIDA la pone el despacho. */
-    public function esCierreManual(): bool
+    public static function esCierreManual(string $estado): bool
     {
-        return $this === self::COMPLETADA || $this === self::CANCELADA;
+        return $estado === self::COMPLETADA || $estado === self::CANCELADA;
     }
 }

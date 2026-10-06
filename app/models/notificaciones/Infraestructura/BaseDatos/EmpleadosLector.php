@@ -9,8 +9,12 @@ final class EmpleadosLector
 {
     private const ESTADO_ACTIVO = 1;
 
-    public function __construct(private Consulta $consulta)
+    /** @var Consulta */
+    private $consulta;
+
+    public function __construct(Consulta $consulta)
     {
+        $this->consulta = $consulta;
     }
 
     /** De los ids dados, los activos de esa empresa: [id => nombre]. */

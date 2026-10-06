@@ -12,7 +12,7 @@ function notificacionesPresentar(array $fila, DateTimeImmutable $hoy): array
 {
     $fechaLimite = $fila['fecha_limite'] ? new DateTimeImmutable($fila['fecha_limite']) : null;
     $diasRestantes = $fechaLimite ? (int) $hoy->diff($fechaLimite->setTime(0, 0))->format('%r%a') : null;
-    $estaAbierta = $fila['estado'] === EstadoNotificacion::ABIERTA->value;
+    $estaAbierta = $fila['estado'] === EstadoNotificacion::ABIERTA;
     $venceProntoOVencida = $estaAbierta && $diasRestantes !== null && $diasRestantes <= NOTIFICACIONES_DIAS_PARA_ALERTA;
 
     $plazo = '';
@@ -81,7 +81,11 @@ function notificacionesPintarLista(array $items, string $vacio, bool $mostrarEst
 $bandeja = ConsultarBandeja::ejecutar($connect_admin, (int) $user_log['id_empresa'], (int) $user_log['id']);
 
 $hoy = new DateTimeImmutable('today');
-$presentar = fn (array $filas) => array_map(fn (array $fila) => notificacionesPresentar($fila, $hoy), $filas);
+$presentar = function (array $filas) use ($hoy) {
+    return array_map(function (array $fila) use ($hoy) {
+        return notificacionesPresentar($fila, $hoy);
+    }, $filas);
+};
 $pendientes = $presentar($bandeja['pendientes']);
 $avisos = $presentar($bandeja['avisos']);
 $historial = $presentar($bandeja['historial']);

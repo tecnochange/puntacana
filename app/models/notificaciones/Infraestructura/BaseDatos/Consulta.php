@@ -1,8 +1,10 @@
 <?php
 namespace Notificaciones\Infraestructura\BaseDatos;
 
+use DateTimeImmutable;
 use mysqli;
 use mysqli_sql_exception;
+use mysqli_stmt;
 
 /**
  * Sentencias preparadas sobre mysqli. Todo el SQL del módulo pasa por aquí:
@@ -10,8 +12,21 @@ use mysqli_sql_exception;
  */
 final class Consulta
 {
-    public function __construct(private mysqli $conexion)
+    /** Formato de DATETIME en la BD. */
+    const FORMATO_FECHA = 'Y-m-d H:i:s';
+
+    /** @var mysqli */
+    private $conexion;
+
+    public function __construct(mysqli $conexion)
     {
+        $this->conexion = $conexion;
+    }
+
+    /** Fecha lista para un parámetro DATETIME (NULL se queda NULL). */
+    public static function fecha(?DateTimeImmutable $fecha): ?string
+    {
+        return $fecha === null ? null : $fecha->format(self::FORMATO_FECHA);
     }
 
     public function filas(string $sql, string $tipos = '', array $parametros = []): array
@@ -25,7 +40,8 @@ final class Consulta
 
     public function fila(string $sql, string $tipos = '', array $parametros = []): ?array
     {
-        return $this->filas($sql, $tipos, $parametros)[0] ?? null;
+        $filas = $this->filas($sql, $tipos, $parametros);
+        return $filas ? $filas[0] : null;
     }
 
     /** Ejecuta un INSERT/UPDATE/DELETE y devuelve las filas afectadas. */
@@ -43,7 +59,7 @@ final class Consulta
     }
 
     /** Ejecuta $operacion dentro de una transacción; si lanza, deshace todo. */
-    public function transaccion(callable $operacion): mixed
+    public function transaccion(callable $operacion)
     {
         mysqli_begin_transaction($this->conexion);
         try {
@@ -56,7 +72,7 @@ final class Consulta
         }
     }
 
-    private function ejecutarSentencia(string $sql, string $tipos, array $parametros): \mysqli_stmt
+    private function ejecutarSentencia(string $sql, string $tipos, array $parametros): mysqli_stmt
     {
         try {
             $sentencia = mysqli_prepare($this->conexion, $sql);

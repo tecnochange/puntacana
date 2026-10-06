@@ -11,7 +11,8 @@ use Notificaciones\Aplicacion\ResultadoEnvio;
  */
 final class CorreoBrevo implements EnviadorCorreo
 {
-    private \Brevo $brevo;
+    /** @var \Brevo */
+    private $brevo;
 
     public function __construct()
     {

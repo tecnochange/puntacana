@@ -21,16 +21,18 @@ if ($seEnvioFormulario) {
     try {
         $idEvento = GenerarNotificacion::ejecutar(
             $connect_admin,
-            codigo: CodigoNotificacion::PRUEBA,
-            idEmpresa: (int) $user_log['id_empresa'],
-            destinatarios: [(int) $user_log['id']],
-            datos: [
-                'titulo' => trim((string) ($_POST['titulo'] ?? '')),
-                'mensaje' => trim((string) ($_POST['mensaje'] ?? '')),
-            ],
-            url: '?pg=notificaciones/bandeja',
-            tipoRegistro: $tipoRegistro,
-            idRegistro: $idRegistro,
+            CodigoNotificacion::PRUEBA,
+            (int) $user_log['id_empresa'],
+            [(int) $user_log['id']],
+            [
+                'datos' => [
+                    'titulo' => trim((string) ($_POST['titulo'] ?? '')),
+                    'mensaje' => trim((string) ($_POST['mensaje'] ?? '')),
+                ],
+                'url' => '?pg=notificaciones/bandeja',
+                'tipo_registro' => $tipoRegistro,
+                'id_registro' => $idRegistro,
+            ]
         );
         $exito = $idEvento !== null;
         $mensaje = $exito

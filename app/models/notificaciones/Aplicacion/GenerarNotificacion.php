@@ -22,36 +22,42 @@ use Notificaciones\Infraestructura\BaseDatos\TiposRepositorio;
  *
  *   GenerarNotificacion::ejecutar(
  *       $connect_admin,
- *       codigo:        CodigoNotificacion::PRUEBA,
- *       idEmpresa:     $user_log['id_empresa'],
- *       destinatarios: [45, 78],
- *       datos:         ['titulo' => '...', 'mensaje' => '...'],
- *       url:           '?pg=kpis/gestionar_kpi&id=10',
+ *       CodigoNotificacion::PRUEBA,
+ *       $user_log['id_empresa'],
+ *       [45, 78],                                  // Empleados.id destinatarios
+ *       [
+ *           'datos'         => ['titulo' => '...', 'mensaje' => '...'],
+ *           'url'           => '?pg=kpis/gestionar_kpi&id=10',
+ *           'tipo_registro' => 'kpi',
+ *           'id_registro'   => 10,
+ *           'fecha_limite'  => '2026-10-31',
+ *           'id_autor'      => $user_log['id'],
+ *           'clave_unica'   => 'kpi:10:asignacion',
+ *       ]
  *   );
  *
+ * Todas las opciones son opcionales; una opción con otro nombre es un error
+ * (así un error de tipeo no se pierde en silencio).
+ *
  * Guarda la notificación y su bandeja; no envía correo (eso lo hace el cron).
- * Devuelve el id de la notificación, la existente si la claveUnica ya estaba,
+ * Devuelve el id de la notificación, la existente si la clave_unica ya estaba,
  * o NULL si ningún destinatario quedó válido.
  */
 final class GenerarNotificacion
 {
+    private const OPCIONES_VALIDAS = ['datos', 'url', 'tipo_registro', 'id_registro', 'fecha_limite', 'id_autor', 'clave_unica'];
     private const PREFIJO_URL_PORTAL = '?pg=';
     private const LARGO_MAXIMO_TITULO = 255;
     private const LARGO_MAXIMO_CUERPO = 1000;
 
-    public static function ejecutar(
-        mysqli $conexion,
-        CodigoNotificacion $codigo,
-        int $idEmpresa,
-        array $destinatarios,
-        array $datos = [],
-        ?string $url = null,
-        ?string $tipoRegistro = null,
-        ?int $idRegistro = null,
-        ?string $fechaLimite = null,
-        ?int $idAutor = null,
-        ?string $claveUnica = null,
-    ): ?int {
+    public static function ejecutar(mysqli $conexion, string $codigo, int $idEmpresa, array $destinatarios, array $opciones = []): ?int
+    {
+        self::validarOpciones($opciones);
+        $datos = isset($opciones['datos']) ? $opciones['datos'] : [];
+        $url = isset($opciones['url']) ? (string) $opciones['url'] : null;
+        $idAutor = isset($opciones['id_autor']) ? (int) $opciones['id_autor'] : null;
+        $claveUnica = isset($opciones['clave_unica']) ? (string) $opciones['clave_unica'] : null;
+
         $ahora = new DateTimeImmutable();
         $consulta = new Consulta($conexion);
         $eventos = new EventosRepositorio($consulta);
@@ -59,7 +65,7 @@ final class GenerarNotificacion
         $tipo = (new TiposRepositorio($consulta))->buscarActivo($codigo, $idEmpresa);
         self::validarDatos($codigo, $datos);
         self::validarUrl($url);
-        $limite = self::interpretarFechaLimite($fechaLimite);
+        $limite = self::interpretarFechaLimite(isset($opciones['fecha_limite']) ? (string) $opciones['fecha_limite'] : null);
 
         if ($claveUnica !== null) {
             $existente = $eventos->idPorClaveUnica($idEmpresa, $claveUnica);
@@ -78,13 +84,13 @@ final class GenerarNotificacion
         $evento = [
             'id_empresa' => $idEmpresa,
             'id_tipo' => $tipo->id,
-            'codigo' => $codigo->value,
-            'clase' => $tipo->clase->value,
+            'codigo' => $codigo,
+            'clase' => $tipo->clase,
             'titulo' => mb_substr(Plantilla::renderizarTexto($tipo->plataformaTitulo, $valores), 0, self::LARGO_MAXIMO_TITULO),
             'cuerpo' => mb_substr(Plantilla::renderizarTexto($tipo->plataformaCuerpo, $valores), 0, self::LARGO_MAXIMO_CUERPO),
             'url' => $url,
-            'tipo_registro' => $tipoRegistro,
-            'id_registro' => $idRegistro,
+            'tipo_registro' => isset($opciones['tipo_registro']) ? (string) $opciones['tipo_registro'] : null,
+            'id_registro' => isset($opciones['id_registro']) ? (int) $opciones['id_registro'] : null,
             'datos' => json_encode($datos, JSON_UNESCAPED_UNICODE),
             'fecha_limite' => $limite,
             'id_autor' => $idAutor,
@@ -102,7 +108,7 @@ final class GenerarNotificacion
                 return $idEvento;
             });
         } catch (ErrorBaseDatos $error) {
-            // Otra petición creó la misma claveUnica entre la consulta y el INSERT.
+            // Otra petición creó la misma clave_unica entre la consulta y el INSERT.
             $otraPeticionLaCreo = $error->esLlaveDuplicada() && $claveUnica !== null;
             if (!$otraPeticionLaCreo) {
                 throw $error;
@@ -111,14 +117,22 @@ final class GenerarNotificacion
         }
     }
 
-    private static function validarDatos(CodigoNotificacion $codigo, array $datos): void
+    private static function validarOpciones(array $opciones): void
+    {
+        $desconocidas = array_diff(array_keys($opciones), self::OPCIONES_VALIDAS);
+        if ($desconocidas) {
+            throw new InvalidArgumentException('Opciones desconocidas: ' . implode(', ', $desconocidas) . '. Válidas: ' . implode(', ', self::OPCIONES_VALIDAS));
+        }
+    }
+
+    private static function validarDatos(string $codigo, array $datos): void
     {
         $nombres = array_keys($datos);
         CamposSensibles::validar($nombres);
 
-        $noDeclarados = array_diff($nombres, $codigo->campos());
+        $noDeclarados = array_diff($nombres, CodigoNotificacion::campos($codigo));
         if ($noDeclarados) {
-            throw new CampoNoPermitido("'{$codigo->value}' no acepta: " . implode(', ', $noDeclarados));
+            throw new CampoNoPermitido("'$codigo' no acepta: " . implode(', ', $noDeclarados));
         }
         foreach ($datos as $nombre => $valor) {
             if (!is_scalar($valor) && $valor !== null) {
@@ -133,7 +147,8 @@ final class GenerarNotificacion
         if ($url === null) {
             return;
         }
-        $esRutaDelPortal = str_starts_with($url, self::PREFIJO_URL_PORTAL) && !preg_match('/[\s"\'<>]/', $url);
+        $empiezaComoRutaDelPortal = strpos($url, self::PREFIJO_URL_PORTAL) === 0;
+        $esRutaDelPortal = $empiezaComoRutaDelPortal && !preg_match('/[\s"\'<>]/', $url);
         if (!$esRutaDelPortal) {
             throw new UrlNoPermitida("La url debe empezar por '" . self::PREFIJO_URL_PORTAL . "' y no llevar espacios ni comillas.");
         }
@@ -153,12 +168,14 @@ final class GenerarNotificacion
         if ($conHora !== false && $conHora->format('Y-m-d H:i:s') === $fechaLimite) {
             return $conHora;
         }
-        throw new InvalidArgumentException("fechaLimite inválida: '$fechaLimite' (se espera Y-m-d o Y-m-d H:i:s).");
+        throw new InvalidArgumentException("fecha_limite inválida: '$fechaLimite' (se espera Y-m-d o Y-m-d H:i:s).");
     }
 
     private static function idsCandidatos(array $destinatarios, TipoNotificacion $tipo, ?int $idAutor): array
     {
-        $ids = array_values(array_unique(array_filter(array_map('intval', $destinatarios), fn (int $id) => $id > 0)));
+        $ids = array_values(array_unique(array_filter(array_map('intval', $destinatarios), function ($id) {
+            return $id > 0;
+        })));
         $excluirAutor = !$tipo->notificarAutor && $idAutor !== null;
         if ($excluirAutor) {
             $ids = array_values(array_diff($ids, [$idAutor]));
