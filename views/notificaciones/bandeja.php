@@ -235,7 +235,7 @@ $cantidadVencenPronto = count(array_filter($pendientes, function (array $n) {
     <div class="notif-encabezado">
         <div>
             <h3>Mis notificaciones</h3>
-            <p>Tus tareas y avisos de OKRs y KPIs en un solo lugar.</p>
+            <p>Tus tareas pendientes y avisos en un solo lugar.</p>
         </div>
         <?php if ($bandeja['cantidad_no_leidas'] > 0): ?>
             <button type="button" class="btn btn-outline-primary" id="bt_marcar_todas">
@@ -289,7 +289,7 @@ $cantidadVencenPronto = count(array_filter($pendientes, function (array $n) {
                 <?php notificacionesPintarLista($pendientes, 'bx-check-circle', 'Todo al día', 'No tienes tareas pendientes.'); ?>
             </div>
             <div class="tab-pane fade" id="tab_avisos" role="tabpanel">
-                <?php notificacionesPintarLista($avisos, 'bx-bell-off', 'Sin notificaciones', 'Aquí verás los avisos de tus OKRs y KPIs.'); ?>
+                <?php notificacionesPintarLista($avisos, 'bx-bell-off', 'Sin notificaciones', 'Aquí verás los avisos que te lleguen.'); ?>
             </div>
             <div class="tab-pane fade" id="tab_historial" role="tabpanel">
                 <?php notificacionesPintarLista($historial, 'bx-history', 'Sin historial', 'Las tareas completadas, vencidas o canceladas aparecerán aquí.'); ?>
