@@ -8,6 +8,13 @@ final class Plantilla
     public const CAMPOS_BASE = ['destinatario_nombre', 'fecha_limite', 'enlace'];
 
     private const PATRON_MARCADOR = '/\{\{\s*([a-z0-9_]+)\s*\}\}/';
+    private const FORMATO_FECHA_VISIBLE = 'd/m/Y';
+
+    /** Cómo se muestra una fecha en plantillas y correos. */
+    public static function formatearFecha(?\DateTimeImmutable $fecha): string
+    {
+        return $fecha === null ? '' : $fecha->format(self::FORMATO_FECHA_VISIBLE);
+    }
 
     /** Nombres de los marcadores que usa un texto. */
     public static function marcadores(?string $texto): array

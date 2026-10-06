@@ -37,11 +37,13 @@ CREATE TABLE Notificaciones_Tipos (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- Cada notificación generada. Nunca se borra: se completa, vence o cancela.
+-- clase, titulo y cuerpo quedan fijos al crearla aunque luego cambie el tipo.
 CREATE TABLE Notificaciones_Eventos (
   id int(11) NOT NULL AUTO_INCREMENT,
   id_empresa int(11) NOT NULL,
   id_tipo int(11) NOT NULL,
   codigo varchar(80) NOT NULL,
+  clase varchar(10) NOT NULL,
   titulo varchar(255) NOT NULL,
   cuerpo varchar(1000) NULL,
   url varchar(500) NULL,
