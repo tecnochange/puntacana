@@ -48,4 +48,21 @@ final class EnviosRepositorio
             ]
         );
     }
+
+    /** Últimos intentos de correo de la empresa, con el título de su notificación. */
+    public function listarDeEmpresa(int $idEmpresa, int $limite): array
+    {
+        return $this->conexion->consultar(
+            'SELECT e.id, e.id_empleado, e.asunto, e.resultado, e.id_mensaje_proveedor, e.mensaje_error,
+                    e.fecha_envio, e.created_at, n.id AS id_notificacion, n.titulo
+             FROM Notificaciones_Envios e
+             JOIN Notificaciones_Destinatarios d ON d.id = e.id_destinatario
+             JOIN Notificaciones n ON n.id = d.id_notificacion
+             WHERE e.id_empresa = ?
+             ORDER BY e.id DESC
+             LIMIT ?',
+            'ii',
+            [$idEmpresa, $limite]
+        );
+    }
 }

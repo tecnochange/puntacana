@@ -15,10 +15,14 @@ final class ModoOperacion
 
     const ACTIVO = 'ACTIVO';
 
+    public static function valores(): array
+    {
+        return [self::APAGADO, self::SOLO_BANDEJA, self::PRUEBA, self::ACTIVO];
+    }
+
     /** Un valor desconocido o vacío se trata como APAGADO: ante la duda, no enviar. */
     public static function desdeValor(string $valor): string
     {
-        $validos = [self::APAGADO, self::SOLO_BANDEJA, self::PRUEBA, self::ACTIVO];
-        return in_array($valor, $validos, true) ? $valor : self::APAGADO;
+        return in_array($valor, self::valores(), true) ? $valor : self::APAGADO;
     }
 }

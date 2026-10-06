@@ -53,7 +53,7 @@ final class DestinatariosRepositorio
         $condicionResumen = $agrupados ? 't.intervalo_resumen IS NOT NULL' : 't.intervalo_resumen IS NULL';
         return $this->conexion->consultar(
             "SELECT d.id, d.id_empresa, d.id_empleado, d.fecha_proximo_correo, d.cantidad_intentos_correo,
-                    n.id AS id_notificacion, n.id_tipo, n.titulo, n.datos_plantilla, n.fecha_vencimiento
+                    n.id AS id_notificacion, n.id_tipo, n.tipo_registro, n.titulo, n.datos_plantilla, n.fecha_vencimiento
              FROM Notificaciones_Destinatarios d
              JOIN Notificaciones n ON n.id = d.id_notificacion
              JOIN Notificaciones_Tipos t ON t.id = n.id_tipo

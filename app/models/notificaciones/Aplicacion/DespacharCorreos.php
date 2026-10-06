@@ -6,6 +6,7 @@ use mysqli;
 use Notificaciones\Dominio\CalendarioResumen;
 use Notificaciones\Dominio\Excepciones\ErrorNotificacion;
 use Notificaciones\Dominio\ModoOperacion;
+use Notificaciones\Dominio\NotificacionPrueba;
 use Notificaciones\Dominio\Plantilla;
 use Notificaciones\Dominio\ResultadoEnvio;
 use Notificaciones\Dominio\TipoNotificacion;
@@ -40,6 +41,7 @@ final class DespacharCorreos
     private const VENTANA_ENVIO_POR_DEFECTO = '07-19';
     private const HORA_RESUMEN_POR_DEFECTO = '7';
     private const DIA_SEMANA_RESUMEN_POR_DEFECTO = '1';
+    private const PREFIJO_ASUNTO_DESVIADO = '[PRUEBA para %s] ';
 
     /** @var ProveedorCorreo */
     private $proveedorCorreo;
@@ -47,6 +49,8 @@ final class DespacharCorreos
     private $urlBase;
     /** @var DateTimeImmutable */
     private $ahora;
+    /** @var int|null Si se indica, solo se despacha esa empresa. */
+    private $idEmpresaUnica;
     /** @var NotificacionesRepositorio */
     private $notificaciones;
     /** @var DestinatariosRepositorio */
@@ -67,11 +71,12 @@ final class DespacharCorreos
     /** @var array */
     private $totales = ['vencidas' => 0, 'enviados' => 0, 'fallidos' => 0, 'omitidos' => 0];
 
-    private function __construct(mysqli $mysqli, ProveedorCorreo $proveedorCorreo, string $urlBase, DateTimeImmutable $ahora)
+    private function __construct(mysqli $mysqli, ProveedorCorreo $proveedorCorreo, string $urlBase, DateTimeImmutable $ahora, ?int $idEmpresaUnica)
     {
         $this->proveedorCorreo = $proveedorCorreo;
         $this->urlBase = $urlBase;
         $this->ahora = $ahora;
+        $this->idEmpresaUnica = $idEmpresaUnica;
 
         $conexion = new Conexion($mysqli);
         $this->notificaciones = new NotificacionesRepositorio($conexion);
@@ -82,10 +87,19 @@ final class DespacharCorreos
         $this->configuraciones = new ConfiguracionRepositorio($conexion);
     }
 
-    /** $urlBase: raíz del portal, p. ej. https://puntacana.goforagile.com/ */
-    public static function ejecutar(mysqli $mysqli, ProveedorCorreo $proveedorCorreo, string $urlBase, ?DateTimeImmutable $ahora = null): array
-    {
-        $despacho = new self($mysqli, $proveedorCorreo, rtrim($urlBase, '/') . '/', $ahora ?: new DateTimeImmutable());
+    /**
+     * $urlBase: raíz del portal, p. ej. https://puntacana.goforagile.com/
+     * $idEmpresaUnica: solo esa empresa (el botón "Procesar envíos ahora" de la
+     * administración); NULL = todas (el cron).
+     */
+    public static function ejecutar(
+        mysqli $mysqli,
+        ProveedorCorreo $proveedorCorreo,
+        string $urlBase,
+        ?DateTimeImmutable $ahora = null,
+        ?int $idEmpresaUnica = null
+    ): array {
+        $despacho = new self($mysqli, $proveedorCorreo, rtrim($urlBase, '/') . '/', $ahora ?: new DateTimeImmutable(), $idEmpresaUnica);
         return $despacho->despachar();
     }
 
@@ -96,14 +110,15 @@ final class DespacharCorreos
 
         $empresasQuePuedenEnviar = [];
         foreach ($this->destinatarios->empresasConCorreoPendiente($this->ahora) as $idEmpresa) {
-            if ($this->puedeEnviarAhora($this->configuracion($idEmpresa))) {
+            $esOtraEmpresa = $this->idEmpresaUnica !== null && $idEmpresa !== $this->idEmpresaUnica;
+            if (!$esOtraEmpresa && $this->puedeEnviarAhora($this->configuracion($idEmpresa))) {
                 $empresasQuePuedenEnviar[] = $idEmpresa;
             }
         }
 
         $individuales = $this->destinatarios->pendientesDeCorreo($this->ahora, false, $empresasQuePuedenEnviar, self::LIMITE_INDIVIDUALES_POR_CORRIDA);
         foreach ($individuales as $pendiente) {
-            $tipo = $this->tipo((int) $pendiente['id_tipo']);
+            $tipo = $this->tipo($pendiente);
             if ($tipo === null) {
                 $this->omitirPorTipoInactivo($pendiente);
                 continue;
@@ -114,7 +129,7 @@ final class DespacharCorreos
         $resumenesPorEmpleado = [];
         $agrupados = $this->destinatarios->pendientesDeCorreo($this->ahora, true, $empresasQuePuedenEnviar, self::LIMITE_AGRUPADOS_POR_CORRIDA);
         foreach ($agrupados as $pendiente) {
-            $tipo = $this->tipo((int) $pendiente['id_tipo']);
+            $tipo = $this->tipo($pendiente);
             if ($tipo === null) {
                 $this->omitirPorTipoInactivo($pendiente);
                 continue;
@@ -140,9 +155,10 @@ final class DespacharCorreos
         $idEmpleado = (int) $pendiente['id_empleado'];
         $empleado = $this->empleados->paraEnvio($idEmpleado, $idEmpresa);
 
+        $configuracion = $this->configuracion($idEmpresa);
         $motivoOmision = $this->motivoCaducado($pendiente);
         if ($motivoOmision === null) {
-            $motivoOmision = $this->motivoOmisionEmpleado($this->configuracion($idEmpresa), $idEmpleado, $empleado);
+            $motivoOmision = $this->motivoOmisionEmpleado($configuracion, $idEmpleado, $empleado);
         }
         if ($motivoOmision !== null) {
             $this->registrarCorreoOmitido($pendiente, $motivoOmision);
@@ -150,10 +166,10 @@ final class DespacharCorreos
         }
 
         $datos = $this->datosPlantilla($pendiente, $empleado['nombre']);
-        $asunto = Plantilla::renderizarTexto($tipo->plantillaAsuntoCorreo, $datos);
+        $asunto = $this->prefijoDesvio($configuracion, $empleado) . Plantilla::renderizarTexto($tipo->plantillaAsuntoCorreo, $datos);
         $html = MarcoCorreo::envolver(Plantilla::renderizarHtml($tipo->plantillaCuerpoCorreo, $datos));
 
-        $respuesta = $this->proveedorCorreo->enviar($empleado['nombre'], $empleado['correo'], $asunto, $html);
+        $respuesta = $this->proveedorCorreo->enviar($empleado['nombre'], $this->correoDestino($configuracion, $empleado), $asunto, $html);
         $this->registrarRespuesta($pendiente, $asunto, $respuesta);
     }
 
@@ -177,7 +193,8 @@ final class DespacharCorreos
         }
 
         $empleado = $this->empleados->paraEnvio($idEmpleado, $idEmpresa);
-        $motivoOmision = $this->motivoOmisionEmpleado($this->configuracion($idEmpresa), $idEmpleado, $empleado);
+        $configuracion = $this->configuracion($idEmpresa);
+        $motivoOmision = $this->motivoOmisionEmpleado($configuracion, $idEmpleado, $empleado);
         if ($motivoOmision !== null) {
             foreach ($vigentes as $pendiente) {
                 $this->registrarCorreoOmitido($pendiente, $motivoOmision);
@@ -185,9 +202,9 @@ final class DespacharCorreos
             return;
         }
 
-        $asunto = sprintf(self::ASUNTO_RESUMEN, count($vigentes));
+        $asunto = $this->prefijoDesvio($configuracion, $empleado) . sprintf(self::ASUNTO_RESUMEN, count($vigentes));
         $html = MarcoCorreo::envolver($this->contenidoResumen($empleado['nombre'], $vigentes));
-        $respuesta = $this->proveedorCorreo->enviar($empleado['nombre'], $empleado['correo'], $asunto, $html);
+        $respuesta = $this->proveedorCorreo->enviar($empleado['nombre'], $this->correoDestino($configuracion, $empleado), $asunto, $html);
         foreach ($vigentes as $pendiente) {
             $this->registrarRespuesta($pendiente, $asunto, $respuesta);
         }
@@ -235,10 +252,30 @@ final class DespacharCorreos
         if ($empleado === null || !$empleado['activo']) {
             return ResultadoEnvio::OMITIDO_EMPLEADO_INACTIVO;
         }
-        if (!filter_var($empleado['correo'], FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($this->correoDestino($configuracion, $empleado), FILTER_VALIDATE_EMAIL)) {
             return ResultadoEnvio::OMITIDO_SIN_CORREO;
         }
         return null;
+    }
+
+    /**
+     * En modo PRUEBA con correo_desvio_prueba, todo correo va a esa dirección en
+     * vez de al empleado (solo llegan aquí los de ids_empleados_prueba).
+     */
+    private function seDesvia(array $configuracion): bool
+    {
+        return $configuracion['modo_operacion'] === ModoOperacion::PRUEBA && $configuracion['correo_desvio_prueba'] !== '';
+    }
+
+    private function correoDestino(array $configuracion, array $empleado): string
+    {
+        return $this->seDesvia($configuracion) ? $configuracion['correo_desvio_prueba'] : (string) $empleado['correo'];
+    }
+
+    /** Un correo desviado dice en el asunto para quién era. */
+    private function prefijoDesvio(array $configuracion, array $empleado): string
+    {
+        return $this->seDesvia($configuracion) ? sprintf(self::PREFIJO_ASUNTO_DESVIADO, $empleado['nombre']) : '';
     }
 
     private function omitirPorTipoInactivo(array $pendiente): void
@@ -319,6 +356,7 @@ final class DespacharCorreos
             $this->configuracionPorEmpresa[$idEmpresa] = [
                 'modo_operacion' => ModoOperacion::desdeValor($this->configuraciones->valor($idEmpresa, 'modo_operacion')),
                 'ids_empleados_prueba' => array_map('intval', $idsPrueba),
+                'correo_desvio_prueba' => trim($this->configuraciones->valor($idEmpresa, 'correo_desvio_prueba')),
                 'hora_resumen' => (int) $this->configuraciones->valor($idEmpresa, 'hora_resumen', self::HORA_RESUMEN_POR_DEFECTO),
                 'dia_semana_resumen' => (int) $this->configuraciones->valor($idEmpresa, 'dia_semana_resumen', self::DIA_SEMANA_RESUMEN_POR_DEFECTO),
                 'hora_inicio_ventana' => (int) $ventana[0],
@@ -328,16 +366,23 @@ final class DespacharCorreos
         return $this->configuracionPorEmpresa[$idEmpresa];
     }
 
-    /** NULL si el tipo está INACTIVO, ya no existe, ya no está en CodigoNotificacion o está mal configurado. */
-    private function tipo(int $idTipo): ?TipoNotificacion
+    /**
+     * El tipo con que se generó la notificación. NULL si está INACTIVO, ya no
+     * existe, ya no está en CodigoNotificacion o está mal configurado. Las
+     * notificaciones de prueba ignoran el estado (NotificacionPrueba).
+     */
+    private function tipo(array $pendiente): ?TipoNotificacion
     {
-        if (!array_key_exists($idTipo, $this->tipoPorId)) {
+        $idTipo = (int) $pendiente['id_tipo'];
+        $esPrueba = NotificacionPrueba::es($pendiente['tipo_registro']);
+        $llave = ($esPrueba ? 'prueba:' : 'activo:') . $idTipo;
+        if (!array_key_exists($llave, $this->tipoPorId)) {
             try {
-                $this->tipoPorId[$idTipo] = $this->tipos->buscarActivoPorId($idTipo);
+                $this->tipoPorId[$llave] = $esPrueba ? $this->tipos->buscarPorId($idTipo) : $this->tipos->buscarActivoPorId($idTipo);
             } catch (ErrorNotificacion $error) {
-                $this->tipoPorId[$idTipo] = null;
+                $this->tipoPorId[$llave] = null;
             }
         }
-        return $this->tipoPorId[$idTipo];
+        return $this->tipoPorId[$llave];
     }
 }

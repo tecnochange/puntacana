@@ -2,12 +2,14 @@
 namespace Notificaciones\Infraestructura\BaseDatos;
 
 /**
- * Única lectura de Empleados del módulo. Solo trae id, nombre, estado y, al
- * momento de enviar, el correo. Ninguna otra columna de Empleados se lee.
+ * Única lectura de Empleados del módulo. Solo trae id, nombre, estado, role y,
+ * al momento de enviar, el correo. Ninguna otra columna de Empleados se lee.
  */
 final class EmpleadosLector
 {
     private const ESTADO_ACTIVO = 1;
+    /** Empleados.role es un CSV de ids de Roles; 1 = Administrador. */
+    private const ROL_ADMINISTRADOR = '1';
 
     /** @var Conexion */
     private $conexion;
@@ -33,6 +35,21 @@ final class EmpleadosLector
         return array_column($filas, 'nombre', 'id');
     }
 
+    /** Nombres de esos empleados de la empresa, activos o no: [id => nombre]. */
+    public function nombresDeEmpresa(array $idsEmpleados, int $idEmpresa): array
+    {
+        if (!$idsEmpleados) {
+            return [];
+        }
+        $marcadores = implode(',', array_fill(0, count($idsEmpleados), '?'));
+        $filas = $this->conexion->consultar(
+            "SELECT id, nombre FROM Empleados WHERE id_empresa = ? AND id IN ($marcadores)",
+            'i' . str_repeat('i', count($idsEmpleados)),
+            array_merge([$idEmpresa], $idsEmpleados)
+        );
+        return array_column($filas, 'nombre', 'id');
+    }
+
     /** Nombre, correo y si está activo; NULL si no existe en esa empresa. */
     public function paraEnvio(int $idEmpleado, int $idEmpresa): ?array
     {
@@ -49,5 +66,20 @@ final class EmpleadosLector
             'correo' => $fila['correo'],
             'activo' => (int) $fila['estado'] === self::ESTADO_ACTIVO,
         ];
+    }
+
+    /** Si el empleado está activo en la empresa y tiene el rol Administrador. */
+    public function esAdministradorActivo(int $idEmpleado, int $idEmpresa): bool
+    {
+        $fila = $this->conexion->consultarUno(
+            'SELECT role, estado FROM Empleados WHERE id = ? AND id_empresa = ?',
+            'ii',
+            [$idEmpleado, $idEmpresa]
+        );
+        if ($fila === null || (int) $fila['estado'] !== self::ESTADO_ACTIVO) {
+            return false;
+        }
+        $roles = array_map('trim', explode(',', (string) $fila['role']));
+        return in_array(self::ROL_ADMINISTRADOR, $roles, true);
     }
 }

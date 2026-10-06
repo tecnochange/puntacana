@@ -57,6 +57,22 @@ final class GenerarNotificacion
     public static function ejecutar(mysqli $mysqli, string $codigo, int $idEmpresa, array $idsEmpleados, array $opciones = []): ?int
     {
         self::validarOpciones($opciones);
+        $tipo = (new TiposRepositorio(new Conexion($mysqli)))->buscarActivo($codigo, $idEmpresa);
+        if ($tipo === null) {
+            return null;
+        }
+        return self::ejecutarConTipo($mysqli, $tipo, $idEmpresa, $idsEmpleados, $opciones);
+    }
+
+    /**
+     * Igual que ejecutar(), pero con un tipo ya cargado y sin mirar su estado.
+     * Solo para el envío de prueba de la administración, que debe funcionar
+     * aunque el tipo esté INACTIVO.
+     */
+    public static function ejecutarConTipo(mysqli $mysqli, TipoNotificacion $tipo, int $idEmpresa, array $idsEmpleados, array $opciones = []): ?int
+    {
+        self::validarOpciones($opciones);
+        $codigo = $tipo->codigo;
         $datosPlantilla = isset($opciones['datos_plantilla']) ? $opciones['datos_plantilla'] : [];
         $url = isset($opciones['url']) ? (string) $opciones['url'] : null;
         $idEmpleadoAutor = isset($opciones['id_empleado_autor']) ? (int) $opciones['id_empleado_autor'] : null;
@@ -66,10 +82,6 @@ final class GenerarNotificacion
         $conexion = new Conexion($mysqli);
         $notificaciones = new NotificacionesRepositorio($conexion);
 
-        $tipo = (new TiposRepositorio($conexion))->buscarActivo($codigo, $idEmpresa);
-        if ($tipo === null) {
-            return null;
-        }
         self::validarDatosPlantilla($codigo, $datosPlantilla);
         self::validarUrl($url);
         $fechaVencimiento = self::interpretarFechaVencimiento(isset($opciones['fecha_vencimiento']) ? (string) $opciones['fecha_vencimiento'] : null);
