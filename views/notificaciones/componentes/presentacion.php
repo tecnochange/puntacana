@@ -2,10 +2,10 @@
 // Funciones de presentación compartidas por las vistas de notificaciones.
 
 const NOTIFICACIONES_ESTADOS_VISIBLES = [
-    'abierta' => ['Abierta', 'bg-primary'],
-    'completada' => ['Completada', 'bg-success'],
-    'vencida' => ['Vencida', 'bg-danger'],
-    'cancelada' => ['Cancelada', 'bg-secondary'],
+    'ABIERTA' => ['Abierta', 'bg-primary'],
+    'COMPLETADA' => ['Completada', 'bg-success'],
+    'VENCIDA' => ['Vencida', 'bg-danger'],
+    'CANCELADA' => ['Cancelada', 'bg-secondary'],
 ];
 const NOTIFICACIONES_ICONO_POR_DEFECTO = 'bx-bell';
 

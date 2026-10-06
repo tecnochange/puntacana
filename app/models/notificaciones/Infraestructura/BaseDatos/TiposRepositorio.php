@@ -1,12 +1,12 @@
 <?php
 namespace Notificaciones\Infraestructura\BaseDatos;
 
+use Notificaciones\Dominio\EstadoTipo;
 use Notificaciones\Dominio\Excepciones\TipoNoEncontrado;
 use Notificaciones\Dominio\TipoNotificacion;
 
 final class TiposRepositorio
 {
-    private const ESTADO_ACTIVO = 1;
     private const EMPRESA_POR_DEFECTO = 0;
 
     /** @var Consulta */
@@ -19,9 +19,13 @@ final class TiposRepositorio
 
     /**
      * La fila de la empresa gana sobre la por defecto (id_empresa = 0), también
-     * cuando está inactiva: así una empresa puede apagar un tipo solo para ella.
+     * cuando está INACTIVO: así una empresa puede apagar un tipo solo para ella.
+     *
+     * NULL si el tipo está INACTIVO (apagarlo es una decisión de configuración,
+     * no un error). Lanza TipoNoEncontrado si el código no tiene fila: eso sí es
+     * un error de despliegue (falta el INSERT del tipo).
      */
-    public function buscarActivo(string $codigo, int $idEmpresa): TipoNotificacion
+    public function buscarActivo(string $codigo, int $idEmpresa): ?TipoNotificacion
     {
         $fila = $this->consulta->fila(
             'SELECT * FROM Notificaciones_Tipos
@@ -32,9 +36,11 @@ final class TiposRepositorio
             [$codigo, self::EMPRESA_POR_DEFECTO, $idEmpresa]
         );
 
-        $estaActivo = $fila !== null && (int) $fila['estado'] === self::ESTADO_ACTIVO;
-        if (!$estaActivo) {
-            throw new TipoNoEncontrado("No hay un tipo activo '$codigo' para la empresa $idEmpresa.");
+        if ($fila === null) {
+            throw new TipoNoEncontrado("El código '$codigo' no tiene fila en Notificaciones_Tipos (empresa $idEmpresa ni por defecto).");
+        }
+        if ($fila['estado'] !== EstadoTipo::ACTIVO) {
+            return null;
         }
         return TipoNotificacion::desdeFila($fila, $codigo);
     }

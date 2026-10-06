@@ -3,10 +3,10 @@ namespace Notificaciones\Dominio;
 
 final class EstadoNotificacion
 {
-    const ABIERTA = 'abierta';
-    const COMPLETADA = 'completada';
-    const VENCIDA = 'vencida';
-    const CANCELADA = 'cancelada';
+    const ABIERTA = 'ABIERTA';
+    const COMPLETADA = 'COMPLETADA';
+    const VENCIDA = 'VENCIDA';
+    const CANCELADA = 'CANCELADA';
 
     /** Estados a los que un llamador puede cerrar una notificación; VENCIDA la pone el despacho. */
     public static function esCierreManual(string $estado): bool

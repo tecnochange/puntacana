@@ -63,9 +63,9 @@ final class TipoNotificacion
         $tipo->diasAnticipacion = self::enteroNoNegativo($fila['dias_anticipacion'], 'dias_anticipacion', $codigo);
         $tipo->recordarCadaDias = self::enteroNoNegativo($fila['recordar_cada_dias'], 'recordar_cada_dias', $codigo);
         $tipo->maxRecordatorios = self::enteroNoNegativo($fila['max_recordatorios'], 'max_recordatorios', $codigo);
-        $tipo->notificarAutor = (bool) $fila['notificar_autor'];
-        $tipo->canalPlataforma = (bool) $fila['canal_plataforma'];
-        $tipo->canalCorreo = (bool) $fila['canal_correo'];
+        $tipo->notificarAutor = SiNo::esSi($fila['notificar_autor']);
+        $tipo->canalPlataforma = SiNo::esSi($fila['canal_plataforma']);
+        $tipo->canalCorreo = SiNo::esSi($fila['canal_correo']);
         $tipo->modoCorreo = $modoCorreo;
         $tipo->correoAsunto = $fila['correo_asunto'];
         $tipo->correoCuerpo = $fila['correo_cuerpo'];

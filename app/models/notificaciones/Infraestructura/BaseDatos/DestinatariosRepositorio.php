@@ -3,6 +3,7 @@ namespace Notificaciones\Infraestructura\BaseDatos;
 
 use DateTimeImmutable;
 use Notificaciones\Dominio\EstadoNotificacion;
+use Notificaciones\Dominio\SiNo;
 
 final class DestinatariosRepositorio
 {
@@ -108,11 +109,11 @@ final class DestinatariosRepositorio
              FROM Notificaciones_Destinatarios d
              JOIN Notificaciones_Eventos e ON e.id = d.id_evento
              JOIN Notificaciones_Tipos t ON t.id = e.id_tipo
-             WHERE d.id_empresa = ? AND d.id_empleado = ? AND t.canal_plataforma = 1
+             WHERE d.id_empresa = ? AND d.id_empleado = ? AND t.canal_plataforma = ?
              ORDER BY e.created_at DESC
              LIMIT ?',
-            'iii',
-            [$idEmpresa, $idEmpleado, self::LIMITE_BANDEJA]
+            'iisi',
+            [$idEmpresa, $idEmpleado, SiNo::SI, self::LIMITE_BANDEJA]
         );
     }
 

@@ -22,12 +22,12 @@ use Notificaciones\Infraestructura\Correo\MarcoCorreo;
  * Lo corre el cron cada pocos minutos:
  *  1. vence las tareas cuya fecha límite pasó y quita sus avisos pendientes;
  *  2. envía los correos inmediatos que ya tocan (y programa el siguiente recordatorio);
- *  3. a la hora del resumen, junta los de modo resumen_diario en un correo por persona.
+ *  3. a la hora del resumen, junta los de modo RESUMEN_DIARIO en un correo por persona.
  *
  * El modo de correo se toma del tipo con el que se creó la notificación
  * (Notificaciones_Eventos.id_tipo).
  *
- * Respeta el modo de cada empresa (apagado / solo_plataforma / prueba / activo)
+ * Respeta el modo de cada empresa (APAGADO / SOLO_PLATAFORMA / PRUEBA / ACTIVO)
  * y la ventana de horas de envío. Cada aviso se reclama antes de enviarlo, así
  * dos corridas cruzadas no duplican correos.
  */
@@ -332,7 +332,7 @@ final class DespacharCorreos
         return $this->cacheConfiguracion[$idEmpresa];
     }
 
-    /** NULL si el código ya no está en CodigoNotificacion o su tipo está inactivo o mal configurado. */
+    /** NULL si el código ya no está en CodigoNotificacion o su tipo está INACTIVO, sin fila o mal configurado. */
     private function tipo(string $codigo, int $idEmpresa): ?TipoNotificacion
     {
         $llave = "$idEmpresa|$codigo";

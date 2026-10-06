@@ -4,10 +4,10 @@ namespace Notificaciones\Dominio;
 final class ClaseNotificacion
 {
     /** Algo por hacer: queda pendiente en la bandeja y vence con su fecha límite. */
-    const TAREA = 'tarea';
+    const TAREA = 'TAREA';
 
     /** Informativa: solo leída o no leída. */
-    const AVISO = 'aviso';
+    const AVISO = 'AVISO';
 
     public static function esValida(string $clase): bool
     {

@@ -6,13 +6,13 @@ use DateTimeImmutable;
 /** Bitácora de correos. No guarda direcciones ni cuerpos. */
 final class EnviosRepositorio
 {
-    const ENVIADO = 'enviado';
-    const FALLIDO = 'fallido';
-    const OMITIDO_MODO = 'omitido_modo';
-    const OMITIDO_INACTIVO = 'omitido_inactivo';
-    const OMITIDO_SIN_CORREO = 'omitido_sin_correo';
-    const OMITIDO_CADUCADO = 'omitido_caducado';
-    const OMITIDO_TIPO = 'omitido_tipo';
+    const ENVIADO = 'ENVIADO';
+    const FALLIDO = 'FALLIDO';
+    const OMITIDO_MODO = 'OMITIDO_MODO';
+    const OMITIDO_INACTIVO = 'OMITIDO_INACTIVO';
+    const OMITIDO_SIN_CORREO = 'OMITIDO_SIN_CORREO';
+    const OMITIDO_CADUCADO = 'OMITIDO_CADUCADO';
+    const OMITIDO_TIPO = 'OMITIDO_TIPO';
 
     private const LARGO_MAXIMO_ERROR = 500;
 

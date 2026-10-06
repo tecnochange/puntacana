@@ -22,7 +22,7 @@ use Notificaciones\Infraestructura\BaseDatos\TiposRepositorio;
  *
  *   GenerarNotificacion::ejecutar(
  *       $connect_admin,
- *       CodigoNotificacion::PRUEBA,
+ *       CodigoNotificacion::OKRS_KR_ASIGNACION,       // ejemplo; el catálogo hoy está vacío
  *       $user_log['id_empresa'],
  *       [45, 78],                                  // Empleados.id destinatarios
  *       [
@@ -41,7 +41,8 @@ use Notificaciones\Infraestructura\BaseDatos\TiposRepositorio;
  *
  * Guarda la notificación y su bandeja; no envía correo (eso lo hace el cron).
  * Devuelve el id de la notificación, la existente si la clave_unica ya estaba,
- * o NULL si ningún destinatario quedó válido.
+ * o NULL si el tipo está INACTIVO o si ningún destinatario quedó válido. Un
+ * tipo desactivado no rompe el flujo que llama: simplemente no notifica.
  */
 final class GenerarNotificacion
 {
@@ -63,6 +64,9 @@ final class GenerarNotificacion
         $eventos = new EventosRepositorio($consulta);
 
         $tipo = (new TiposRepositorio($consulta))->buscarActivo($codigo, $idEmpresa);
+        if ($tipo === null) {
+            return null;
+        }
         self::validarDatos($codigo, $datos);
         self::validarUrl($url);
         $limite = self::interpretarFechaLimite(isset($opciones['fecha_limite']) ? (string) $opciones['fecha_limite'] : null);

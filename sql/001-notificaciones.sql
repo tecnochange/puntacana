@@ -3,33 +3,37 @@
 -- Solo crea tablas nuevas y agrega filas a Rutas: no altera nada existente.
 -- Ejecutar ANTES de subir los archivos de app/models/notificaciones, views/notificaciones,
 -- api/notificaciones y cron_jobs/notificaciones_despacho.php.
+--
+-- Valores enumerados en MAYÚSCULAS_CON_GUION_BAJO, iguales a las constantes de
+-- app/models/notificaciones/Dominio. Charset utf8, igual que las conexiones de connect.php.
 
 USE puntacana_admin;
 
--- Configuración de cada tipo. `codigo` es el valor del enum
--- Notificaciones\Dominio\CodigoNotificacion. id_empresa = 0 aplica a todas las
--- empresas; una fila con el mismo código y una empresa concreta la sobreescribe.
+-- Configuración de cada tipo. `codigo` es el valor de una constante de
+-- Notificaciones\Dominio\CodigoNotificacion (p. ej. 'OKRS_KR_ASIGNACION').
+-- id_empresa = 0 aplica a todas las empresas; una fila con el mismo código y una
+-- empresa concreta la sobreescribe (también para desactivarlo solo en esa empresa).
 CREATE TABLE Notificaciones_Tipos (
   id int(11) NOT NULL AUTO_INCREMENT,
   id_empresa int(11) NOT NULL DEFAULT 0,
   codigo varchar(80) NOT NULL,
   nombre varchar(150) NOT NULL,
   descripcion text NULL,
-  clase varchar(10) NOT NULL DEFAULT 'aviso',
+  clase enum('TAREA','AVISO') NOT NULL DEFAULT 'AVISO',
   dias_anticipacion int(11) NULL,
   recordar_cada_dias int(11) NULL,
   max_recordatorios int(11) NULL,
-  notificar_autor tinyint(1) NOT NULL DEFAULT 0,
-  canal_plataforma tinyint(1) NOT NULL DEFAULT 1,
-  canal_correo tinyint(1) NOT NULL DEFAULT 0,
-  modo_correo varchar(15) NOT NULL DEFAULT 'inmediato',
+  notificar_autor enum('SI','NO') NOT NULL DEFAULT 'NO',
+  canal_plataforma enum('SI','NO') NOT NULL DEFAULT 'SI',
+  canal_correo enum('SI','NO') NOT NULL DEFAULT 'NO',
+  modo_correo enum('INMEDIATO','RESUMEN_DIARIO') NOT NULL DEFAULT 'INMEDIATO',
   correo_asunto varchar(200) NULL,
   correo_cuerpo text NULL,
   plataforma_titulo varchar(200) NOT NULL,
   plataforma_cuerpo varchar(500) NULL,
   icono varchar(50) NULL,
   color varchar(20) NULL,
-  estado tinyint(1) NOT NULL DEFAULT 1,
+  estado enum('ACTIVO','INACTIVO') NOT NULL DEFAULT 'ACTIVO',
   created_at datetime NOT NULL,
   updated_at datetime NULL,
   PRIMARY KEY (id),
@@ -43,7 +47,7 @@ CREATE TABLE Notificaciones_Eventos (
   id_empresa int(11) NOT NULL,
   id_tipo int(11) NOT NULL,
   codigo varchar(80) NOT NULL,
-  clase varchar(10) NOT NULL,
+  clase enum('TAREA','AVISO') NOT NULL,
   titulo varchar(255) NOT NULL,
   cuerpo varchar(1000) NULL,
   url varchar(500) NULL,
@@ -51,7 +55,7 @@ CREATE TABLE Notificaciones_Eventos (
   id_registro int(11) NULL,
   datos longtext NULL CHECK (datos IS NULL OR JSON_VALID(datos)),
   fecha_limite datetime NULL,
-  estado varchar(12) NOT NULL DEFAULT 'abierta',
+  estado enum('ABIERTA','COMPLETADA','VENCIDA','CANCELADA') NOT NULL DEFAULT 'ABIERTA',
   id_autor int(11) NULL,
   clave_unica varchar(150) NULL,
   fecha_cierre datetime NULL,
@@ -89,7 +93,7 @@ CREATE TABLE Notificaciones_Envios (
   id_destinatario int(11) NULL,
   id_empleado int(11) NOT NULL,
   asunto varchar(200) NULL,
-  estado varchar(25) NOT NULL,
+  estado enum('ENVIADO','FALLIDO','OMITIDO_MODO','OMITIDO_INACTIVO','OMITIDO_SIN_CORREO','OMITIDO_CADUCADO','OMITIDO_TIPO') NOT NULL,
   id_mensaje_proveedor varchar(150) NULL,
   error varchar(500) NULL,
   fecha_envio datetime NULL,
@@ -100,7 +104,8 @@ CREATE TABLE Notificaciones_Envios (
   KEY ix_envios_destinatario (id_destinatario)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
--- Ajustes por empresa (id_empresa = 0 = valor por defecto).
+-- Ajustes por empresa (id_empresa = 0 = valor por defecto). Es clave/valor, por
+-- eso `valor` es texto; los valores válidos de `modo` están en ModoOperacion.
 CREATE TABLE Notificaciones_Configuracion (
   id int(11) NOT NULL AUTO_INCREMENT,
   id_empresa int(11) NOT NULL DEFAULT 0,
@@ -112,26 +117,14 @@ CREATE TABLE Notificaciones_Configuracion (
   UNIQUE KEY uq_configuracion_empresa_clave (id_empresa, clave)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
--- modo: apagado | solo_plataforma | prueba | activo. Arranca apagado: el cron no envía nada.
--- lista_prueba: ids de Empleados (CSV) que reciben correo en modo prueba.
+-- modo: APAGADO | SOLO_PLATAFORMA | PRUEBA | ACTIVO. Arranca APAGADO: el cron no envía nada.
+-- lista_prueba: ids de Empleados (CSV) que reciben correo en modo PRUEBA.
 -- hora_resumen: hora local (0-23) del resumen diario. ventana_envio: horas locales permitidas.
 INSERT INTO Notificaciones_Configuracion (id_empresa, clave, valor, created_at) VALUES
-  (0, 'modo', 'apagado', NOW()),
+  (0, 'modo', 'APAGADO', NOW()),
   (0, 'lista_prueba', '', NOW()),
   (0, 'hora_resumen', '7', NOW()),
   (0, 'ventana_envio', '07-19', NOW());
-
--- Tipo de prueba: lo usa ?pg=notificaciones/prueba para validar el ciclo completo.
-INSERT INTO Notificaciones_Tipos
-  (id_empresa, codigo, nombre, descripcion, clase, canal_plataforma, canal_correo, modo_correo,
-   correo_asunto, correo_cuerpo, plataforma_titulo, plataforma_cuerpo, icono, color, estado, created_at)
-VALUES
-  (0, 'general.prueba', 'Notificación de prueba',
-   'Valida el módulo de punta a punta. Solo la genera un administrador para sí mismo.',
-   'aviso', 1, 1, 'inmediato',
-   'Prueba de notificaciones: {{titulo}}',
-   '<p>Hola {{destinatario_nombre}},</p><p>{{mensaje}}</p><p><a href="{{enlace}}">Ver la notificación</a></p>',
-   '{{titulo}}', '{{mensaje}}', 'bx-bell', '#0d6efd', 1, NOW());
 
 -- Rutas de las pantallas nuevas (sin esto, index.php muestra sin_permisos).
 -- editar/crear/eliminar/exportar en '' y no NULL: ValidarRuta() hace explode() sobre ellos.
@@ -143,13 +136,9 @@ INSERT INTO Rutas (id_empresa, ruta, roles, editar, crear, eliminar, exportar, m
 SELECT 1, 'notificaciones/detalle', '1,2,3,4', '', '', '', '', NULL
 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM Rutas WHERE ruta = 'notificaciones/detalle');
 
-INSERT INTO Rutas (id_empresa, ruta, roles, editar, crear, eliminar, exportar, modulo)
-SELECT 1, 'notificaciones/prueba', '1', '', '', '', '', NULL
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM Rutas WHERE ruta = 'notificaciones/prueba');
-
 -- ---------------------------------------------------------------------------
 -- Reversión (descomentar para deshacer):
--- DELETE FROM Rutas WHERE ruta IN ('notificaciones/bandeja', 'notificaciones/detalle', 'notificaciones/prueba');
+-- DELETE FROM Rutas WHERE ruta IN ('notificaciones/bandeja', 'notificaciones/detalle');
 -- DROP TABLE Notificaciones_Envios;
 -- DROP TABLE Notificaciones_Destinatarios;
 -- DROP TABLE Notificaciones_Eventos;
