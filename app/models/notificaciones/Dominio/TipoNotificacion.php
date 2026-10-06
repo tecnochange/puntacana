@@ -5,10 +5,10 @@ use DateTimeImmutable;
 use Notificaciones\Dominio\Excepciones\TipoMalConfigurado;
 
 /**
- * Configuración de un tipo, ya validada contra su código. Si una fila de
- * Notificaciones_Tipos no cuadra con CodigoNotificacion, no se construye.
- * Las propiedades son de solo lectura por convención: nada las modifica
- * después de desdeFila().
+ * Configuración de un tipo (fila de Notificaciones_Tipos), ya validada contra su
+ * código. Si la fila no cuadra con CodigoNotificacion, no se construye.
+ * Las propiedades son de solo lectura por convención: nada las modifica después
+ * de desdeFila().
  */
 final class TipoNotificacion
 {
@@ -21,105 +21,121 @@ final class TipoNotificacion
     /** @var string ClaseNotificacion::* */
     public $clase;
     /** @var int|null */
-    public $diasAnticipacion;
+    public $diasAntesDeVencer;
     /** @var int|null */
-    public $recordarCadaDias;
+    public $diasEntreRecordatorios;
     /** @var int|null */
-    public $maxRecordatorios;
+    public $maximoRecordatorios;
     /** @var bool */
-    public $notificarAutor;
+    public $incluyeAutor;
     /** @var bool */
-    public $canalPlataforma;
+    public $muestraEnBandeja;
     /** @var bool */
-    public $canalCorreo;
-    /** @var string ModoCorreo::* */
-    public $modoCorreo;
-    /** @var string|null */
-    public $correoAsunto;
-    /** @var string|null */
-    public $correoCuerpo;
+    public $enviaCorreo;
+    /** @var int|null */
+    public $intervaloResumen;
+    /** @var string|null UnidadIntervalo::* */
+    public $unidadIntervaloResumen;
     /** @var string */
-    public $plataformaTitulo;
+    public $plantillaTitulo;
     /** @var string|null */
-    public $plataformaCuerpo;
+    public $plantillaMensaje;
+    /** @var string|null */
+    public $plantillaAsuntoCorreo;
+    /** @var string|null */
+    public $plantillaCuerpoCorreo;
 
     private function __construct()
     {
     }
 
-    public static function desdeFila(array $fila, string $codigo): self
+    public static function desdeFila(array $fila): self
     {
-        $clase = (string) $fila['clase'];
-        $modoCorreo = (string) $fila['modo_correo'];
-        if (!ClaseNotificacion::esValida($clase) || !ModoCorreo::esValido($modoCorreo)) {
-            throw new TipoMalConfigurado("Tipo '$codigo': clase o modo_correo inválidos.");
-        }
-
         $tipo = new self();
         $tipo->id = (int) $fila['id'];
-        $tipo->codigo = $codigo;
+        $tipo->codigo = (string) $fila['codigo'];
         $tipo->nombre = (string) $fila['nombre'];
-        $tipo->clase = $clase;
-        $tipo->diasAnticipacion = self::enteroNoNegativo($fila['dias_anticipacion'], 'dias_anticipacion', $codigo);
-        $tipo->recordarCadaDias = self::enteroNoNegativo($fila['recordar_cada_dias'], 'recordar_cada_dias', $codigo);
-        $tipo->maxRecordatorios = self::enteroNoNegativo($fila['max_recordatorios'], 'max_recordatorios', $codigo);
-        $tipo->notificarAutor = SiNo::esSi($fila['notificar_autor']);
-        $tipo->canalPlataforma = SiNo::esSi($fila['canal_plataforma']);
-        $tipo->canalCorreo = SiNo::esSi($fila['canal_correo']);
-        $tipo->modoCorreo = $modoCorreo;
-        $tipo->correoAsunto = $fila['correo_asunto'];
-        $tipo->correoCuerpo = $fila['correo_cuerpo'];
-        $tipo->plataformaTitulo = (string) $fila['plataforma_titulo'];
-        $tipo->plataformaCuerpo = $fila['plataforma_cuerpo'];
-        $tipo->validarPlantillas();
+        $tipo->clase = (string) $fila['clase'];
+        $tipo->diasAntesDeVencer = self::enteroNoNegativo($fila['dias_antes_de_vencer'], 'dias_antes_de_vencer', $tipo->codigo);
+        $tipo->diasEntreRecordatorios = self::enteroNoNegativo($fila['dias_entre_recordatorios'], 'dias_entre_recordatorios', $tipo->codigo);
+        $tipo->maximoRecordatorios = self::enteroNoNegativo($fila['maximo_recordatorios'], 'maximo_recordatorios', $tipo->codigo);
+        $tipo->incluyeAutor = (bool) $fila['incluye_autor'];
+        $tipo->muestraEnBandeja = (bool) $fila['muestra_en_bandeja'];
+        $tipo->enviaCorreo = (bool) $fila['envia_correo'];
+        $tipo->intervaloResumen = self::enteroNoNegativo($fila['intervalo_resumen'], 'intervalo_resumen', $tipo->codigo);
+        $tipo->unidadIntervaloResumen = $fila['unidad_intervalo_resumen'];
+        $tipo->plantillaTitulo = (string) $fila['plantilla_titulo'];
+        $tipo->plantillaMensaje = $fila['plantilla_mensaje'];
+        $tipo->plantillaAsuntoCorreo = $fila['plantilla_asunto_correo'];
+        $tipo->plantillaCuerpoCorreo = $fila['plantilla_cuerpo_correo'];
+        $tipo->validar();
         return $tipo;
     }
 
-    /** Cuándo va el primer correo. NULL si este tipo no envía correo. */
-    public function primerAviso(?DateTimeImmutable $fechaLimite, DateTimeImmutable $ahora): ?DateTimeImmutable
+    /** Sus correos se agrupan en un resumen periódico en vez de salir uno por uno. */
+    public function agrupaEnResumen(): bool
     {
-        if (!$this->canalCorreo) {
-            return null;
-        }
-        $avisaConAnticipacion = $this->diasAnticipacion !== null && $fechaLimite !== null;
-        if (!$avisaConAnticipacion) {
-            return $ahora;
-        }
-        $aviso = $fechaLimite->setTime(0, 0)->modify("-{$this->diasAnticipacion} days");
-        return max($aviso, $ahora);
+        return $this->intervaloResumen !== null;
     }
 
-    /** Cuándo va el siguiente recordatorio tras $avisosDados avisos. NULL = ya no hay más. */
-    public function siguienteAviso(DateTimeImmutable $ultimoAviso, int $avisosDados, ?DateTimeImmutable $fechaLimite): ?DateTimeImmutable
+    /** Cuándo va el primer correo. NULL si este tipo no envía correo. */
+    public function fechaPrimerCorreo(?DateTimeImmutable $fechaVencimiento, DateTimeImmutable $ahora): ?DateTimeImmutable
     {
-        if ($this->recordarCadaDias === null || $this->recordarCadaDias === 0) {
+        if (!$this->enviaCorreo) {
             return null;
         }
-        $agotoRecordatorios = $this->maxRecordatorios !== null && $avisosDados > $this->maxRecordatorios;
+        $avisaAntesDeVencer = $this->diasAntesDeVencer !== null && $fechaVencimiento !== null;
+        if (!$avisaAntesDeVencer) {
+            return $ahora;
+        }
+        $fechaCorreo = $fechaVencimiento->setTime(0, 0)->modify("-{$this->diasAntesDeVencer} days");
+        return max($fechaCorreo, $ahora);
+    }
+
+    /** Cuándo va el siguiente recordatorio tras $intentosRealizados correos. NULL = ya no hay más. */
+    public function fechaSiguienteCorreo(DateTimeImmutable $ultimoIntento, int $intentosRealizados, ?DateTimeImmutable $fechaVencimiento): ?DateTimeImmutable
+    {
+        if ($this->diasEntreRecordatorios === null || $this->diasEntreRecordatorios === 0) {
+            return null;
+        }
+        $agotoRecordatorios = $this->maximoRecordatorios !== null && $intentosRealizados > $this->maximoRecordatorios;
         if ($agotoRecordatorios) {
             return null;
         }
-        $siguiente = $ultimoAviso->modify("+{$this->recordarCadaDias} days");
-        $pasaDeLaFecha = $fechaLimite !== null && $siguiente > $fechaLimite;
-        return $pasaDeLaFecha ? null : $siguiente;
+        $siguiente = $ultimoIntento->modify("+{$this->diasEntreRecordatorios} days");
+        $pasaDelVencimiento = $fechaVencimiento !== null && $siguiente > $fechaVencimiento;
+        return $pasaDelVencimiento ? null : $siguiente;
     }
 
-    /** Las plantillas solo pueden usar los campos del código y los base. */
-    private function validarPlantillas(): void
+    private function validar(): void
     {
-        $permitidos = array_merge(CodigoNotificacion::campos($this->codigo), Plantilla::CAMPOS_BASE);
+        if (!ClaseNotificacion::esValida($this->clase)) {
+            throw new TipoMalConfigurado("Tipo '{$this->codigo}': clase inválida.");
+        }
+
+        $intervaloCompleto = $this->intervaloResumen !== null && $this->intervaloResumen > 0
+            && $this->unidadIntervaloResumen !== null && UnidadIntervalo::esValida($this->unidadIntervaloResumen);
+        $sinIntervalo = $this->intervaloResumen === null && $this->unidadIntervaloResumen === null;
+        if (!$intervaloCompleto && !$sinIntervalo) {
+            throw new TipoMalConfigurado("Tipo '{$this->codigo}': intervalo_resumen y unidad_intervalo_resumen van juntos (ambos NULL o ambos con valor).");
+        }
+
+        // Las plantillas solo pueden usar los datos del código y los base.
+        $permitidos = array_merge(CodigoNotificacion::datosPermitidos($this->codigo), Plantilla::DATOS_BASE);
         $usados = array_merge(
-            Plantilla::marcadores($this->correoAsunto),
-            Plantilla::marcadores($this->correoCuerpo),
-            Plantilla::marcadores($this->plataformaTitulo),
-            Plantilla::marcadores($this->plataformaCuerpo)
+            Plantilla::marcadores($this->plantillaTitulo),
+            Plantilla::marcadores($this->plantillaMensaje),
+            Plantilla::marcadores($this->plantillaAsuntoCorreo),
+            Plantilla::marcadores($this->plantillaCuerpoCorreo)
         );
         $noPermitidos = array_diff($usados, $permitidos);
         if ($noPermitidos) {
             throw new TipoMalConfigurado("Tipo '{$this->codigo}': marcadores no permitidos: " . implode(', ', $noPermitidos));
         }
-        if ($this->canalCorreo && ($this->correoAsunto === null || $this->correoCuerpo === null)) {
-            throw new TipoMalConfigurado("Tipo '{$this->codigo}': tiene correo activo pero sin asunto o cuerpo.");
+
+        $faltaPlantillaDeCorreo = $this->plantillaAsuntoCorreo === null || $this->plantillaCuerpoCorreo === null;
+        if ($this->enviaCorreo && $faltaPlantillaDeCorreo) {
+            throw new TipoMalConfigurado("Tipo '{$this->codigo}': envia_correo sin plantilla de asunto o de cuerpo.");
         }
     }
 

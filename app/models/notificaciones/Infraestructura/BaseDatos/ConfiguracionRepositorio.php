@@ -6,17 +6,17 @@ final class ConfiguracionRepositorio
 {
     private const EMPRESA_POR_DEFECTO = 0;
 
-    /** @var Consulta */
-    private $consulta;
+    /** @var Conexion */
+    private $conexion;
 
-    public function __construct(Consulta $consulta)
+    public function __construct(Conexion $conexion)
     {
-        $this->consulta = $consulta;
+        $this->conexion = $conexion;
     }
 
     public function valor(int $idEmpresa, string $clave, string $porDefecto = ''): string
     {
-        $fila = $this->consulta->fila(
+        $fila = $this->conexion->consultarUno(
             'SELECT valor FROM Notificaciones_Configuracion
              WHERE clave = ? AND id_empresa IN (?, ?)
              ORDER BY id_empresa DESC

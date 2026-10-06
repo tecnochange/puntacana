@@ -11,7 +11,7 @@ use Notificaciones\Dominio\Excepciones\CodigoDesconocido;
  * prefijo. Agregar una notificación nueva:
  *
  *   const OKRS_KR_ASIGNACION = 'OKRS_KR_ASIGNACION';
- *   // en CAMPOS: self::OKRS_KR_ASIGNACION => ['kr_titulo', 'okr_titulo'],
+ *   // en DATOS_PERMITIDOS: self::OKRS_KR_ASIGNACION => ['kr_titulo', 'okr_titulo'],
  *   // y su fila en Notificaciones_Tipos con codigo = 'OKRS_KR_ASIGNACION'
  *
  * El valor de una constante no se cambia nunca: es la llave contra la BD.
@@ -20,22 +20,22 @@ use Notificaciones\Dominio\Excepciones\CodigoDesconocido;
 final class CodigoNotificacion
 {
     /**
-     * Datos que acepta cada código en GenerarNotificacion::ejecutar(), y por lo
-     * tanto los únicos {{marcadores}} que sus plantillas pueden usar (además de
-     * Plantilla::CAMPOS_BASE).
+     * Nombres de datos que acepta cada código en datos_plantilla, y por lo tanto
+     * los únicos {{marcadores}} que sus plantillas pueden usar (además de
+     * Plantilla::DATOS_BASE).
      */
-    private const CAMPOS = [];
+    private const DATOS_PERMITIDOS = [];
 
     public static function existe(string $codigo): bool
     {
-        return array_key_exists($codigo, self::CAMPOS);
+        return array_key_exists($codigo, self::DATOS_PERMITIDOS);
     }
 
-    public static function campos(string $codigo): array
+    public static function datosPermitidos(string $codigo): array
     {
         if (!self::existe($codigo)) {
             throw new CodigoDesconocido("El código '$codigo' no está en CodigoNotificacion.");
         }
-        return self::CAMPOS[$codigo];
+        return self::DATOS_PERMITIDOS[$codigo];
     }
 }

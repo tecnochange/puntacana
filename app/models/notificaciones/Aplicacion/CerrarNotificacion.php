@@ -5,23 +5,23 @@ use DateTimeImmutable;
 use mysqli;
 use Notificaciones\Dominio\EstadoNotificacion;
 use Notificaciones\Dominio\Excepciones\EstadoNoPermitido;
-use Notificaciones\Infraestructura\BaseDatos\Consulta;
-use Notificaciones\Infraestructura\BaseDatos\EventosRepositorio;
+use Notificaciones\Infraestructura\BaseDatos\Conexion;
+use Notificaciones\Infraestructura\BaseDatos\NotificacionesRepositorio;
 
 /**
- * Cierra una notificación abierta por su clave_unica (p. ej. cuando el registro
+ * Cierra una notificación ABIERTA por su clave_evento (p. ej. cuando el registro
  * se completó o se borró). $estado: EstadoNotificacion::COMPLETADA o ::CANCELADA.
- * Deja de recordarse en la siguiente corrida del cron.
+ * Sus correos pendientes se cancelan en la siguiente corrida del cron.
  * Devuelve false si no existía o ya estaba cerrada.
  */
 final class CerrarNotificacion
 {
-    public static function ejecutar(mysqli $conexion, int $idEmpresa, string $claveUnica, string $estado): bool
+    public static function ejecutar(mysqli $mysqli, int $idEmpresa, string $claveEvento, string $estado): bool
     {
         if (!EstadoNotificacion::esCierreManual($estado)) {
-            throw new EstadoNoPermitido("Una notificación solo se cierra como completada o cancelada, no como '$estado'.");
+            throw new EstadoNoPermitido("Una notificación solo se cierra como COMPLETADA o CANCELADA, no como '$estado'.");
         }
-        $eventos = new EventosRepositorio(new Consulta($conexion));
-        return $eventos->cerrarPorClaveUnica($idEmpresa, $claveUnica, $estado, new DateTimeImmutable());
+        $notificaciones = new NotificacionesRepositorio(new Conexion($mysqli));
+        return $notificaciones->cerrarPorClaveEvento($idEmpresa, $claveEvento, $estado, new DateTimeImmutable());
     }
 }

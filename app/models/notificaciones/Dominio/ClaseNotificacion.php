@@ -3,7 +3,7 @@ namespace Notificaciones\Dominio;
 
 final class ClaseNotificacion
 {
-    /** Algo por hacer: queda pendiente en la bandeja y vence con su fecha límite. */
+    /** Algo por hacer: queda pendiente en la bandeja y vence con su fecha_vencimiento. */
     const TAREA = 'TAREA';
 
     /** Informativa: solo leída o no leída. */

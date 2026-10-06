@@ -2,7 +2,7 @@
 require __DIR__ . '/../../app/connect.php';
 require_once __DIR__ . '/../../app/models/notificaciones/cargar.php';
 
-use Notificaciones\Aplicacion\MarcarLeida;
+use Notificaciones\Aplicacion\MarcarNotificacionLeida;
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -15,7 +15,7 @@ if ($idEmpleado === 0 || $_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$notificacion = MarcarLeida::ejecutar($connect_admin, $idEmpresa, $idEmpleado, (int) ($_POST['id'] ?? 0));
+$notificacion = MarcarNotificacionLeida::ejecutar($connect_admin, $idEmpresa, $idEmpleado, (int) ($_POST['id'] ?? 0));
 if ($notificacion === null) {
     http_response_code(404);
     echo json_encode(['status' => 'error', 'message' => 'Notificación no encontrada']);

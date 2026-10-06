@@ -9,12 +9,12 @@ final class EmpleadosLector
 {
     private const ESTADO_ACTIVO = 1;
 
-    /** @var Consulta */
-    private $consulta;
+    /** @var Conexion */
+    private $conexion;
 
-    public function __construct(Consulta $consulta)
+    public function __construct(Conexion $conexion)
     {
-        $this->consulta = $consulta;
+        $this->conexion = $conexion;
     }
 
     /** De los ids dados, los activos de esa empresa: [id => nombre]. */
@@ -24,7 +24,7 @@ final class EmpleadosLector
             return [];
         }
         $marcadores = implode(',', array_fill(0, count($idsEmpleados), '?'));
-        $filas = $this->consulta->filas(
+        $filas = $this->conexion->consultar(
             "SELECT id, nombre FROM Empleados
              WHERE id_empresa = ? AND estado = ? AND id IN ($marcadores)",
             'ii' . str_repeat('i', count($idsEmpleados)),
@@ -36,7 +36,7 @@ final class EmpleadosLector
     /** Nombre, correo y si está activo; NULL si no existe en esa empresa. */
     public function paraEnvio(int $idEmpleado, int $idEmpresa): ?array
     {
-        $fila = $this->consulta->fila(
+        $fila = $this->conexion->consultarUno(
             'SELECT nombre, correo, estado FROM Empleados WHERE id = ? AND id_empresa = ?',
             'ii',
             [$idEmpleado, $idEmpresa]

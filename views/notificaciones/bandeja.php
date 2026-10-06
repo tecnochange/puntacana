@@ -10,8 +10,8 @@ const NOTIFICACIONES_DIAS_PARA_ALERTA = 3;
 /** Lo que la vista necesita de cada fila, ya calculado. */
 function notificacionesPresentar(array $fila, DateTimeImmutable $hoy): array
 {
-    $fechaLimite = $fila['fecha_limite'] ? new DateTimeImmutable($fila['fecha_limite']) : null;
-    $diasRestantes = $fechaLimite ? (int) $hoy->diff($fechaLimite->setTime(0, 0))->format('%r%a') : null;
+    $fechaVencimiento = $fila['fecha_vencimiento'] ? new DateTimeImmutable($fila['fecha_vencimiento']) : null;
+    $diasRestantes = $fechaVencimiento ? (int) $hoy->diff($fechaVencimiento->setTime(0, 0))->format('%r%a') : null;
     $estaAbierta = $fila['estado'] === EstadoNotificacion::ABIERTA;
     $venceProntoOVencida = $estaAbierta && $diasRestantes !== null && $diasRestantes <= NOTIFICACIONES_DIAS_PARA_ALERTA;
 
@@ -23,13 +23,13 @@ function notificacionesPresentar(array $fila, DateTimeImmutable $hoy): array
     return [
         'id' => (int) $fila['id'],
         'titulo' => $fila['titulo'],
-        'cuerpo' => $fila['cuerpo'],
+        'mensaje' => $fila['mensaje'],
         'icono' => $fila['icono'] ?: NOTIFICACIONES_ICONO_POR_DEFECTO,
         'color' => $fila['color'] ?: '',
         'leida' => $fila['fecha_lectura'] !== null,
         'creada' => (new DateTimeImmutable($fila['created_at']))->format('d/m/Y H:i'),
         'registro' => notificacionesRegistroVisible($fila['tipo_registro'], $fila['id_registro']),
-        'fecha_limite' => $fechaLimite ? $fechaLimite->format('d/m/Y') : '',
+        'fecha_vencimiento' => $fechaVencimiento ? $fechaVencimiento->format('d/m/Y') : '',
         'plazo' => $plazo,
         'plazo_clase' => $venceProntoOVencida ? 'text-danger' : 'text-muted',
         'estado' => notificacionesEstadoVisible($fila['estado']),
@@ -50,15 +50,15 @@ function notificacionesPintarLista(array $items, string $vacio, bool $mostrarEst
         echo '<i class="bx ' . notificacionesEscapar($n['icono']) . ' fs-3" style="color:' . notificacionesEscapar($n['color']) . '"></i>';
         echo '<div class="flex-grow-1">';
         echo '<div class="' . $peso . '">' . notificacionesEscapar($n['titulo']) . '</div>';
-        if ($n['cuerpo'] !== null && $n['cuerpo'] !== '') {
-            echo '<div class="small">' . notificacionesEscapar($n['cuerpo']) . '</div>';
+        if ($n['mensaje'] !== null && $n['mensaje'] !== '') {
+            echo '<div class="small">' . notificacionesEscapar($n['mensaje']) . '</div>';
         }
         echo '<div class="small text-muted mt-1">' . notificacionesEscapar($n['creada']);
         if ($n['registro'] !== '') {
             echo ' · Registro: ' . notificacionesEscapar($n['registro']);
         }
-        if ($n['fecha_limite'] !== '') {
-            echo ' · Fecha límite: ' . notificacionesEscapar($n['fecha_limite']);
+        if ($n['fecha_vencimiento'] !== '') {
+            echo ' · Vence: ' . notificacionesEscapar($n['fecha_vencimiento']);
         }
         if ($n['plazo'] !== '') {
             echo ' · <span class="' . $n['plazo_clase'] . '">' . notificacionesEscapar($n['plazo']) . '</span>';
@@ -96,9 +96,9 @@ $historial = $presentar($bandeja['historial']);
     <div class="card mb-3">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="mb-0">Mis notificaciones</h3>
-            <?php if ($bandeja['no_leidas'] > 0): ?>
+            <?php if ($bandeja['cantidad_no_leidas'] > 0): ?>
                 <button type="button" class="btn btn-outline-primary btn-sm" id="bt_marcar_todas">
-                    Marcar todas como leídas (<?= (int) $bandeja['no_leidas'] ?>)
+                    Marcar todas como leídas (<?= (int) $bandeja['cantidad_no_leidas'] ?>)
                 </button>
             <?php endif; ?>
         </div>

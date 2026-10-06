@@ -1,7 +1,8 @@
 <?php
 // Despacho de correos del módulo de Notificaciones. Corre por crontab cada 5 minutos:
 //   */5 * * * * php /var/www/html/puntacana.goforagile.com/cron_jobs/notificaciones_despacho.php >> /var/log/notificaciones_despacho.log 2>&1
-// Qué envía y a quién lo decide Notificaciones_Configuracion (modo, lista_prueba, ventana_envio, hora_resumen).
+// Qué envía y a quién lo decide Notificaciones_Configuracion (modo_operacion, ids_empleados_prueba,
+// ventana_envio, hora_resumen, dia_semana_resumen).
 
 // Está bajo el docroot: por web no debe hacer nada.
 if (PHP_SAPI !== 'cli') {

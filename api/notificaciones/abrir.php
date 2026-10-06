@@ -4,7 +4,7 @@
 require __DIR__ . '/../../app/connect.php';
 require_once __DIR__ . '/../../app/models/notificaciones/cargar.php';
 
-use Notificaciones\Aplicacion\MarcarLeida;
+use Notificaciones\Aplicacion\MarcarNotificacionLeida;
 
 const NOTIFICACIONES_RUTA_BANDEJA = '?pg=notificaciones/bandeja';
 
@@ -15,7 +15,7 @@ if ($idEmpleado === 0) {
     exit;
 }
 
-$notificacion = MarcarLeida::ejecutar($connect_admin, $idEmpresa, $idEmpleado, (int) ($_GET['id'] ?? 0));
+$notificacion = MarcarNotificacionLeida::ejecutar($connect_admin, $idEmpresa, $idEmpleado, (int) ($_GET['id'] ?? 0));
 
 // GenerarNotificacion solo acepta urls '?pg=...', así que el destino siempre es del portal.
 $destino = ($notificacion['url'] ?? '') ?: NOTIFICACIONES_RUTA_BANDEJA;

@@ -7,20 +7,20 @@ use mysqli_sql_exception;
 use mysqli_stmt;
 
 /**
- * Sentencias preparadas sobre mysqli. Todo el SQL del módulo pasa por aquí:
- * ningún valor se concatena en una consulta.
+ * Acceso a la base del módulo: sentencias preparadas y transacciones sobre una
+ * conexión mysqli existente. Ningún valor se concatena en una consulta.
  */
-final class Consulta
+final class Conexion
 {
     /** Formato de DATETIME en la BD. */
     const FORMATO_FECHA = 'Y-m-d H:i:s';
 
     /** @var mysqli */
-    private $conexion;
+    private $mysqli;
 
-    public function __construct(mysqli $conexion)
+    public function __construct(mysqli $mysqli)
     {
-        $this->conexion = $conexion;
+        $this->mysqli = $mysqli;
     }
 
     /** Fecha lista para un parámetro DATETIME (NULL se queda NULL). */
@@ -29,7 +29,8 @@ final class Consulta
         return $fecha === null ? null : $fecha->format(self::FORMATO_FECHA);
     }
 
-    public function filas(string $sql, string $tipos = '', array $parametros = []): array
+    /** SELECT que devuelve todas las filas. */
+    public function consultar(string $sql, string $tipos = '', array $parametros = []): array
     {
         $sentencia = $this->ejecutarSentencia($sql, $tipos, $parametros);
         $resultado = mysqli_stmt_get_result($sentencia);
@@ -38,14 +39,15 @@ final class Consulta
         return $filas;
     }
 
-    public function fila(string $sql, string $tipos = '', array $parametros = []): ?array
+    /** SELECT que devuelve una fila o NULL. */
+    public function consultarUno(string $sql, string $tipos = '', array $parametros = []): ?array
     {
-        $filas = $this->filas($sql, $tipos, $parametros);
+        $filas = $this->consultar($sql, $tipos, $parametros);
         return $filas ? $filas[0] : null;
     }
 
-    /** Ejecuta un INSERT/UPDATE/DELETE y devuelve las filas afectadas. */
-    public function ejecutar(string $sql, string $tipos = '', array $parametros = []): int
+    /** INSERT/UPDATE/DELETE; devuelve las filas afectadas. */
+    public function modificar(string $sql, string $tipos = '', array $parametros = []): int
     {
         $sentencia = $this->ejecutarSentencia($sql, $tipos, $parametros);
         $afectadas = mysqli_stmt_affected_rows($sentencia);
@@ -53,21 +55,21 @@ final class Consulta
         return $afectadas;
     }
 
-    public function ultimoId(): int
+    public function ultimoIdInsertado(): int
     {
-        return (int) mysqli_insert_id($this->conexion);
+        return (int) mysqli_insert_id($this->mysqli);
     }
 
     /** Ejecuta $operacion dentro de una transacción; si lanza, deshace todo. */
-    public function transaccion(callable $operacion)
+    public function enTransaccion(callable $operacion)
     {
-        mysqli_begin_transaction($this->conexion);
+        mysqli_begin_transaction($this->mysqli);
         try {
             $resultado = $operacion();
-            mysqli_commit($this->conexion);
+            mysqli_commit($this->mysqli);
             return $resultado;
         } catch (\Throwable $error) {
-            mysqli_rollback($this->conexion);
+            mysqli_rollback($this->mysqli);
             throw $error;
         }
     }
@@ -75,9 +77,9 @@ final class Consulta
     private function ejecutarSentencia(string $sql, string $tipos, array $parametros): mysqli_stmt
     {
         try {
-            $sentencia = mysqli_prepare($this->conexion, $sql);
+            $sentencia = mysqli_prepare($this->mysqli, $sql);
             if ($sentencia === false) {
-                throw new ErrorBaseDatos(mysqli_error($this->conexion), mysqli_errno($this->conexion));
+                throw new ErrorBaseDatos(mysqli_error($this->mysqli), mysqli_errno($this->mysqli));
             }
             if ($tipos !== '') {
                 mysqli_stmt_bind_param($sentencia, $tipos, ...$parametros);

@@ -4,17 +4,17 @@ namespace Notificaciones\Aplicacion;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use mysqli;
-use Notificaciones\Dominio\CamposSensibles;
 use Notificaciones\Dominio\CodigoNotificacion;
-use Notificaciones\Dominio\Excepciones\CampoNoPermitido;
+use Notificaciones\Dominio\DatosSensibles;
+use Notificaciones\Dominio\Excepciones\DatoNoPermitido;
 use Notificaciones\Dominio\Excepciones\UrlNoPermitida;
 use Notificaciones\Dominio\Plantilla;
 use Notificaciones\Dominio\TipoNotificacion;
-use Notificaciones\Infraestructura\BaseDatos\Consulta;
+use Notificaciones\Infraestructura\BaseDatos\Conexion;
 use Notificaciones\Infraestructura\BaseDatos\DestinatariosRepositorio;
 use Notificaciones\Infraestructura\BaseDatos\EmpleadosLector;
 use Notificaciones\Infraestructura\BaseDatos\ErrorBaseDatos;
-use Notificaciones\Infraestructura\BaseDatos\EventosRepositorio;
+use Notificaciones\Infraestructura\BaseDatos\NotificacionesRepositorio;
 use Notificaciones\Infraestructura\BaseDatos\TiposRepositorio;
 
 /**
@@ -22,102 +22,104 @@ use Notificaciones\Infraestructura\BaseDatos\TiposRepositorio;
  *
  *   GenerarNotificacion::ejecutar(
  *       $connect_admin,
- *       CodigoNotificacion::OKRS_KR_ASIGNACION,       // ejemplo; el catálogo hoy está vacío
+ *       CodigoNotificacion::OKRS_KR_ASIGNACION,    // ejemplo; el catálogo hoy está vacío
  *       $user_log['id_empresa'],
- *       [45, 78],                                  // Empleados.id destinatarios
+ *       [45, 78],                                   // ids de Empleados destinatarios
  *       [
- *           'datos'         => ['titulo' => '...', 'mensaje' => '...'],
- *           'url'           => '?pg=kpis/gestionar_kpi&id=10',
- *           'tipo_registro' => 'kpi',
- *           'id_registro'   => 10,
- *           'fecha_limite'  => '2026-10-31',
- *           'id_autor'      => $user_log['id'],
- *           'clave_unica'   => 'kpi:10:asignacion',
+ *           'datos_plantilla'   => ['kr_titulo' => '...'],
+ *           'url'               => '?pg=okrs/okr/resultados&id=12&id_resultado=123',
+ *           'tipo_registro'     => 'OKRS_KR',
+ *           'id_registro'       => 123,
+ *           'fecha_vencimiento' => '2026-10-31',
+ *           'id_empleado_autor' => $user_log['id'],
+ *           'clave_evento'      => 'OKRS_KR_ASIGNACION:123',
  *       ]
  *   );
  *
- * Todas las opciones son opcionales; una opción con otro nombre es un error
- * (así un error de tipeo no se pierde en silencio).
+ * Las opciones se llaman igual que las columnas de Notificaciones y todas son
+ * opcionales; una opción con otro nombre es un error (un error de tipeo no se
+ * pierde en silencio).
  *
- * Guarda la notificación y su bandeja; no envía correo (eso lo hace el cron).
- * Devuelve el id de la notificación, la existente si la clave_unica ya estaba,
- * o NULL si el tipo está INACTIVO o si ningún destinatario quedó válido. Un
- * tipo desactivado no rompe el flujo que llama: simplemente no notifica.
+ * Guarda la notificación y sus destinatarios; no envía correo (eso lo hace el
+ * cron). Devuelve el id de la notificación, el de la existente si clave_evento
+ * ya estaba, o NULL si el tipo está INACTIVO o ningún destinatario quedó válido.
+ * Un tipo desactivado no rompe el flujo que llama: simplemente no notifica.
  */
 final class GenerarNotificacion
 {
-    private const OPCIONES_VALIDAS = ['datos', 'url', 'tipo_registro', 'id_registro', 'fecha_limite', 'id_autor', 'clave_unica'];
+    private const OPCIONES_VALIDAS = [
+        'datos_plantilla', 'url', 'tipo_registro', 'id_registro', 'fecha_vencimiento', 'id_empleado_autor', 'clave_evento',
+    ];
     private const PREFIJO_URL_PORTAL = '?pg=';
     private const LARGO_MAXIMO_TITULO = 255;
-    private const LARGO_MAXIMO_CUERPO = 1000;
+    private const LARGO_MAXIMO_MENSAJE = 1000;
 
-    public static function ejecutar(mysqli $conexion, string $codigo, int $idEmpresa, array $destinatarios, array $opciones = []): ?int
+    public static function ejecutar(mysqli $mysqli, string $codigo, int $idEmpresa, array $idsEmpleados, array $opciones = []): ?int
     {
         self::validarOpciones($opciones);
-        $datos = isset($opciones['datos']) ? $opciones['datos'] : [];
+        $datosPlantilla = isset($opciones['datos_plantilla']) ? $opciones['datos_plantilla'] : [];
         $url = isset($opciones['url']) ? (string) $opciones['url'] : null;
-        $idAutor = isset($opciones['id_autor']) ? (int) $opciones['id_autor'] : null;
-        $claveUnica = isset($opciones['clave_unica']) ? (string) $opciones['clave_unica'] : null;
+        $idEmpleadoAutor = isset($opciones['id_empleado_autor']) ? (int) $opciones['id_empleado_autor'] : null;
+        $claveEvento = isset($opciones['clave_evento']) ? (string) $opciones['clave_evento'] : null;
 
         $ahora = new DateTimeImmutable();
-        $consulta = new Consulta($conexion);
-        $eventos = new EventosRepositorio($consulta);
+        $conexion = new Conexion($mysqli);
+        $notificaciones = new NotificacionesRepositorio($conexion);
 
-        $tipo = (new TiposRepositorio($consulta))->buscarActivo($codigo, $idEmpresa);
+        $tipo = (new TiposRepositorio($conexion))->buscarActivo($codigo, $idEmpresa);
         if ($tipo === null) {
             return null;
         }
-        self::validarDatos($codigo, $datos);
+        self::validarDatosPlantilla($codigo, $datosPlantilla);
         self::validarUrl($url);
-        $limite = self::interpretarFechaLimite(isset($opciones['fecha_limite']) ? (string) $opciones['fecha_limite'] : null);
+        $fechaVencimiento = self::interpretarFechaVencimiento(isset($opciones['fecha_vencimiento']) ? (string) $opciones['fecha_vencimiento'] : null);
 
-        if ($claveUnica !== null) {
-            $existente = $eventos->idPorClaveUnica($idEmpresa, $claveUnica);
+        if ($claveEvento !== null) {
+            $existente = $notificaciones->idPorClaveEvento($idEmpresa, $claveEvento);
             if ($existente !== null) {
                 return $existente;
             }
         }
 
-        $idsCandidatos = self::idsCandidatos($destinatarios, $tipo, $idAutor);
-        $activos = (new EmpleadosLector($consulta))->activosDeEmpresa($idsCandidatos, $idEmpresa);
-        if (!$activos) {
+        $idsCandidatos = self::idsDestinatariosCandidatos($idsEmpleados, $tipo, $idEmpleadoAutor);
+        $destinatariosActivos = (new EmpleadosLector($conexion))->activosDeEmpresa($idsCandidatos, $idEmpresa);
+        if (!$destinatariosActivos) {
             return null;
         }
 
-        $valores = $datos + ['fecha_limite' => Plantilla::formatearFecha($limite)];
-        $evento = [
+        $datosParaTitulo = $datosPlantilla + ['fecha_vencimiento' => Plantilla::formatearFecha($fechaVencimiento)];
+        $notificacion = [
             'id_empresa' => $idEmpresa,
             'id_tipo' => $tipo->id,
-            'codigo' => $codigo,
             'clase' => $tipo->clase,
-            'titulo' => mb_substr(Plantilla::renderizarTexto($tipo->plataformaTitulo, $valores), 0, self::LARGO_MAXIMO_TITULO),
-            'cuerpo' => mb_substr(Plantilla::renderizarTexto($tipo->plataformaCuerpo, $valores), 0, self::LARGO_MAXIMO_CUERPO),
+            'titulo' => mb_substr(Plantilla::renderizarTexto($tipo->plantillaTitulo, $datosParaTitulo), 0, self::LARGO_MAXIMO_TITULO),
+            'mensaje' => mb_substr(Plantilla::renderizarTexto($tipo->plantillaMensaje, $datosParaTitulo), 0, self::LARGO_MAXIMO_MENSAJE),
             'url' => $url,
             'tipo_registro' => isset($opciones['tipo_registro']) ? (string) $opciones['tipo_registro'] : null,
             'id_registro' => isset($opciones['id_registro']) ? (int) $opciones['id_registro'] : null,
-            'datos' => json_encode($datos, JSON_UNESCAPED_UNICODE),
-            'fecha_limite' => $limite,
-            'id_autor' => $idAutor,
-            'clave_unica' => $claveUnica,
+            'datos_plantilla' => json_encode($datosPlantilla, JSON_UNESCAPED_UNICODE),
+            'fecha_vencimiento' => $fechaVencimiento,
+            'id_empleado_autor' => $idEmpleadoAutor,
+            'clave_evento' => $claveEvento,
         ];
-        $primerAviso = $tipo->primerAviso($limite, $ahora);
-        $bandejas = new DestinatariosRepositorio($consulta);
+        $fechaPrimerCorreo = $tipo->fechaPrimerCorreo($fechaVencimiento, $ahora);
+        $destinatarios = new DestinatariosRepositorio($conexion);
 
         try {
-            return $consulta->transaccion(function () use ($eventos, $bandejas, $evento, $activos, $idEmpresa, $primerAviso, $ahora) {
-                $idEvento = $eventos->insertar($evento, $ahora);
-                foreach (array_keys($activos) as $idEmpleado) {
-                    $bandejas->insertar($idEmpresa, $idEvento, (int) $idEmpleado, $primerAviso, $ahora);
+            return $conexion->enTransaccion(function () use ($notificaciones, $destinatarios, $notificacion, $destinatariosActivos, $idEmpresa, $fechaPrimerCorreo, $ahora) {
+                $idNotificacion = $notificaciones->insertar($notificacion, $ahora);
+                foreach (array_keys($destinatariosActivos) as $idEmpleado) {
+                    $destinatarios->insertar($idEmpresa, $idNotificacion, (int) $idEmpleado, $fechaPrimerCorreo, $ahora);
                 }
-                return $idEvento;
+                return $idNotificacion;
             });
         } catch (ErrorBaseDatos $error) {
-            // Otra petición creó la misma clave_unica entre la consulta y el INSERT.
-            $otraPeticionLaCreo = $error->esLlaveDuplicada() && $claveUnica !== null;
+            // Otra petición creó la misma clave_evento entre la consulta y el INSERT.
+            $otraPeticionLaCreo = $error->esLlaveDuplicada() && $claveEvento !== null;
             if (!$otraPeticionLaCreo) {
                 throw $error;
             }
-            return $eventos->idPorClaveUnica($idEmpresa, $claveUnica);
+            return $notificaciones->idPorClaveEvento($idEmpresa, $claveEvento);
         }
     }
 
@@ -129,23 +131,23 @@ final class GenerarNotificacion
         }
     }
 
-    private static function validarDatos(string $codigo, array $datos): void
+    private static function validarDatosPlantilla(string $codigo, array $datosPlantilla): void
     {
-        $nombres = array_keys($datos);
-        CamposSensibles::validar($nombres);
+        $nombres = array_keys($datosPlantilla);
+        DatosSensibles::validar($nombres);
 
-        $noDeclarados = array_diff($nombres, CodigoNotificacion::campos($codigo));
+        $noDeclarados = array_diff($nombres, CodigoNotificacion::datosPermitidos($codigo));
         if ($noDeclarados) {
-            throw new CampoNoPermitido("'$codigo' no acepta: " . implode(', ', $noDeclarados));
+            throw new DatoNoPermitido("'$codigo' no acepta: " . implode(', ', $noDeclarados));
         }
-        foreach ($datos as $nombre => $valor) {
+        foreach ($datosPlantilla as $nombre => $valor) {
             if (!is_scalar($valor) && $valor !== null) {
-                throw new CampoNoPermitido("El dato '$nombre' debe ser texto o número.");
+                throw new DatoNoPermitido("El dato '$nombre' debe ser texto o número.");
             }
         }
     }
 
-    /** Solo rutas del portal: evita que un enlace de notificación lleve a otro sitio. */
+    /** Solo rutas del portal: evita que el enlace de una notificación lleve a otro sitio. */
     private static function validarUrl(?string $url): void
     {
         if ($url === null) {
@@ -159,30 +161,31 @@ final class GenerarNotificacion
     }
 
     /** 'Y-m-d' vence al final de ese día; también acepta 'Y-m-d H:i:s'. */
-    private static function interpretarFechaLimite(?string $fechaLimite): ?DateTimeImmutable
+    private static function interpretarFechaVencimiento(?string $fechaVencimiento): ?DateTimeImmutable
     {
-        if ($fechaLimite === null) {
+        if ($fechaVencimiento === null) {
             return null;
         }
-        $soloDia = DateTimeImmutable::createFromFormat('!Y-m-d', $fechaLimite);
-        if ($soloDia !== false && $soloDia->format('Y-m-d') === $fechaLimite) {
+        $soloDia = DateTimeImmutable::createFromFormat('!Y-m-d', $fechaVencimiento);
+        if ($soloDia !== false && $soloDia->format('Y-m-d') === $fechaVencimiento) {
             return $soloDia->setTime(23, 59, 59);
         }
-        $conHora = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $fechaLimite);
-        if ($conHora !== false && $conHora->format('Y-m-d H:i:s') === $fechaLimite) {
+        $conHora = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $fechaVencimiento);
+        if ($conHora !== false && $conHora->format('Y-m-d H:i:s') === $fechaVencimiento) {
             return $conHora;
         }
-        throw new InvalidArgumentException("fecha_limite inválida: '$fechaLimite' (se espera Y-m-d o Y-m-d H:i:s).");
+        throw new InvalidArgumentException("fecha_vencimiento inválida: '$fechaVencimiento' (se espera Y-m-d o Y-m-d H:i:s).");
     }
 
-    private static function idsCandidatos(array $destinatarios, TipoNotificacion $tipo, ?int $idAutor): array
+    /** Ids únicos y positivos; sin el autor salvo que el tipo lo incluya. */
+    private static function idsDestinatariosCandidatos(array $idsEmpleados, TipoNotificacion $tipo, ?int $idEmpleadoAutor): array
     {
-        $ids = array_values(array_unique(array_filter(array_map('intval', $destinatarios), function ($id) {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $idsEmpleados), function ($id) {
             return $id > 0;
         })));
-        $excluirAutor = !$tipo->notificarAutor && $idAutor !== null;
+        $excluirAutor = !$tipo->incluyeAutor && $idEmpleadoAutor !== null;
         if ($excluirAutor) {
-            $ids = array_values(array_diff($ids, [$idAutor]));
+            $ids = array_values(array_diff($ids, [$idEmpleadoAutor]));
         }
         return $ids;
     }

@@ -2,10 +2,10 @@
 require_once __DIR__ . '/../../app/models/notificaciones/cargar.php';
 require_once __DIR__ . '/componentes/presentacion.php';
 
-use Notificaciones\Aplicacion\MarcarLeida;
+use Notificaciones\Aplicacion\MarcarNotificacionLeida;
 
 // Solo la devuelve si quien la pide es destinatario; abrirla la marca leída.
-$notificacion = MarcarLeida::ejecutar($connect_admin, (int) $user_log['id_empresa'], (int) $user_log['id'], (int) ($_GET['id'] ?? 0));
+$notificacion = MarcarNotificacionLeida::ejecutar($connect_admin, (int) $user_log['id_empresa'], (int) $user_log['id'], (int) ($_GET['id'] ?? 0));
 
 $e = 'notificacionesEscapar';
 $fecha = function (?string $valor, string $formato) {
@@ -34,22 +34,22 @@ $registro = $notificacion ? notificacionesRegistroVisible($notificacion['tipo_re
                 <span class="badge <?= $estadoClase ?>"><?= $e($estadoTexto) ?></span>
             </div>
             <div class="card-body">
-                <?php if ($notificacion['cuerpo'] !== null && $notificacion['cuerpo'] !== ''): ?>
-                    <p><?= nl2br($e($notificacion['cuerpo'])) ?></p>
+                <?php if ($notificacion['mensaje'] !== null && $notificacion['mensaje'] !== ''): ?>
+                    <p><?= nl2br($e($notificacion['mensaje'])) ?></p>
                 <?php endif; ?>
 
                 <dl class="row small mb-0">
                     <dt class="col-sm-3">Tipo</dt>
-                    <dd class="col-sm-9"><?= $e($notificacion['tipo_nombre']) ?></dd>
+                    <dd class="col-sm-9"><?= $e($notificacion['nombre_tipo']) ?></dd>
                     <?php if ($registro !== ''): ?>
                         <dt class="col-sm-3">Registro</dt>
                         <dd class="col-sm-9"><?= $e($registro) ?></dd>
                     <?php endif; ?>
                     <dt class="col-sm-3">Recibida</dt>
                     <dd class="col-sm-9"><?= $e($fecha($notificacion['created_at'], 'd/m/Y H:i')) ?></dd>
-                    <?php if ($notificacion['fecha_limite']): ?>
-                        <dt class="col-sm-3">Fecha límite</dt>
-                        <dd class="col-sm-9"><?= $e($fecha($notificacion['fecha_limite'], 'd/m/Y')) ?></dd>
+                    <?php if ($notificacion['fecha_vencimiento']): ?>
+                        <dt class="col-sm-3">Vence</dt>
+                        <dd class="col-sm-9"><?= $e($fecha($notificacion['fecha_vencimiento'], 'd/m/Y')) ?></dd>
                     <?php endif; ?>
                 </dl>
             </div>
