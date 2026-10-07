@@ -11,18 +11,18 @@ use Notificaciones\Dominio\UnidadIntervalo;
 use Notificaciones\Infraestructura\Web\Peticion;
 
 $esAdministrador = notificacionesEsAdministrador($connect_admin, $user_log);
-$idEmpresa = (int) $user_log['id_empresa'];
-$codigo = isset($_GET['codigo']) ? (string) $_GET['codigo'] : '';
+$idTipo = (int) ($_GET['id'] ?? 0);
 
 $errores = null;
 $seGuardo = $esAdministrador && Peticion::esPostDelMismoSitio() && isset($_POST['guardar_tipo']);
 if ($seGuardo) {
-    $errores = AdministrarTipos::guardar($connect_admin, $idEmpresa, $codigo, $_POST);
+    $errores = AdministrarTipos::guardar($connect_admin, $idTipo, $_POST);
 }
-$tipo = $esAdministrador ? AdministrarTipos::obtener($connect_admin, $idEmpresa, $codigo) : null;
+$tipo = $esAdministrador ? AdministrarTipos::obtener($connect_admin, $idTipo) : null;
+$codigo = $tipo !== null ? $tipo['codigo'] : '';
 // Si no se pudo guardar, el formulario muestra lo que se escribió, no lo guardado.
 $valores = $tipo !== null && $errores ? array_merge($tipo, $_POST) : $tipo;
-$vistaPrevia = $tipo !== null ? AdministrarTipos::vistaPrevia($codigo, $valores) : null;
+$vistaPrevia = $tipo !== null ? AdministrarTipos::vistaPrevia($connect_admin, $idTipo, $valores) : null;
 
 $e = 'notificacionesEscapar';
 $campo = function (string $nombre) use ($valores) {
@@ -47,19 +47,22 @@ $marcadoresDisponibles = array_merge($tipo['datos_permitidos'], Plantilla::DATOS
 
 <div class="notif">
     <?php notificacionesPintarEncabezadoAdministracion('tipos', $tipo['nombre'], 'Configura cómo se genera, a quién llega y cómo se ve esta notificación.'); ?>
-    <?php notificacionesPintarResultado($errores, 'Configuración guardada para tu empresa.'); ?>
+    <?php notificacionesPintarResultado($errores, 'Configuración guardada.'); ?>
     <?php if ($tipo['error_configuracion'] !== null && $errores === null): ?>
         <div class="alert alert-warning"><i class="bx bx-error"></i> <?= $e($tipo['error_configuracion']) ?></div>
     <?php endif; ?>
 
     <div class="row g-4">
         <div class="col-lg-7">
-            <form method="post" action="?pg=notificaciones/administrar/tipo&codigo=<?= urlencode($codigo) ?>" id="form_tipo" class="notif-panel">
+            <form method="post" action="?pg=notificaciones/administrar/tipo&id=<?= $idTipo ?>" id="form_tipo" class="notif-panel">
                 <input type="hidden" name="guardar_tipo" value="1">
 
                 <div class="notif-seccion">
                     <h6>General</h6>
-                    <p class="notif-ayuda">Código <span class="notif-codigo"><?= $e($codigo) ?></span> · <?= $tipo['es_de_la_empresa'] ? 'Configuración propia de tu empresa.' : 'Usa la configuración por defecto; al guardar se crea una propia de tu empresa.' ?></p>
+                    <p class="notif-ayuda">Código <span class="notif-codigo"><?= $e($codigo) ?></span></p>
+                    <?php if (!$tipo['implementado']): ?>
+                        <div class="alert alert-warning py-2 small"><i class="bx bx-time-five"></i> <strong>Sin implementar.</strong> Desarrollo debe agregar este código al sistema y conectarlo al evento que lo genera. Mientras tanto, las plantillas solo pueden usar los datos base y no se puede enviar una prueba.</div>
+                    <?php endif; ?>
                     <div class="row g-3">
                         <div class="col-md-8">
                             <label class="form-label" for="nombre">Nombre</label>
@@ -198,7 +201,7 @@ $marcadoresDisponibles = array_merge($tipo['datos_permitidos'], Plantilla::DATOS
                 <div class="notif-previa__bandeja">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="notif-previa__etiqueta mb-0">Vista previa · bandeja</span>
-                        <button type="button" class="btn btn-sm btn-outline-primary" id="bt_enviar_prueba">
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="bt_enviar_prueba"<?= $tipo['implementado'] ? '' : ' disabled title="Disponible cuando el código esté implementado"' ?>>
                             <i class="bx bx-send"></i> Enviarme una prueba
                         </button>
                     </div>
@@ -225,7 +228,7 @@ $marcadoresDisponibles = array_merge($tipo['datos_permitidos'], Plantilla::DATOS
 
 <script>
     $(document).ready(function () {
-        var codigo = <?= json_encode($codigo) ?>;
+        var idTipo = <?= $idTipo ?>;
         var ultimoCampo = null;
 
         $('.notif-plantilla').on('focus', function () { ultimoCampo = this; });
@@ -246,7 +249,7 @@ $marcadoresDisponibles = array_merge($tipo['datos_permitidos'], Plantilla::DATOS
         });
 
         function actualizarVistaPrevia() {
-            var datos = $('#form_tipo').serialize() + '&codigo=' + encodeURIComponent(codigo);
+            var datos = $('#form_tipo').serialize() + '&id=' + idTipo;
             $.post('api/notificaciones/administrar/vista_previa.php', datos, function (respuesta) {
                 var previa = respuesta.data || {};
                 $('#previa_error').toggleClass('d-none', !previa.error).text(previa.error || '');
@@ -262,7 +265,7 @@ $marcadoresDisponibles = array_merge($tipo['datos_permitidos'], Plantilla::DATOS
 
         $('#bt_enviar_prueba').on('click', function () {
             var boton = $(this).prop('disabled', true);
-            $.post('api/notificaciones/administrar/enviar_prueba.php', { codigo: codigo }, function (respuesta) {
+            $.post('api/notificaciones/administrar/enviar_prueba.php', { id: idTipo }, function (respuesta) {
                 var clase = respuesta.status === 'success' ? 'alert-success' : 'alert-danger';
                 var texto = respuesta.status === 'success'
                     ? 'Prueba generada solo para ti. <a href="?pg=notificaciones/bandeja">Ver en mi bandeja</a>. El correo sale según el modo de operación.'

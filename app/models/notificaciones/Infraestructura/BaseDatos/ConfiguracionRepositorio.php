@@ -4,13 +4,13 @@ namespace Notificaciones\Infraestructura\BaseDatos;
 use DateTimeImmutable;
 
 /**
- * Tabla Notificaciones_Configuracion: el valor de la empresa gana sobre el por
- * defecto (id_empresa = 0). Desde la aplicación solo se escriben valores de una
- * empresa; los por defecto se cambian por SQL.
+ * Tabla Notificaciones_Configuracion. La administración trabaja con los valores
+ * generales (id_empresa = 0); la lectura en tiempo de ejecución sigue aceptando
+ * un valor propio de empresa si algún día existe.
  */
 final class ConfiguracionRepositorio
 {
-    private const EMPRESA_POR_DEFECTO = 0;
+    private const EMPRESA_GENERAL = 0;
 
     /** @var Conexion */
     private $conexion;
@@ -28,33 +28,23 @@ final class ConfiguracionRepositorio
              ORDER BY id_empresa DESC
              LIMIT 1',
             'sii',
-            [$clave, self::EMPRESA_POR_DEFECTO, $idEmpresa]
+            [$clave, self::EMPRESA_GENERAL, $idEmpresa]
         );
         return $fila['valor'] ?? $porDefecto;
     }
 
-    /** Todas las claves que aplican a la empresa: [clave => ['valor' => ..., 'es_de_la_empresa' => bool]]. */
-    public function valoresDeEmpresa(int $idEmpresa): array
+    /** Valores generales: [clave => valor]. */
+    public function valoresGenerales(): array
     {
         $filas = $this->conexion->consultar(
-            'SELECT clave, valor, id_empresa FROM Notificaciones_Configuracion
-             WHERE id_empresa IN (?, ?)
-             ORDER BY id_empresa',
-            'ii',
-            [self::EMPRESA_POR_DEFECTO, $idEmpresa]
+            'SELECT clave, valor FROM Notificaciones_Configuracion WHERE id_empresa = ?',
+            'i',
+            [self::EMPRESA_GENERAL]
         );
-        $valores = [];
-        foreach ($filas as $fila) {
-            // Ordenadas por id_empresa: la fila de la empresa pisa a la por defecto.
-            $valores[$fila['clave']] = [
-                'valor' => (string) $fila['valor'],
-                'es_de_la_empresa' => (int) $fila['id_empresa'] !== self::EMPRESA_POR_DEFECTO,
-            ];
-        }
-        return $valores;
+        return array_map('strval', array_column($filas, 'valor', 'clave'));
     }
 
-    public function guardarDeEmpresa(int $idEmpresa, string $clave, string $valor, DateTimeImmutable $ahora): void
+    public function guardarGeneral(string $clave, string $valor, DateTimeImmutable $ahora): void
     {
         $fecha = Conexion::fecha($ahora);
         $this->conexion->modificar(
@@ -62,7 +52,7 @@ final class ConfiguracionRepositorio
              VALUES (?, ?, ?, ?)
              ON DUPLICATE KEY UPDATE valor = VALUES(valor), updated_at = ?',
             'issss',
-            [$idEmpresa, $clave, $valor, $fecha, $fecha]
+            [self::EMPRESA_GENERAL, $clave, $valor, $fecha, $fecha]
         );
     }
 }

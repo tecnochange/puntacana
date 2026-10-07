@@ -6,8 +6,9 @@ use mysqli;
 use Notificaciones\Dominio\ClaseNotificacion;
 use Notificaciones\Dominio\CodigoNotificacion;
 use Notificaciones\Dominio\EstadoTipo;
-use Notificaciones\Dominio\NotificacionPrueba;
 use Notificaciones\Dominio\Excepciones\ErrorNotificacion;
+use Notificaciones\Dominio\Excepciones\TipoSinImplementar;
+use Notificaciones\Dominio\NotificacionPrueba;
 use Notificaciones\Dominio\Plantilla;
 use Notificaciones\Dominio\TipoNotificacion;
 use Notificaciones\Dominio\UnidadIntervalo;
@@ -16,56 +17,87 @@ use Notificaciones\Infraestructura\BaseDatos\TiposRepositorio;
 use Notificaciones\Infraestructura\Correo\MarcoCorreo;
 
 /**
- * Administración de tipos desde la plataforma. Todo lo que se guarda queda como
- * configuración propia de la empresa del administrador; la fila por defecto
- * (id_empresa = 0) solo se cambia por SQL. El código no se edita.
+ * Administración de tipos desde la plataforma: crear, configurar, previsualizar
+ * y probar. Un tipo se puede crear antes de que su código exista en el sistema
+ * ("sin implementar"); el desarrollador agrega después la constante en
+ * CodigoNotificacion y la llamada a GenerarNotificacion. El código no se edita.
  */
 final class AdministrarTipos
 {
     private const URL_PRUEBA = '?pg=notificaciones/bandeja';
     private const DESTINATARIO_DE_EJEMPLO = 'Nombre del destinatario';
     private const DIAS_VENCIMIENTO_DE_EJEMPLO = 5;
+    private const LARGO_MAXIMO_CODIGO = 80;
 
-    /** Tipos que aplican a la empresa, con si son propios y si su configuración es válida. */
-    public static function listar(mysqli $mysqli, int $idEmpresa): array
+    /** Todos los tipos, con si están implementados y si su configuración es válida. */
+    public static function listar(mysqli $mysqli): array
     {
-        $filas = (new TiposRepositorio(new Conexion($mysqli)))->filasDeEmpresa($idEmpresa);
-        return array_map(function (array $fila) use ($idEmpresa) {
-            $fila['es_de_la_empresa'] = (int) $fila['id_empresa'] === $idEmpresa;
-            $fila['error_configuracion'] = self::errorDeConfiguracion($fila);
-            return $fila;
+        $filas = (new TiposRepositorio(new Conexion($mysqli)))->filasGenerales();
+        return array_map(function (array $fila) {
+            return self::completar($fila);
         }, $filas);
     }
 
-    /** La fila que aplica a la empresa para ese código; NULL si no existe. */
-    public static function obtener(mysqli $mysqli, int $idEmpresa, string $codigo): ?array
+    /** El tipo con sus datos permitidos; NULL si no existe. */
+    public static function obtener(mysqli $mysqli, int $idTipo): ?array
     {
-        $fila = (new TiposRepositorio(new Conexion($mysqli)))->filaDeEmpresa($codigo, $idEmpresa);
-        if ($fila === null) {
-            return null;
-        }
-        $fila['es_de_la_empresa'] = (int) $fila['id_empresa'] === $idEmpresa;
-        $fila['datos_permitidos'] = CodigoNotificacion::existe($codigo) ? CodigoNotificacion::datosPermitidos($codigo) : [];
-        $fila['error_configuracion'] = self::errorDeConfiguracion($fila);
-        return $fila;
+        $fila = (new TiposRepositorio(new Conexion($mysqli)))->filaPorId($idTipo);
+        return $fila === null ? null : self::completar($fila);
     }
 
-    /** Guarda el formulario como configuración de la empresa. Devuelve los errores ([] = guardado). */
-    public static function guardar(mysqli $mysqli, int $idEmpresa, string $codigo, array $formulario): array
+    /**
+     * Crea un tipo nuevo, INACTIVO, con código, nombre y clase.
+     * ['errores' => [...], 'id' => id del tipo creado o NULL].
+     */
+    public static function crear(mysqli $mysqli, array $formulario): array
     {
-        $conexion = new Conexion($mysqli);
-        $tipos = new TiposRepositorio($conexion);
-        $actual = $tipos->filaDeEmpresa($codigo, $idEmpresa);
-        if ($actual === null || !CodigoNotificacion::existe($codigo)) {
-            return ["El código '$codigo' no existe."];
+        $tipos = new TiposRepositorio(new Conexion($mysqli));
+        $codigo = isset($formulario['codigo']) ? strtoupper(trim((string) $formulario['codigo'])) : '';
+        $nombre = isset($formulario['nombre']) ? trim((string) $formulario['nombre']) : '';
+        $clase = isset($formulario['clase']) ? (string) $formulario['clase'] : '';
+
+        $errores = [];
+        if (!CodigoNotificacion::tieneFormatoValido($codigo) || strlen($codigo) > self::LARGO_MAXIMO_CODIGO) {
+            $errores[] = 'El código debe estar en MAYÚSCULAS_CON_GUION_BAJO, empezar con una letra y tener hasta ' . self::LARGO_MAXIMO_CODIGO . ' caracteres (p. ej. KPIS_KPI_COMENTARIO).';
+        } elseif ($tipos->existeCodigo($codigo)) {
+            $errores[] = "Ya existe un tipo con el código $codigo.";
+        }
+        if ($nombre === '') {
+            $errores[] = 'El nombre es obligatorio.';
+        }
+        if (!ClaseNotificacion::esValida($clase)) {
+            $errores[] = 'Clase inválida.';
+        }
+        if ($errores) {
+            return ['errores' => $errores, 'id' => null];
+        }
+
+        $valores = self::normalizar([
+            'nombre' => $nombre,
+            'clase' => $clase,
+            'muestra_en_bandeja' => 1,
+            'plantilla_titulo' => $nombre,
+            'estado' => EstadoTipo::INACTIVO,
+        ]);
+        $id = $tipos->crear($codigo, $valores, new DateTimeImmutable());
+        return ['errores' => [], 'id' => $id];
+    }
+
+    /** Guarda el formulario. Devuelve los errores ([] = guardado). */
+    public static function guardar(mysqli $mysqli, int $idTipo, array $formulario): array
+    {
+        $tipos = new TiposRepositorio(new Conexion($mysqli));
+        $actual = $tipos->filaPorId($idTipo);
+        if ($actual === null) {
+            return ['El tipo no existe.'];
         }
 
         $valores = self::normalizar($formulario);
-        $errores = self::validar($codigo, $valores);
+        $errores = self::validar($actual['codigo'], $valores);
         if ($errores) {
             return $errores;
         }
-        $tipos->guardarDeEmpresa($idEmpresa, $codigo, $valores, new DateTimeImmutable());
+        $tipos->actualizar($idTipo, $valores, new DateTimeImmutable());
         return [];
     }
 
@@ -73,10 +105,15 @@ final class AdministrarTipos
      * Cómo se verían la bandeja y el correo con los valores del formulario y
      * datos de ejemplo. ['error' => string|null, 'titulo', 'mensaje', 'asunto', 'cuerpo_html'].
      */
-    public static function vistaPrevia(string $codigo, array $formulario): array
+    public static function vistaPrevia(mysqli $mysqli, int $idTipo, array $formulario): array
     {
+        $actual = (new TiposRepositorio(new Conexion($mysqli)))->filaPorId($idTipo);
+        if ($actual === null) {
+            return ['error' => 'El tipo no existe.'];
+        }
+        $codigo = $actual['codigo'];
         $valores = self::normalizar($formulario);
-        $errores = CodigoNotificacion::existe($codigo) ? self::validar($codigo, $valores) : ["El código '$codigo' no existe."];
+        $errores = self::validar($codigo, $valores);
         if ($errores) {
             return ['error' => implode(' ', $errores)];
         }
@@ -98,27 +135,39 @@ final class AdministrarTipos
     /**
      * Genera una notificación de ese tipo con datos de ejemplo, solo para el
      * administrador, aunque el tipo esté INACTIVO. El correo sigue las reglas
-     * normales del despacho (modo_operacion, desvío de prueba).
+     * normales del despacho (modo_operacion, desvío de prueba). Un tipo sin
+     * implementar no se puede probar: aún no se sabe qué datos llevará.
      */
-    public static function enviarPrueba(mysqli $mysqli, int $idEmpresa, string $codigo, int $idEmpleado): ?int
+    public static function enviarPrueba(mysqli $mysqli, int $idEmpresa, int $idTipo, int $idEmpleado): ?int
     {
-        $fila = (new TiposRepositorio(new Conexion($mysqli)))->filaDeEmpresa($codigo, $idEmpresa);
-        if ($fila === null) {
+        $tipo = (new TiposRepositorio(new Conexion($mysqli)))->buscarPorId($idTipo);
+        if ($tipo === null) {
             return null;
         }
-        $tipo = TipoNotificacion::desdeFila($fila);
+        if (!CodigoNotificacion::existe($tipo->codigo)) {
+            throw new TipoSinImplementar("El código {$tipo->codigo} aún no está implementado en el sistema.");
+        }
         return GenerarNotificacion::ejecutarConTipo($mysqli, $tipo, $idEmpresa, [$idEmpleado], [
-            'datos_plantilla' => self::datosDeEjemplo($codigo),
+            'datos_plantilla' => self::datosDeEjemplo($tipo->codigo),
             'url' => self::URL_PRUEBA,
             'tipo_registro' => NotificacionPrueba::TIPO_REGISTRO,
             'fecha_vencimiento' => (new DateTimeImmutable('+' . self::DIAS_VENCIMIENTO_DE_EJEMPLO . ' days'))->format('Y-m-d'),
         ]);
     }
 
+    /** Agrega a la fila lo que la administración muestra además de las columnas. */
+    private static function completar(array $fila): array
+    {
+        $fila['implementado'] = CodigoNotificacion::existe($fila['codigo']);
+        $fila['datos_permitidos'] = CodigoNotificacion::datosPermitidosSiExiste($fila['codigo']);
+        $fila['error_configuracion'] = self::errorDeConfiguracion($fila);
+        return $fila;
+    }
+
     private static function datosDeEjemplo(string $codigo): array
     {
         $datos = [];
-        foreach (CodigoNotificacion::datosPermitidos($codigo) as $nombre) {
+        foreach (CodigoNotificacion::datosPermitidosSiExiste($codigo) as $nombre) {
             $datos[$nombre] = "($nombre de ejemplo)";
         }
         return $datos;

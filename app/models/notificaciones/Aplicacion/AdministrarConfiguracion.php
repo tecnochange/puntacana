@@ -8,11 +8,7 @@ use Notificaciones\Infraestructura\BaseDatos\Conexion;
 use Notificaciones\Infraestructura\BaseDatos\ConfiguracionRepositorio;
 use Notificaciones\Infraestructura\BaseDatos\EmpleadosLector;
 
-/**
- * Configuración del despacho de correos desde la plataforma. Lo que se guarda
- * queda como valor propio de la empresa del administrador; los valores por
- * defecto (id_empresa = 0) solo se cambian por SQL.
- */
+/** Configuración del despacho de correos desde la plataforma (valores generales). */
 final class AdministrarConfiguracion
 {
     const CLAVES = [
@@ -25,22 +21,25 @@ final class AdministrarConfiguracion
     private const DIA_SEMANA_MINIMO = 1;
     private const DIA_SEMANA_MAXIMO = 7;
 
-    /** [clave => ['valor', 'es_de_la_empresa']] + 'empleados_prueba' => [id => nombre]. */
+    /**
+     * [clave => valor] + 'empleados_prueba' => [id => nombre]. $idEmpresa es la
+     * del administrador: los empleados de prueba se buscan en ella.
+     */
     public static function obtener(mysqli $mysqli, int $idEmpresa): array
     {
         $conexion = new Conexion($mysqli);
-        $configuracion = (new ConfiguracionRepositorio($conexion))->valoresDeEmpresa($idEmpresa);
+        $configuracion = (new ConfiguracionRepositorio($conexion))->valoresGenerales();
         foreach (self::CLAVES as $clave) {
             if (!isset($configuracion[$clave])) {
-                $configuracion[$clave] = ['valor' => '', 'es_de_la_empresa' => false];
+                $configuracion[$clave] = '';
             }
         }
-        $ids = self::idsDesdeCsv($configuracion['ids_empleados_prueba']['valor']);
+        $ids = self::idsDesdeCsv($configuracion['ids_empleados_prueba']);
         $configuracion['empleados_prueba'] = (new EmpleadosLector($conexion))->nombresDeEmpresa($ids, $idEmpresa);
         return $configuracion;
     }
 
-    /** Guarda el formulario como configuración de la empresa. Devuelve los errores ([] = guardado). */
+    /** Guarda el formulario. Devuelve los errores ([] = guardado). */
     public static function guardar(mysqli $mysqli, int $idEmpresa, array $formulario): array
     {
         $conexion = new Conexion($mysqli);
@@ -58,7 +57,7 @@ final class AdministrarConfiguracion
         $existentes = (new EmpleadosLector($conexion))->nombresDeEmpresa($idsPrueba, $idEmpresa);
         $inexistentes = array_diff($idsPrueba, array_map('intval', array_keys($existentes)));
         if ($inexistentes) {
-            $errores[] = 'Estos ids no son empleados de la empresa: ' . implode(', ', $inexistentes) . '.';
+            $errores[] = 'Estos ids no son empleados: ' . implode(', ', $inexistentes) . '.';
         }
 
         $correoDesvio = $valor('correo_desvio_prueba');
@@ -93,9 +92,9 @@ final class AdministrarConfiguracion
         ];
         $configuraciones = new ConfiguracionRepositorio($conexion);
         $ahora = new DateTimeImmutable();
-        $conexion->enTransaccion(function () use ($configuraciones, $idEmpresa, $nuevos, $ahora) {
+        $conexion->enTransaccion(function () use ($configuraciones, $nuevos, $ahora) {
             foreach ($nuevos as $clave => $valor) {
-                $configuraciones->guardarDeEmpresa($idEmpresa, $clave, $valor, $ahora);
+                $configuraciones->guardarGeneral($clave, $valor, $ahora);
             }
         });
         return [];

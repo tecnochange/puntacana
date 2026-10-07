@@ -120,8 +120,8 @@ final class TipoNotificacion
             throw new TipoMalConfigurado("Tipo '{$this->codigo}': intervalo_resumen y unidad_intervalo_resumen van juntos (ambos NULL o ambos con valor).");
         }
 
-        // Las plantillas solo pueden usar los datos del código y los base.
-        $permitidos = array_merge(CodigoNotificacion::datosPermitidos($this->codigo), Plantilla::DATOS_BASE);
+        // Las plantillas solo pueden usar los datos del código (si ya está implementado) y los base.
+        $permitidos = array_merge(CodigoNotificacion::datosPermitidosSiExiste($this->codigo), Plantilla::DATOS_BASE);
         $usados = array_merge(
             Plantilla::marcadores($this->plantillaTitulo),
             Plantilla::marcadores($this->plantillaMensaje),

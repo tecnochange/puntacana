@@ -30,7 +30,7 @@ $valor = function (string $clave) use ($configuracion, $errores) {
     if ($errores && isset($_POST[$clave])) {
         return (string) $_POST[$clave];
     }
-    return isset($configuracion[$clave]) ? $configuracion[$clave]['valor'] : '';
+    return isset($configuracion[$clave]) ? (string) $configuracion[$clave] : '';
 };
 $ventana = explode('-', $valor('ventana_envio'));
 $inicioVentana = $errores && isset($_POST['inicio_ventana']) ? (int) $_POST['inicio_ventana'] : (int) $ventana[0];
@@ -44,8 +44,8 @@ if (!$esAdministrador) {
 ?>
 
 <div class="notif">
-    <?php notificacionesPintarEncabezadoAdministracion('configuracion', 'Configuración de notificaciones', 'Cuándo y a quién se envían los correos en tu empresa.'); ?>
-    <?php notificacionesPintarResultado($errores, 'Configuración guardada para tu empresa.'); ?>
+    <?php notificacionesPintarEncabezadoAdministracion('configuracion', 'Configuración de notificaciones', 'Cuándo y a quién se envían los correos.'); ?>
+    <?php notificacionesPintarResultado($errores, 'Configuración guardada.'); ?>
 
     <form method="post" action="?pg=notificaciones/administrar/configuracion" class="notif-panel">
         <input type="hidden" name="guardar_configuracion" value="1">
@@ -131,7 +131,4 @@ if (!$esAdministrador) {
             <button type="submit" class="btn btn-primary"><i class="bx bx-save"></i> Guardar</button>
         </div>
     </form>
-    <p class="notif-aviso-alcance mt-3 mb-0">
-        <i class="bx bx-info-circle"></i> Lo que guardes aplica solo a tu empresa. Los valores por defecto, comunes a todas, se cambian desde el sistema.
-    </p>
 </div>

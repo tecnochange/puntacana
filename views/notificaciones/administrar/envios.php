@@ -32,7 +32,7 @@ if (!$esAdministrador) {
 
     <div class="notif-panel">
         <div class="notif-barra">
-            <span class="text-muted small">Últimos <?= count($envios) ?> intentos de tu empresa.</span>
+            <span class="text-muted small">Últimos <?= count($envios) ?> intentos de correo.</span>
             <div class="d-flex align-items-center gap-2">
                 <span id="resultado_proceso" class="small"></span>
                 <button type="button" class="btn btn-outline-primary btn-sm" id="bt_procesar_envios">
@@ -70,7 +70,7 @@ if (!$esAdministrador) {
         <?php endif; ?>
     </div>
     <p class="notif-aviso-alcance mt-3 mb-0">
-        <i class="bx bx-info-circle"></i> "Procesar envíos ahora" hace lo mismo que el proceso automático, solo para tu empresa, y respeta el modo de operación y la ventana de envío.
+        <i class="bx bx-info-circle"></i> "Procesar envíos ahora" hace lo mismo que el proceso automático y respeta el modo de operación y la ventana de envío.
     </p>
 </div>
 
