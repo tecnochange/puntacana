@@ -27,7 +27,7 @@ if (!$esAdministrador) {
 }
 ?>
 
-<div class="notif" style="max-width: 1280px;">
+<div class="notif">
     <?php notificacionesPintarEncabezadoAdministracion('envios', 'Envíos de correo', 'Qué pasó con cada correo: enviado, fallido u omitido y por qué.'); ?>
 
     <div class="notif-panel">

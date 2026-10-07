@@ -45,7 +45,7 @@ if ($tipo === null) {
 $marcadoresDisponibles = array_merge($tipo['datos_permitidos'], Plantilla::DATOS_BASE);
 ?>
 
-<div class="notif" style="max-width: 1280px;">
+<div class="notif">
     <?php notificacionesPintarEncabezadoAdministracion('tipos', $tipo['nombre'], 'Configura cómo se genera, a quién llega y cómo se ve esta notificación.'); ?>
     <?php notificacionesPintarResultado($errores, 'Configuración guardada para tu empresa.'); ?>
     <?php if ($tipo['error_configuracion'] !== null && $errores === null): ?>

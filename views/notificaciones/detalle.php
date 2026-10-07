@@ -14,7 +14,8 @@ $fecha = function (?string $valor, string $formato) {
 $registro = $notificacion ? notificacionesRegistroVisible($notificacion['tipo_registro'], $notificacion['id_registro']) : '';
 ?>
 
-<div class="container-fluid" style="max-width: 900px; margin: 0 auto;">
+<?php require __DIR__ . '/componentes/estilos.php'; ?>
+<div class="notif">
     <div class="mb-3">
         <a href="?pg=notificaciones/bandeja" class="btn btn-sm btn-outline-secondary"><i class="bx bx-arrow-back"></i> Volver a mis notificaciones</a>
     </div>
