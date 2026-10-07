@@ -5,6 +5,8 @@
 <style>
     /* Un solo ancho para todas las pantallas del módulo: cambiar de pantalla no mueve el contenido. */
     .notif { max-width: 1280px; margin: 0 auto; padding: 0 12px 40px; }
+    /* Reserva el espacio de la barra de desplazamiento: las pantallas largas no se corren respecto a las cortas. */
+    html { scrollbar-gutter: stable; }
     .notif-encabezado { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
     .notif-encabezado h3 { margin: 0; font-weight: 700; }
     .notif-encabezado p { margin: 2px 0 0; color: #6c757d; }
