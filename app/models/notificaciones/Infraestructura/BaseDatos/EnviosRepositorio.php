@@ -49,6 +49,19 @@ final class EnviosRepositorio
         );
     }
 
+    /** Fechas de los correos que sí le llegaron a un destinatario, del primero al último. */
+    public function fechasEnviadasADestinatario(int $idEmpresa, int $idDestinatario): array
+    {
+        $filas = $this->conexion->consultar(
+            'SELECT fecha_envio FROM Notificaciones_Envios
+             WHERE id_empresa = ? AND id_destinatario = ? AND resultado = ?
+             ORDER BY fecha_envio',
+            'iis',
+            [$idEmpresa, $idDestinatario, ResultadoEnvio::ENVIADO]
+        );
+        return array_column($filas, 'fecha_envio');
+    }
+
     /** Últimos intentos de correo de la empresa, con el título de su notificación. */
     public function listarDeEmpresa(int $idEmpresa, int $limite): array
     {

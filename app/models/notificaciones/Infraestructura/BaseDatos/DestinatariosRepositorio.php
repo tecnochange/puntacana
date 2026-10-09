@@ -106,8 +106,8 @@ final class DestinatariosRepositorio
     public function listarBandeja(int $idEmpresa, int $idEmpleado): array
     {
         return $this->conexion->consultar(
-            'SELECT n.id, n.clase, n.titulo, n.mensaje, n.estado, n.fecha_vencimiento, n.created_at,
-                    n.tipo_registro, n.id_registro, t.icono, t.color, d.fecha_lectura
+            'SELECT n.id, n.id_tipo, n.clase, n.titulo, n.mensaje, n.estado, n.fecha_vencimiento, n.created_at,
+                    n.tipo_registro, n.id_registro, t.nombre AS nombre_tipo, t.icono, t.color, d.fecha_lectura
              FROM Notificaciones_Destinatarios d
              JOIN Notificaciones n ON n.id = d.id_notificacion
              JOIN Notificaciones_Tipos t ON t.id = n.id_tipo
@@ -123,8 +123,9 @@ final class DestinatariosRepositorio
     public function notificacionDeEmpleado(int $idEmpresa, int $idEmpleado, int $idNotificacion): ?array
     {
         return $this->conexion->consultarUno(
-            'SELECT n.id, n.clase, n.titulo, n.mensaje, n.url, n.estado, n.fecha_vencimiento, n.created_at,
-                    n.tipo_registro, n.id_registro, t.nombre AS nombre_tipo, t.icono, t.color, d.fecha_lectura
+            'SELECT n.id, n.clase, n.titulo, n.mensaje, n.url, n.estado, n.fecha_vencimiento, n.fecha_cierre, n.created_at,
+                    n.tipo_registro, n.id_registro, n.id_empleado_autor, t.nombre AS nombre_tipo, t.icono, t.color,
+                    t.muestra_en_bandeja, d.id AS id_destinatario, d.fecha_lectura
              FROM Notificaciones_Destinatarios d
              JOIN Notificaciones n ON n.id = d.id_notificacion
              JOIN Notificaciones_Tipos t ON t.id = n.id_tipo
@@ -132,6 +133,29 @@ final class DestinatariosRepositorio
             'iii',
             [$idEmpresa, $idEmpleado, $idNotificacion]
         );
+    }
+
+    /**
+     * Id de la notificación vecina en la bandeja (mismo orden: created_at y luego id),
+     * la más reciente o la más antigua. NULL si es la primera o la última.
+     */
+    public function vecinaEnBandeja(int $idEmpresa, int $idEmpleado, string $creada, int $idNotificacion, bool $masReciente): ?int
+    {
+        $comparacion = $masReciente ? '>' : '<';
+        $orden = $masReciente ? 'ASC' : 'DESC';
+        $fila = $this->conexion->consultarUno(
+            "SELECT n.id
+             FROM Notificaciones_Destinatarios d
+             JOIN Notificaciones n ON n.id = d.id_notificacion
+             JOIN Notificaciones_Tipos t ON t.id = n.id_tipo
+             WHERE d.id_empresa = ? AND d.id_empleado = ? AND t.muestra_en_bandeja = TRUE
+               AND (n.created_at $comparacion ? OR (n.created_at = ? AND n.id $comparacion ?))
+             ORDER BY n.created_at $orden, n.id $orden
+             LIMIT 1",
+            'iissi',
+            [$idEmpresa, $idEmpleado, $creada, $creada, $idNotificacion]
+        );
+        return $fila ? (int) $fila['id'] : null;
     }
 
     public function marcarLeida(int $idEmpresa, int $idEmpleado, int $idNotificacion, DateTimeImmutable $ahora): void

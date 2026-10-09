@@ -7,6 +7,12 @@ const NOTIFICACIONES_ESTADOS_VISIBLES = [
     'VENCIDA' => ['Vencida', 'bg-danger'],
     'CANCELADA' => ['Cancelada', 'bg-secondary'],
 ];
+const NOTIFICACIONES_CLASES_VISIBLES = [
+    'TAREA' => ['Tarea', 'bx-task'],
+    'AVISO' => ['Aviso', 'bx-bell'],
+];
+const NOTIFICACIONES_DIAS_VENCE_PRONTO = 3;
+const NOTIFICACIONES_DIAS_URGENTE = 1;
 const NOTIFICACIONES_ICONO_POR_DEFECTO = 'bx-bell';
 const NOTIFICACIONES_COLOR_POR_DEFECTO = '#0d6efd';
 
@@ -43,4 +49,52 @@ function notificacionesRegistroVisible(?string $tipoRegistro, $idRegistro): stri
 function notificacionesEstadoVisible(string $estado): array
 {
     return NOTIFICACIONES_ESTADOS_VISIBLES[$estado] ?? [$estado, 'bg-secondary'];
+}
+
+/** [texto, ícono] de una clase (Tarea o Aviso). */
+function notificacionesClaseVisible(string $clase): array
+{
+    return NOTIFICACIONES_CLASES_VISIBLES[$clase] ?? [$clase, NOTIFICACIONES_ICONO_POR_DEFECTO];
+}
+
+/** Días de calendario de $desde a $hasta: negativo si $hasta ya pasó. */
+function notificacionesDiasEntre(DateTimeImmutable $desde, DateTimeImmutable $hasta): int
+{
+    return (int) $desde->setTime(0, 0)->diff($hasta->setTime(0, 0))->format('%r%a');
+}
+
+function notificacionesTiempoRelativo(DateTimeImmutable $fecha, DateTimeImmutable $ahora): string
+{
+    $segundos = $ahora->getTimestamp() - $fecha->getTimestamp();
+    if ($segundos < 60) {
+        return 'hace un momento';
+    }
+    if ($segundos < 3600) {
+        return 'hace ' . intdiv($segundos, 60) . ' min';
+    }
+    if ($segundos < 86400) {
+        return 'hace ' . intdiv($segundos, 3600) . ' h';
+    }
+    $dias = intdiv($segundos, 86400);
+    return $dias === 1 ? 'hace 1 día' : "hace $dias días";
+}
+
+/** [texto, clase del chip] del vencimiento; NULL si no tiene fecha. */
+function notificacionesEtiquetaVencimiento(?int $dias, ?DateTimeImmutable $fecha): ?array
+{
+    if ($dias === null) {
+        return null;
+    }
+    if ($dias < 0) {
+        $atraso = -$dias;
+        return [$atraso === 1 ? 'Venció ayer' : "Venció hace $atraso días", 'notif-chip--urgente'];
+    }
+    if ($dias === 0) {
+        return ['Vence hoy', 'notif-chip--urgente'];
+    }
+    if ($dias <= NOTIFICACIONES_DIAS_URGENTE) {
+        return ['Vence mañana', 'notif-chip--urgente'];
+    }
+    $clase = $dias <= NOTIFICACIONES_DIAS_VENCE_PRONTO ? 'notif-chip--pronto' : 'notif-chip--normal';
+    return ["Vence en $dias días · " . $fecha->format('d/m/Y'), $clase];
 }

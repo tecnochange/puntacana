@@ -118,7 +118,7 @@ if ($creacion && $creacion['id'] !== null) {
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <span class="notif-item__icono" style="--notif-color: <?= notificacionesColorSeguro($tipo['color']) ?>; width: 36px; height: 36px; font-size: 18px;">
+                                        <span class="notif-item__icono" style="--notif-color: <?= notificacionesColorSeguro($tipo['color']) ?>; width: 2.25rem; height: 2.25rem; font-size: 1.125rem;">
                                             <i class="bx <?= notificacionesIconoSeguro($tipo['icono']) ?>"></i>
                                         </span>
                                         <div>

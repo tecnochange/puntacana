@@ -5,9 +5,10 @@ require_once __DIR__ . '/componentes/presentacion.php';
 use Notificaciones\Aplicacion\ConsultarBandeja;
 use Notificaciones\Dominio\EstadoNotificacion;
 
-const NOTIFICACIONES_DIAS_VENCE_PRONTO = 3;
-const NOTIFICACIONES_DIAS_URGENTE = 1;
 const NOTIFICACIONES_DIAS_ESTA_SEMANA = 7;
+const NOTIFICACIONES_FILTROS_RECIBIDAS = ['' => 'Cualquier fecha', '0' => 'Hoy', '7' => 'Últimos 7 días', '30' => 'Últimos 30 días', '90' => 'Últimos 90 días'];
+const NOTIFICACIONES_FILTROS_VENCIMIENTO = ['' => 'Cualquier vencimiento', 'vencidas' => 'Vencidas o vencen hoy', '3' => 'Próximos 3 días', '7' => 'Próximos 7 días', 'sin_fecha' => 'Sin fecha de vencimiento'];
+const NOTIFICACIONES_ORDENES = ['recientes' => 'Más recientes', 'antiguas' => 'Más antiguas', 'vencimiento' => 'Vencen primero'];
 
 /** Lo que la vista necesita de cada notificación, ya calculado. */
 function notificacionesPresentar(array $fila, DateTimeImmutable $ahora): array
@@ -16,10 +17,12 @@ function notificacionesPresentar(array $fila, DateTimeImmutable $ahora): array
     $creada = new DateTimeImmutable($fila['created_at']);
     $fechaVencimiento = $fila['fecha_vencimiento'] ? new DateTimeImmutable($fila['fecha_vencimiento']) : null;
     $estaAbierta = $fila['estado'] === EstadoNotificacion::ABIERTA;
-    $diasParaVencer = $fechaVencimiento ? (int) $hoy->diff($fechaVencimiento->setTime(0, 0))->format('%r%a') : null;
+    $diasParaVencer = $fechaVencimiento ? notificacionesDiasEntre($hoy, $fechaVencimiento) : null;
 
     return [
         'id' => (int) $fila['id'],
+        'id_tipo' => (int) $fila['id_tipo'],
+        'nombre_tipo' => $fila['nombre_tipo'],
         'titulo' => $fila['titulo'],
         'mensaje' => $fila['mensaje'],
         'icono' => notificacionesIconoSeguro($fila['icono']),
@@ -28,32 +31,20 @@ function notificacionesPresentar(array $fila, DateTimeImmutable $ahora): array
         'grupo' => notificacionesGrupoFecha($creada, $hoy),
         'hace' => notificacionesTiempoRelativo($creada, $ahora),
         'creada' => $creada->format('d/m/Y H:i'),
+        'marca_creada' => $creada->getTimestamp(),
+        'dias_desde_creada' => notificacionesDiasEntre($creada, $hoy),
+        'dias_para_vencer' => $diasParaVencer,
         'vencimiento' => $estaAbierta ? notificacionesEtiquetaVencimiento($diasParaVencer, $fechaVencimiento) : null,
         'vence_pronto' => $estaAbierta && $diasParaVencer !== null && $diasParaVencer <= NOTIFICACIONES_DIAS_VENCE_PRONTO,
         'registro' => notificacionesRegistroVisible($fila['tipo_registro'], $fila['id_registro']),
+        'codigo_estado' => $fila['estado'],
         'estado' => $estaAbierta ? null : notificacionesEstadoVisible($fila['estado']),
     ];
 }
 
-/** [texto, clase] del chip de vencimiento; NULL si no tiene fecha. */
-function notificacionesEtiquetaVencimiento(?int $dias, ?DateTimeImmutable $fecha): ?array
-{
-    if ($dias === null) {
-        return null;
-    }
-    if ($dias <= 0) {
-        return ['Vence hoy', 'notif-chip--urgente'];
-    }
-    if ($dias <= NOTIFICACIONES_DIAS_URGENTE) {
-        return ['Vence mañana', 'notif-chip--urgente'];
-    }
-    $clase = $dias <= NOTIFICACIONES_DIAS_VENCE_PRONTO ? 'notif-chip--pronto' : 'notif-chip--normal';
-    return ["Vence en $dias días · " . $fecha->format('d/m/Y'), $clase];
-}
-
 function notificacionesGrupoFecha(DateTimeImmutable $fecha, DateTimeImmutable $hoy): string
 {
-    $diasAtras = (int) $fecha->setTime(0, 0)->diff($hoy)->format('%r%a');
+    $diasAtras = notificacionesDiasEntre($fecha, $hoy);
     if ($diasAtras <= 0) {
         return 'Hoy';
     }
@@ -63,20 +54,19 @@ function notificacionesGrupoFecha(DateTimeImmutable $fecha, DateTimeImmutable $h
     return $diasAtras < NOTIFICACIONES_DIAS_ESTA_SEMANA ? 'Esta semana' : 'Anteriores';
 }
 
-function notificacionesTiempoRelativo(DateTimeImmutable $fecha, DateTimeImmutable $ahora): string
+/** [id_tipo => nombre] de los tipos que aparecen en la bandeja, por nombre. */
+function notificacionesTiposPresentes(array $notificaciones): array
 {
-    $segundos = $ahora->getTimestamp() - $fecha->getTimestamp();
-    if ($segundos < 60) {
-        return 'hace un momento';
+    $tipos = array_column($notificaciones, 'nombre_tipo', 'id_tipo');
+    asort($tipos, SORT_NATURAL | SORT_FLAG_CASE);
+    return $tipos;
+}
+
+function notificacionesPintarOpciones(array $opciones): void
+{
+    foreach ($opciones as $valor => $texto) {
+        echo '<option value="' . notificacionesEscapar((string) $valor) . '">' . notificacionesEscapar($texto) . '</option>';
     }
-    if ($segundos < 3600) {
-        return 'hace ' . intdiv($segundos, 60) . ' min';
-    }
-    if ($segundos < 86400) {
-        return 'hace ' . intdiv($segundos, 3600) . ' h';
-    }
-    $dias = intdiv($segundos, 86400);
-    return $dias === 1 ? 'hace 1 día' : "hace $dias días";
 }
 
 /** Agrupa por 'Hoy', 'Ayer', ... conservando el orden (más recientes primero). */
@@ -95,7 +85,10 @@ function notificacionesPintarItem(array $n): void
     $claseLeida = $n['leida'] ? '' : ' notif-item--no-leida';
     ?>
     <article class="notif-item<?= $claseLeida ?>" id="notificacion_<?= $n['id'] ?>" style="--notif-color: <?= $n['color'] ?>"
-             data-buscar="<?= $e(mb_strtolower($n['titulo'] . ' ' . $n['mensaje'] . ' ' . $n['registro'])) ?>">
+             data-buscar="<?= $e(mb_strtolower($n['titulo'] . ' ' . $n['mensaje'] . ' ' . $n['registro'] . ' ' . $n['nombre_tipo'])) ?>"
+             data-leida="<?= $n['leida'] ? 1 : 0 ?>" data-tipo="<?= $n['id_tipo'] ?>" data-estado="<?= $e($n['codigo_estado']) ?>"
+             data-grupo="<?= $e($n['grupo']) ?>" data-creada="<?= $n['marca_creada'] ?>" data-dias-creada="<?= $n['dias_desde_creada'] ?>"
+             data-dias-vencer="<?= $n['dias_para_vencer'] === null ? '' : $n['dias_para_vencer'] ?>">
         <div class="notif-item__icono"><i class="bx <?= $n['icono'] ?>"></i></div>
         <div class="notif-item__cuerpo">
             <div class="notif-item__titulo">
@@ -107,6 +100,7 @@ function notificacionesPintarItem(array $n): void
             <?php endif; ?>
             <div class="notif-item__meta">
                 <span title="<?= $e($n['creada']) ?>"><i class="bx bx-time-five"></i> <?= $e($n['hace']) ?></span>
+                <span class="notif-item__tipo"><i class="bx bx-purchase-tag-alt"></i> <?= $e($n['nombre_tipo']) ?></span>
                 <?php if ($n['vencimiento']): ?>
                     <span class="notif-chip <?= $n['vencimiento'][1] ?>"><i class="bx bx-calendar-exclamation"></i> <?= $e($n['vencimiento'][0]) ?></span>
                 <?php endif; ?>
@@ -141,6 +135,7 @@ function notificacionesPintarLista(array $notificaciones, string $icono, string 
         <?php
         return;
     }
+    echo '<div class="notif-lista">';
     foreach (notificacionesAgruparPorFecha($notificaciones) as $grupo => $items) {
         echo '<div class="notif-grupo"><div class="notif-grupo__titulo">' . notificacionesEscapar($grupo) . '</div>';
         foreach ($items as $notificacion) {
@@ -148,7 +143,9 @@ function notificacionesPintarLista(array $notificaciones, string $icono, string 
         }
         echo '</div>';
     }
-    echo '<div class="notif-sin-resultados d-none"><i class="bx bx-search-alt"></i> Ninguna notificación coincide con la búsqueda.</div>';
+    echo '</div>';
+    echo '<div class="notif-sin-resultados d-none"><i class="bx bx-filter-alt"></i><p>Ninguna notificación coincide con los filtros.</p>'
+        . '<button type="button" class="btn btn-sm btn-outline-primary notif-limpiar-filtros">Limpiar filtros</button></div>';
 }
 
 $bandeja = ConsultarBandeja::ejecutar($connect_admin, (int) $user_log['id_empresa'], (int) $user_log['id']);
@@ -165,6 +162,8 @@ $historial = $presentar($bandeja['historial']);
 $cantidadVencenPronto = count(array_filter($pendientes, function (array $n) {
     return $n['vence_pronto'];
 }));
+$tiposPresentes = notificacionesTiposPresentes(array_merge($pendientes, $avisos, $historial));
+$estadosCerrados = array_diff_key(NOTIFICACIONES_ESTADOS_VISIBLES, [EstadoNotificacion::ABIERTA => true]);
 ?>
 
 <?php require __DIR__ . '/componentes/estilos.php'; ?>
@@ -183,18 +182,18 @@ $cantidadVencenPronto = count(array_filter($pendientes, function (array $n) {
     </div>
 
     <div class="notif-resumen">
-        <div class="notif-tarjeta notif-tarjeta--pendientes">
+        <button type="button" class="notif-tarjeta notif-tarjeta--pendientes notif-atajo" data-atajo="pendientes" title="Ver tus pendientes">
             <div class="notif-tarjeta__icono"><i class="bx bx-task"></i></div>
             <div><div class="notif-tarjeta__valor"><?= count($pendientes) ?></div><div class="notif-tarjeta__etiqueta">Pendientes</div></div>
-        </div>
-        <div class="notif-tarjeta notif-tarjeta--pronto">
+        </button>
+        <button type="button" class="notif-tarjeta notif-tarjeta--pronto notif-atajo" data-atajo="pronto" title="Ver los pendientes que vencen pronto">
             <div class="notif-tarjeta__icono"><i class="bx bx-alarm-exclamation"></i></div>
             <div><div class="notif-tarjeta__valor"><?= $cantidadVencenPronto ?></div><div class="notif-tarjeta__etiqueta">Vencen en <?= NOTIFICACIONES_DIAS_VENCE_PRONTO ?> días o menos</div></div>
-        </div>
-        <div class="notif-tarjeta notif-tarjeta--sin-leer">
+        </button>
+        <button type="button" class="notif-tarjeta notif-tarjeta--sin-leer notif-atajo" data-atajo="sin_leer" title="Ver solo las que no has leído">
             <div class="notif-tarjeta__icono"><i class="bx bx-bell"></i></div>
-            <div><div class="notif-tarjeta__valor"><?= (int) $bandeja['cantidad_no_leidas'] ?></div><div class="notif-tarjeta__etiqueta">Sin leer</div></div>
-        </div>
+            <div><div class="notif-tarjeta__valor" id="notif_total_sin_leer"><?= (int) $bandeja['cantidad_no_leidas'] ?></div><div class="notif-tarjeta__etiqueta">Sin leer</div></div>
+        </button>
     </div>
 
     <div class="notif-panel">
@@ -212,14 +211,70 @@ $cantidadVencenPronto = count(array_filter($pendientes, function (array $n) {
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab_historial" type="button" role="tab">
-                        <i class="bx bx-history"></i> Historial
+                        <i class="bx bx-history"></i> Historial <span class="notif-contador"><?= count($historial) ?></span>
                     </button>
                 </li>
             </ul>
-            <div class="notif-buscador">
-                <i class="bx bx-search"></i>
-                <input type="search" class="form-control" id="notif_buscar" placeholder="Buscar notificación...">
+            <div class="notif-barra__derecha">
+                <div class="notif-buscador">
+                    <i class="bx bx-search"></i>
+                    <input type="search" class="form-control" id="notif_buscar" placeholder="Buscar notificación..." title="Busca en el título, el mensaje y el tipo">
+                </div>
+                <button type="button" class="btn btn-light notif-boton-filtros" id="bt_filtros" aria-expanded="true" aria-controls="notif_filtros">
+                    <i class="bx bx-slider-alt"></i> Filtros <span class="notif-contador d-none" id="notif_cantidad_filtros">0</span>
+                </button>
             </div>
+        </div>
+
+        <div class="notif-filtros" id="notif_filtros">
+            <div class="notif-filtro">
+                <span class="notif-filtro__etiqueta">Lectura</span>
+                <div class="notif-segmentos" role="group" aria-label="Filtrar por lectura">
+                    <button type="button" class="active" data-lectura="">Todas</button>
+                    <button type="button" data-lectura="0">Sin leer</button>
+                    <button type="button" data-lectura="1">Leídas</button>
+                </div>
+            </div>
+            <div class="notif-filtro">
+                <label class="notif-filtro__etiqueta" for="notif_filtro_tipo">Tipo</label>
+                <select class="form-select form-select-sm" id="notif_filtro_tipo" data-filtro="tipo">
+                    <option value="">Todos los tipos</option>
+                    <?php notificacionesPintarOpciones($tiposPresentes); ?>
+                </select>
+            </div>
+            <div class="notif-filtro">
+                <label class="notif-filtro__etiqueta" for="notif_filtro_recibidas">Recibidas</label>
+                <select class="form-select form-select-sm" id="notif_filtro_recibidas" data-filtro="recibidas">
+                    <?php notificacionesPintarOpciones(NOTIFICACIONES_FILTROS_RECIBIDAS); ?>
+                </select>
+            </div>
+            <div class="notif-filtro">
+                <label class="notif-filtro__etiqueta" for="notif_filtro_vencimiento">Vencimiento</label>
+                <select class="form-select form-select-sm" id="notif_filtro_vencimiento" data-filtro="vencimiento">
+                    <?php notificacionesPintarOpciones(NOTIFICACIONES_FILTROS_VENCIMIENTO); ?>
+                </select>
+            </div>
+            <div class="notif-filtro d-none" id="notif_filtro_estado_contenedor">
+                <label class="notif-filtro__etiqueta" for="notif_filtro_estado">Estado</label>
+                <select class="form-select form-select-sm" id="notif_filtro_estado" data-filtro="estado">
+                    <option value="">Todos los estados</option>
+                    <?php notificacionesPintarOpciones(array_map(function (array $estado) {
+                        return $estado[0];
+                    }, $estadosCerrados)); ?>
+                </select>
+            </div>
+            <div class="notif-filtro">
+                <label class="notif-filtro__etiqueta" for="notif_orden">Ordenar</label>
+                <select class="form-select form-select-sm" id="notif_orden" data-filtro="orden">
+                    <?php notificacionesPintarOpciones(NOTIFICACIONES_ORDENES); ?>
+                </select>
+            </div>
+        </div>
+
+        <div class="notif-activos d-none" id="notif_activos">
+            <span class="notif-activos__resultado" id="notif_resultado"></span>
+            <div class="notif-activos__chips" id="notif_chips"></div>
+            <button type="button" class="btn btn-link btn-sm notif-limpiar-filtros">Limpiar filtros</button>
         </div>
 
         <div class="tab-content notif-contenido">
@@ -238,13 +293,230 @@ $cantidadVencenPronto = count(array_filter($pendientes, function (array $n) {
 
 <script>
     $(document).ready(function () {
-        $('.bt_marcar_leida').on('click', function () {
+        var CLAVE_GUARDADO = 'notificaciones_bandeja_filtros';
+        var DIAS_VENCE_PRONTO = <?= NOTIFICACIONES_DIAS_VENCE_PRONTO ?>;
+        var FILTROS_VACIOS = { texto: '', lectura: '', tipo: '', recibidas: '', vencimiento: '', estado: '', orden: 'recientes', pestana: 'tab_pendientes' };
+        var filtros = $.extend({}, FILTROS_VACIOS, leerGuardado());
+
+        // Cada panel guarda sus notificaciones una vez; filtrar y ordenar vuelve a armar la lista a partir de ellas.
+        var paneles = {};
+        $('.notif-contenido .tab-pane').each(function () {
+            paneles[this.id] = { panel: $(this), items: $(this).find('.notif-item').toArray() };
+        });
+
+        function leerGuardado() {
+            try {
+                return JSON.parse(sessionStorage.getItem(CLAVE_GUARDADO)) || {};
+            } catch (error) {
+                return {};
+            }
+        }
+
+        function guardar() {
+            try {
+                sessionStorage.setItem(CLAVE_GUARDADO, JSON.stringify(filtros));
+            } catch (error) {
+                // Sin almacenamiento (navegación privada): los filtros solo duran mientras la página esté abierta.
+            }
+        }
+
+        function numero(item, atributo) {
+            var valor = item.getAttribute(atributo);
+            return valor === '' || valor === null ? null : parseInt(valor, 10);
+        }
+
+        // El estado solo filtra el historial: lo abierto siempre está ABIERTA.
+        function cumple(item, idPanel) {
+            var diasVencer = numero(item, 'data-dias-vencer');
+            if (filtros.texto !== '' && item.getAttribute('data-buscar').indexOf(filtros.texto) === -1) return false;
+            if (filtros.lectura !== '' && item.getAttribute('data-leida') !== filtros.lectura) return false;
+            if (filtros.tipo !== '' && item.getAttribute('data-tipo') !== filtros.tipo) return false;
+            if (filtros.estado !== '' && idPanel === 'tab_historial' && item.getAttribute('data-estado') !== filtros.estado) return false;
+            if (filtros.recibidas !== '' && numero(item, 'data-dias-creada') > parseInt(filtros.recibidas, 10)) return false;
+            if (filtros.vencimiento === 'sin_fecha') return diasVencer === null;
+            if (filtros.vencimiento === 'vencidas') return diasVencer !== null && diasVencer <= 0;
+            if (filtros.vencimiento !== '') return diasVencer !== null && diasVencer >= 0 && diasVencer <= parseInt(filtros.vencimiento, 10);
+            return true;
+        }
+
+        function grupoVencimiento(item) {
+            var dias = numero(item, 'data-dias-vencer');
+            if (dias === null) return 'Sin fecha de vencimiento';
+            if (dias < 0) return 'Vencidas';
+            if (dias === 0) return 'Vencen hoy';
+            if (dias <= DIAS_VENCE_PRONTO) return 'Próximos ' + DIAS_VENCE_PRONTO + ' días';
+            if (dias <= 7) return 'Esta semana';
+            return 'Más adelante';
+        }
+
+        function comparar(a, b) {
+            var creadaA = numero(a, 'data-creada'), creadaB = numero(b, 'data-creada');
+            if (filtros.orden === 'antiguas') return creadaA - creadaB;
+            if (filtros.orden === 'vencimiento') {
+                var venceA = numero(a, 'data-dias-vencer'), venceB = numero(b, 'data-dias-vencer');
+                if (venceA !== venceB) {
+                    if (venceA === null) return 1;
+                    if (venceB === null) return -1;
+                    return venceA - venceB;
+                }
+            }
+            return creadaB - creadaA;
+        }
+
+        function armarLista(datos, visibles) {
+            var lista = datos.panel.find('.notif-lista');
+            if (!lista.length) return;
+            $(datos.items).detach();
+            lista.empty();
+            var grupoActual = null, contenedor = null;
+            visibles.forEach(function (item) {
+                var grupo = filtros.orden === 'vencimiento' ? grupoVencimiento(item) : item.getAttribute('data-grupo');
+                if (grupo !== grupoActual) {
+                    grupoActual = grupo;
+                    contenedor = $('<div class="notif-grupo"></div>').append($('<div class="notif-grupo__titulo"></div>').text(grupo));
+                    lista.append(contenedor);
+                }
+                contenedor.append(item);
+            });
+            datos.panel.find('.notif-sin-resultados').toggleClass('d-none', datos.items.length === 0 || visibles.length > 0);
+        }
+
+        function cantidadFiltrosActivos() {
+            var cantidad = 0;
+            ['lectura', 'tipo', 'recibidas', 'vencimiento'].forEach(function (clave) {
+                if (filtros[clave] !== '') cantidad++;
+            });
+            if (filtros.estado !== '' && filtros.pestana === 'tab_historial') cantidad++;
+            return cantidad;
+        }
+
+        function textoDeSelect(id) {
+            return $('#' + id + ' option:selected').text();
+        }
+
+        function pintarChips(totalPestana, visiblesPestana) {
+            var chips = [];
+            if (filtros.texto !== '') chips.push(['texto', '“' + filtros.texto + '”']);
+            if (filtros.lectura !== '') chips.push(['lectura', filtros.lectura === '0' ? 'Sin leer' : 'Leídas']);
+            if (filtros.tipo !== '') chips.push(['tipo', textoDeSelect('notif_filtro_tipo')]);
+            if (filtros.recibidas !== '') chips.push(['recibidas', 'Recibidas: ' + textoDeSelect('notif_filtro_recibidas').toLowerCase()]);
+            if (filtros.vencimiento !== '') chips.push(['vencimiento', textoDeSelect('notif_filtro_vencimiento')]);
+            if (filtros.estado !== '' && filtros.pestana === 'tab_historial') chips.push(['estado', textoDeSelect('notif_filtro_estado')]);
+
+            var contenedor = $('#notif_chips').empty();
+            chips.forEach(function (chip) {
+                var boton = $('<button type="button" class="notif-chip notif-chip--filtro"></button>').attr('data-quitar', chip[0]).attr('title', 'Quitar filtro');
+                boton.text(chip[1]).append(' <i class="bx bx-x"></i>');
+                contenedor.append(boton);
+            });
+            $('#notif_resultado').text('Mostrando ' + visiblesPestana + ' de ' + totalPestana);
+            $('#notif_activos').toggleClass('d-none', chips.length === 0);
+
+            var cantidad = cantidadFiltrosActivos();
+            $('#notif_cantidad_filtros').text(cantidad).toggleClass('d-none', cantidad === 0);
+        }
+
+        function aplicar() {
+            var totalPestana = 0, visiblesPestana = 0;
+            $.each(paneles, function (id, datos) {
+                var visibles = datos.items.filter(function (item) {
+                    return cumple(item, id);
+                }).sort(comparar);
+                armarLista(datos, visibles);
+                $('[data-bs-target="#' + id + '"] .notif-contador').text(visibles.length);
+                if (id === filtros.pestana) {
+                    totalPestana = datos.items.length;
+                    visiblesPestana = visibles.length;
+                }
+            });
+            $('#notif_filtro_estado_contenedor').toggleClass('d-none', filtros.pestana !== 'tab_historial');
+            pintarChips(totalPestana, visiblesPestana);
+            guardar();
+        }
+
+        function sincronizarControles() {
+            $('#notif_buscar').val(filtros.texto);
+            $('[data-lectura]').removeClass('active').filter('[data-lectura="' + filtros.lectura + '"]').addClass('active');
+            $('[data-filtro]').each(function () {
+                var clave = $(this).data('filtro');
+                $(this).val(filtros[clave]);
+                // Un valor guardado que ya no existe (p. ej. un tipo sin notificaciones) vuelve a "todos".
+                if ($(this).val() === null) {
+                    filtros[clave] = FILTROS_VACIOS[clave];
+                    $(this).val(filtros[clave]);
+                }
+            });
+        }
+
+        function mostrarPestana(id) {
+            filtros.pestana = id;
+            // El clic lo atiende el data-api de Bootstrap, igual que si lo hiciera la persona.
+            $('[data-bs-target="#' + id + '"]').get(0).click();
+        }
+
+        function limpiar() {
+            filtros = $.extend({}, FILTROS_VACIOS, { pestana: filtros.pestana });
+            sincronizarControles();
+            aplicar();
+        }
+
+        $('#notif_buscar').on('input', function () {
+            filtros.texto = $(this).val().toLowerCase().trim();
+            aplicar();
+        });
+        $('[data-lectura]').on('click', function () {
+            filtros.lectura = String($(this).data('lectura'));
+            $('[data-lectura]').removeClass('active');
+            $(this).addClass('active');
+            aplicar();
+        });
+        $('[data-filtro]').on('change', function () {
+            filtros[$(this).data('filtro')] = $(this).val();
+            aplicar();
+        });
+        $('[data-bs-toggle="tab"]').on('shown.bs.tab', function () {
+            filtros.pestana = $(this).data('bs-target').substring(1);
+            aplicar();
+        });
+        $(document).on('click', '.notif-limpiar-filtros', limpiar);
+        $(document).on('click', '[data-quitar]', function () {
+            var clave = $(this).data('quitar');
+            filtros[clave] = FILTROS_VACIOS[clave];
+            sincronizarControles();
+            aplicar();
+        });
+        $('#bt_filtros').on('click', function () {
+            var oculto = $('#notif_filtros').toggleClass('d-none').hasClass('d-none');
+            $(this).attr('aria-expanded', oculto ? 'false' : 'true');
+        });
+
+        // Atajos de las tarjetas del resumen.
+        $('.notif-atajo').on('click', function () {
+            var atajo = $(this).data('atajo');
+            var pestanaActual = filtros.pestana;
+            filtros = $.extend({}, FILTROS_VACIOS);
+            if (atajo === 'pronto') {
+                filtros.vencimiento = String(DIAS_VENCE_PRONTO);
+                filtros.orden = 'vencimiento';
+            }
+            if (atajo === 'sin_leer') {
+                filtros.lectura = '0';
+                filtros.pestana = pestanaActual;
+            }
+            sincronizarControles();
+            mostrarPestana(filtros.pestana);
+            aplicar();
+        });
+
+        $(document).on('click', '.bt_marcar_leida', function () {
             var boton = $(this);
             $.post('api/notificaciones/marcar_leida.php', { id: boton.data('id') }, function (respuesta) {
                 if (respuesta.status === 'success') {
                     var item = $('#notificacion_' + boton.data('id'));
-                    item.removeClass('notif-item--no-leida').find('.notif-punto').remove();
+                    item.removeClass('notif-item--no-leida').attr('data-leida', '1').find('.notif-punto').remove();
                     boton.remove();
+                    $('#notif_total_sin_leer').text(Math.max(0, parseInt($('#notif_total_sin_leer').text(), 10) - 1));
+                    aplicar();
                 }
             }, 'json');
         });
@@ -257,21 +529,22 @@ $cantidadVencenPronto = count(array_filter($pendientes, function (array $n) {
             }, 'json');
         });
 
-        // Filtra en el navegador por título, mensaje y registro; oculta los grupos que quedan vacíos.
-        $('#notif_buscar').on('input', function () {
-            var texto = $(this).val().toLowerCase().trim();
-            $('.notif-contenido .tab-pane').each(function () {
-                var panel = $(this);
-                panel.find('.notif-item').each(function () {
-                    $(this).toggleClass('d-none', texto !== '' && String($(this).data('buscar')).indexOf(texto) === -1);
-                });
-                panel.find('.notif-grupo').each(function () {
-                    $(this).toggleClass('d-none', $(this).find('.notif-item:not(.d-none)').length === 0);
-                });
-                var hayItems = panel.find('.notif-item').length > 0;
-                var hayVisibles = panel.find('.notif-item:not(.d-none)').length > 0;
-                panel.find('.notif-sin-resultados').toggleClass('d-none', !hayItems || hayVisibles);
-            });
-        });
+        // En pantallas pequeñas los filtros empiezan plegados para que la lista se vea primero.
+        if (window.matchMedia('(max-width: 48rem)').matches) {
+            $('#bt_filtros').trigger('click');
+        }
+        sincronizarControles();
+        if (!paneles[filtros.pestana]) {
+            filtros.pestana = 'tab_pendientes';
+        }
+        if (filtros.pestana !== 'tab_pendientes') {
+            // Al cargar se activa sin animación: si alguien hace clic mientras dura la transición, Bootstrap lo ignora
+            // y la pestaña y su contenido quedan desfasados.
+            $('.notif-pestanas .nav-link').removeClass('active').attr('aria-selected', 'false');
+            $('[data-bs-target="#' + filtros.pestana + '"]').addClass('active').attr('aria-selected', 'true');
+            $('.notif-contenido .tab-pane').removeClass('active show');
+            $('#' + filtros.pestana).addClass('active show');
+        }
+        aplicar();
     });
 </script>

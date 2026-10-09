@@ -170,7 +170,7 @@ $marcadoresDisponibles = array_merge($tipo['datos_permitidos'], Plantilla::DATOS
                         </div>
                         <div class="col-12">
                             <label class="form-label" for="plantilla_cuerpo_correo">Cuerpo del correo (HTML)</label>
-                            <textarea class="form-control notif-plantilla font-monospace" id="plantilla_cuerpo_correo" name="plantilla_cuerpo_correo" rows="6" style="font-size: 13px;"><?= $e($campo('plantilla_cuerpo_correo')) ?></textarea>
+                            <textarea class="form-control notif-plantilla font-monospace" id="plantilla_cuerpo_correo" name="plantilla_cuerpo_correo" rows="6" style="font-size: .8125rem;"><?= $e($campo('plantilla_cuerpo_correo')) ?></textarea>
                         </div>
                     </div>
                 </div>
