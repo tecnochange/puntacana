@@ -59,7 +59,10 @@
     .notif-item:hover { box-shadow: 0 .25rem .875rem rgba(16, 24, 40, .08); }
     /* El enlace del título cubre toda la tarjeta: cualquier clic abre el detalle. */
     .notif-item__enlace::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
-    .notif-item:hover .notif-item__acciones .btn { background: #e7f0ff; color: #0d6efd; }
+    .notif-item__acciones { align-self: center; }
+    .notif-item__ir { width: 2.25rem; height: 2.25rem; border-radius: 50%; display: grid; place-items: center; font-size: 1.5rem;
+        color: #adb5bd; background: #f8f9fb; transition: background .15s, color .15s, transform .15s; }
+    .notif-item:hover .notif-item__ir { background: #e7f0ff; color: #0d6efd; transform: translateX(.125rem); }
     .notif-item--no-leida { background: #f8faff; border-left-color: var(--notif-color); }
     .notif-item__icono { width: 2.625rem; height: 2.625rem; border-radius: 50%; display: grid; place-items: center; font-size: 1.25rem; flex-shrink: 0;
         color: var(--notif-color); background: #f1f3f5; background: color-mix(in srgb, var(--notif-color) 12%, #fff); }
@@ -179,7 +182,7 @@
         .notif-filtro { min-width: 0; flex: 1 1 8.75rem; }
         .notif-detalle-cabecera { flex-wrap: wrap; padding: 1.125rem; }
         .notif-detalle-cabecera__titulo { font-size: 1.375rem; }
-        .notif-item { flex-wrap: wrap; }
-        .notif-item__acciones { width: 100%; justify-content: flex-end; }
+        .notif-item { flex-wrap: nowrap; }
+        .notif-item__acciones { width: auto; }
     }
 </style>

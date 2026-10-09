@@ -113,7 +113,7 @@ function notificacionesPintarItem(array $n): void
             </div>
         </div>
         <div class="notif-item__acciones">
-            <span class="btn btn-sm btn-light" aria-hidden="true"><i class="bx bx-show"></i> Ver</span>
+            <span class="notif-item__ir" aria-hidden="true"><i class="bx bx-chevron-right"></i></span>
         </div>
     </article>
     <?php
