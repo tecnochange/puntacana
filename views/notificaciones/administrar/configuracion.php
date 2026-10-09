@@ -10,7 +10,7 @@ use Notificaciones\Infraestructura\Web\Peticion;
 const NOTIFICACIONES_MODOS_VISIBLES = [
     ModoOperacion::APAGADO => ['Apagado', 'No se envía ningún correo. Las notificaciones siguen llegando a la bandeja.'],
     ModoOperacion::SOLO_BANDEJA => ['Solo bandeja', 'Los correos pendientes se descartan y quedan registrados como omitidos.'],
-    ModoOperacion::PRUEBA => ['Prueba', 'Solo los empleados de prueba reciben notificaciones, en la bandeja y por correo (o en el correo de desvío, si lo indicas).'],
+    ModoOperacion::PRUEBA => ['Prueba', 'Todos los correos llegan al correo de desvío; ningún empleado recibe correo. Los flujos reales solo notifican a los empleados de la lista.'],
     ModoOperacion::ACTIVO => ['Activo', 'Los correos salen a todos los destinatarios.'],
 ];
 const NOTIFICACIONES_DIAS_SEMANA = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => 'Domingo'];
@@ -67,11 +67,12 @@ if (!$esAdministrador) {
 
         <div class="notif-seccion">
             <h6>Pruebas</h6>
-            <p class="notif-ayuda">Aplica solo en modo Prueba: nadie fuera de esta lista recibe notificaciones.</p>
+            <p class="notif-ayuda">Aplica solo en modo Prueba.</p>
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label" for="ids_empleados_prueba">Ids de empleados de prueba</label>
+                    <label class="form-label" for="ids_empleados_prueba">Empleados de prueba (opcional)</label>
                     <input type="text" class="form-control" id="ids_empleados_prueba" name="ids_empleados_prueba" placeholder="Ej.: 45, 78" value="<?= $e($valor('ids_empleados_prueba')) ?>">
+                    <div class="small text-muted mt-1">Ids separados por coma. Solo ellos reciben en su bandeja lo que generen los flujos reales; vacío = nadie. El botón "Enviarme una prueba" no lo necesita.</div>
                     <?php if (!empty($configuracion['empleados_prueba'])): ?>
                         <div class="small text-muted mt-1">
                             <?php foreach ($configuracion['empleados_prueba'] as $id => $nombre): ?>
@@ -81,9 +82,9 @@ if (!$esAdministrador) {
                     <?php endif; ?>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label" for="correo_desvio_prueba">Correo de desvío</label>
-                    <input type="email" class="form-control" id="correo_desvio_prueba" name="correo_desvio_prueba" placeholder="Vacío = correo de cada empleado" value="<?= $e($valor('correo_desvio_prueba')) ?>">
-                    <div class="small text-muted mt-1">Todo correo de prueba llega aquí, con el asunto marcado [PRUEBA].</div>
+                    <label class="form-label" for="correo_desvio_prueba">Correo de desvío (obligatorio en modo Prueba)</label>
+                    <input type="email" class="form-control" id="correo_desvio_prueba" name="correo_desvio_prueba" placeholder="tu-correo@ejemplo.com" value="<?= $e($valor('correo_desvio_prueba')) ?>">
+                    <div class="small text-muted mt-1">Todos los correos llegan aquí, con el asunto marcado [PRUEBA para …].</div>
                 </div>
             </div>
         </div>

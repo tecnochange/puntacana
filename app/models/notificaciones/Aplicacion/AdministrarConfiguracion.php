@@ -63,6 +63,8 @@ final class AdministrarConfiguracion
         $correoDesvio = $valor('correo_desvio_prueba');
         if ($correoDesvio !== '' && !filter_var($correoDesvio, FILTER_VALIDATE_EMAIL)) {
             $errores[] = 'El correo de desvío no es válido.';
+        } elseif ($correoDesvio === '' && $modo === ModoOperacion::PRUEBA) {
+            $errores[] = 'En modo Prueba indica el correo de desvío: ahí llegan todos los correos.';
         }
 
         $hora = self::enteroEnRango($valor('hora_resumen'), self::HORA_MINIMA, self::HORA_MAXIMA);

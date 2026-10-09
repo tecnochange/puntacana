@@ -245,8 +245,9 @@ final class DespacharCorreos
     private function motivoOmisionEmpleado(array $configuracion, int $idEmpleado, ?array $empleado): ?string
     {
         $modo = $configuracion['modo_operacion'];
-        $noEstaEnLaPrueba = $modo === ModoOperacion::PRUEBA && !in_array($idEmpleado, $configuracion['ids_empleados_prueba'], true);
-        if ($modo === ModoOperacion::SOLO_BANDEJA || $noEstaEnLaPrueba) {
+        // En PRUEBA nunca se escribe a un empleado: sin correo de desvío no sale nada.
+        $pruebaSinDesvio = $modo === ModoOperacion::PRUEBA && !$this->seDesvia($configuracion);
+        if ($modo === ModoOperacion::SOLO_BANDEJA || $pruebaSinDesvio) {
             return ResultadoEnvio::OMITIDO_MODO;
         }
         if ($empleado === null || !$empleado['activo']) {
@@ -258,10 +259,7 @@ final class DespacharCorreos
         return null;
     }
 
-    /**
-     * En modo PRUEBA con correo_desvio_prueba, todo correo va a esa dirección en
-     * vez de al empleado (solo llegan aquí los de ids_empleados_prueba).
-     */
+    /** En modo PRUEBA todo correo va a correo_desvio_prueba en vez de al empleado. */
     private function seDesvia(array $configuracion): bool
     {
         return $configuracion['modo_operacion'] === ModoOperacion::PRUEBA && $configuracion['correo_desvio_prueba'] !== '';
