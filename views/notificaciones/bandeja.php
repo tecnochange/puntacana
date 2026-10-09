@@ -93,7 +93,7 @@ function notificacionesPintarItem(array $n): void
         <div class="notif-item__cuerpo">
             <div class="notif-item__titulo">
                 <?php if (!$n['leida']): ?><span class="notif-punto" title="Sin leer"></span><?php endif; ?>
-                <a href="api/notificaciones/abrir.php?id=<?= $n['id'] ?>"><?= $e($n['titulo']) ?></a>
+                <a href="?pg=notificaciones/detalle&id=<?= $n['id'] ?>" class="notif-item__enlace"><?= $e($n['titulo']) ?></a>
             </div>
             <?php if ($n['mensaje'] !== null && $n['mensaje'] !== ''): ?>
                 <p class="notif-item__mensaje"><?= $e($n['mensaje']) ?></p>
@@ -113,11 +113,7 @@ function notificacionesPintarItem(array $n): void
             </div>
         </div>
         <div class="notif-item__acciones">
-            <a class="btn btn-sm btn-primary" href="api/notificaciones/abrir.php?id=<?= $n['id'] ?>">Abrir <i class="bx bx-right-arrow-alt"></i></a>
-            <a class="btn btn-sm btn-light" href="?pg=notificaciones/detalle&id=<?= $n['id'] ?>" title="Ver detalle"><i class="bx bx-show"></i></a>
-            <?php if (!$n['leida']): ?>
-                <button type="button" class="btn btn-sm btn-light bt_marcar_leida" data-id="<?= $n['id'] ?>" title="Marcar como leída"><i class="bx bx-check"></i></button>
-            <?php endif; ?>
+            <span class="btn btn-sm btn-light" aria-hidden="true"><i class="bx bx-show"></i> Ver</span>
         </div>
     </article>
     <?php
@@ -506,19 +502,6 @@ $estadosCerrados = array_diff_key(NOTIFICACIONES_ESTADOS_VISIBLES, [EstadoNotifi
             sincronizarControles();
             mostrarPestana(filtros.pestana);
             aplicar();
-        });
-
-        $(document).on('click', '.bt_marcar_leida', function () {
-            var boton = $(this);
-            $.post('api/notificaciones/marcar_leida.php', { id: boton.data('id') }, function (respuesta) {
-                if (respuesta.status === 'success') {
-                    var item = $('#notificacion_' + boton.data('id'));
-                    item.removeClass('notif-item--no-leida').attr('data-leida', '1').find('.notif-punto').remove();
-                    boton.remove();
-                    $('#notif_total_sin_leer').text(Math.max(0, parseInt($('#notif_total_sin_leer').text(), 10) - 1));
-                    aplicar();
-                }
-            }, 'json');
         });
 
         $('#bt_marcar_todas').on('click', function () {

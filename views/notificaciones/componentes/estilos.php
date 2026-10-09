@@ -55,7 +55,11 @@
     .notif-grupo__titulo { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: #868e96; margin: .875rem .25rem .5rem; }
     .notif-item { display: flex; gap: .875rem; align-items: flex-start; padding: .875rem; border-radius: .75rem; border: .0625rem solid #eef0f4;
         margin-bottom: .5rem; transition: background .15s, box-shadow .15s; border-left: .25rem solid transparent; }
+    .notif-item { position: relative; cursor: pointer; }
     .notif-item:hover { box-shadow: 0 .25rem .875rem rgba(16, 24, 40, .08); }
+    /* El enlace del título cubre toda la tarjeta: cualquier clic abre el detalle. */
+    .notif-item__enlace::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+    .notif-item:hover .notif-item__acciones .btn { background: #e7f0ff; color: #0d6efd; }
     .notif-item--no-leida { background: #f8faff; border-left-color: var(--notif-color); }
     .notif-item__icono { width: 2.625rem; height: 2.625rem; border-radius: 50%; display: grid; place-items: center; font-size: 1.25rem; flex-shrink: 0;
         color: var(--notif-color); background: #f1f3f5; background: color-mix(in srgb, var(--notif-color) 12%, #fff); }
