@@ -13,6 +13,9 @@ use Notificaciones\Dominio\Plantilla;
 use Notificaciones\Dominio\TipoNotificacion;
 use Notificaciones\Dominio\UnidadIntervalo;
 use Notificaciones\Infraestructura\BaseDatos\Conexion;
+use Notificaciones\Infraestructura\BaseDatos\EmpleadosLector;
+use Notificaciones\Infraestructura\BaseDatos\ErrorBaseDatos;
+use Notificaciones\Infraestructura\BaseDatos\RegistrosParaPrueba;
 use Notificaciones\Infraestructura\BaseDatos\TiposRepositorio;
 use Notificaciones\Infraestructura\Correo\MarcoCorreo;
 
@@ -140,21 +143,53 @@ final class AdministrarTipos
      */
     public static function enviarPrueba(mysqli $mysqli, int $idEmpresa, int $idTipo, int $idEmpleado): ?int
     {
-        $tipo = (new TiposRepositorio(new Conexion($mysqli)))->buscarPorId($idTipo);
+        $conexion = new Conexion($mysqli);
+        $tipo = (new TiposRepositorio($conexion))->buscarPorId($idTipo);
         if ($tipo === null) {
             return null;
         }
         if (!CodigoNotificacion::existe($tipo->codigo)) {
             throw new TipoSinImplementar("El código {$tipo->codigo} aún no está implementado en el sistema.");
         }
-        // Vence justo cuando el tipo empieza a avisar: el correo de prueba sale de inmediato.
-        $diasParaVencer = $tipo->diasAntesDeVencer !== null ? $tipo->diasAntesDeVencer : self::DIAS_VENCIMIENTO_DE_EJEMPLO;
-        return GenerarNotificacion::ejecutarConTipo($mysqli, $tipo, $idEmpresa, [$idEmpleado], [
-            'datos_plantilla' => self::datosDeEjemplo($tipo->codigo),
-            'url' => self::URL_PRUEBA,
+
+        // Un registro real (título, enlace e id) para que la prueba lleve a donde se revisa o se actúa.
+        $empleado = (new EmpleadosLector($conexion))->paraEnvio($idEmpleado, $idEmpresa);
+        $nombreEmpleado = $empleado !== null ? (string) $empleado['nombre'] : self::DESTINATARIO_DE_EJEMPLO;
+        try {
+            $registro = (new RegistrosParaPrueba($conexion))->paraCodigo($tipo->codigo, $idEmpresa, $idEmpleado, $nombreEmpleado, $tipo->diasAntesDeVencer);
+        } catch (ErrorBaseDatos $error) {
+            // Sin acceso a OKRs o KPIs la prueba igual sale, con datos de ejemplo.
+            $registro = null;
+        }
+        $datosReales = $registro !== null
+            ? array_intersect_key($registro['datos'], array_flip(CodigoNotificacion::datosPermitidos($tipo->codigo)))
+            : [];
+
+        $opciones = [
+            'datos_plantilla' => $datosReales + self::datosDeEjemplo($tipo->codigo),
+            'url' => $registro !== null ? $registro['url'] : self::URL_PRUEBA,
             'tipo_registro' => NotificacionPrueba::TIPO_REGISTRO,
-            'fecha_vencimiento' => (new DateTimeImmutable('+' . $diasParaVencer . ' days'))->format('Y-m-d'),
-        ]);
+            'fecha_vencimiento' => self::fechaVencimientoDePrueba($tipo, $registro),
+        ];
+        if ($registro !== null) {
+            $opciones['id_registro'] = $registro['id_registro'];
+        }
+        return GenerarNotificacion::ejecutarConTipo($mysqli, $tipo, $idEmpresa, [$idEmpleado], $opciones);
+    }
+
+    /**
+     * Si el tipo avisa antes de vencer, la prueba vence dentro de ese plazo para que
+     * el correo salga de inmediato: la fecha real del registro si cae ahí, si no
+     * hoy + dias_antes_de_vencer. Si no avisa antes, la fecha real (o ninguna).
+     */
+    private static function fechaVencimientoDePrueba(TipoNotificacion $tipo, ?array $registro): ?string
+    {
+        $fechaReal = $registro !== null ? $registro['fecha_vencimiento'] : null;
+        if ($tipo->diasAntesDeVencer === null) {
+            return $fechaReal;
+        }
+        $limite = (new DateTimeImmutable('+' . $tipo->diasAntesDeVencer . ' days'))->format('Y-m-d');
+        return $fechaReal !== null && $fechaReal <= $limite ? $fechaReal : $limite;
     }
 
     /** Agrega a la fila lo que la administración muestra además de las columnas. */
