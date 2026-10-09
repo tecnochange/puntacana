@@ -68,7 +68,7 @@
     .notif-item__mensaje { margin: .25rem 0 0; color: #6c757d; font-size: .875rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .notif-item__meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin-top: .5rem; font-size: .7812rem; color: #868e96; }
     .notif-item__meta i { vertical-align: -.125rem; }
-    .notif-chip { border-radius: 1.25rem; padding: .125rem .625rem; font-weight: 500; }
+    .notif-chip { display: inline-flex; align-items: center; gap: .25rem; white-space: nowrap; border-radius: 1.25rem; padding: .125rem .625rem; font-weight: 500; }
     .notif-chip--normal { background: #f1f3f5; color: #495057; }
     .notif-chip--pronto { background: #fff4e5; color: #d9480f; }
     .notif-chip--urgente { background: #ffe3e3; color: #c92a2a; }
@@ -136,6 +136,8 @@
     .notif-tabla th { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: #868e96; font-weight: 600; border-bottom: .0625rem solid #eef0f4; padding: .625rem .75rem; }
     .notif-tabla td { padding: .75rem; border-bottom: .0625rem solid #f1f3f5; vertical-align: middle; font-size: .875rem; }
     .notif-tabla tr:last-child td { border-bottom: 0; }
+    .notif-tabla .btn { white-space: nowrap; }
+    .notif-tabla td.notif-canales { min-width: 11rem; }
     .notif-codigo { font-family: SFMono-Regular, Consolas, monospace; font-size: .7812rem; background: #f1f3f5; border-radius: .375rem; padding: .125rem .5rem; color: #495057; }
     .notif-seccion { padding: 1.125rem 1.25rem; border-bottom: .0625rem solid #eef0f4; }
     .notif-seccion:last-child { border-bottom: 0; }

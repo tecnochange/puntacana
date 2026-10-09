@@ -128,7 +128,7 @@ if ($creacion && $creacion['id'] !== null) {
                                     </div>
                                 </td>
                                 <td><?= $tipo['clase'] === ClaseNotificacion::TAREA ? 'Tarea' : 'Aviso' ?></td>
-                                <td>
+                                <td class="notif-canales">
                                     <?php if ($tipo['muestra_en_bandeja']): ?><span class="notif-chip notif-chip--normal"><i class="bx bx-bell"></i> Bandeja</span><?php endif; ?>
                                     <?php if ($tipo['envia_correo']): ?><span class="notif-chip notif-chip--normal"><i class="bx bx-envelope"></i> Correo</span><?php endif; ?>
                                 </td>
