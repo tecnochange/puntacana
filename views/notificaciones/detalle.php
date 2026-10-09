@@ -136,11 +136,6 @@ $e = 'notificacionesEscapar';
                     <?php endif; ?>
                 </div>
             </div>
-            <?php if ($sePuedeCompletar): ?>
-                <div class="notif-detalle-cabecera__accion">
-                    <button type="button" class="btn btn-success" id="bt_completar" data-id="<?= (int) $n['id'] ?>"><i class="bx bx-check-circle"></i> Marcar como completada</button>
-                </div>
-            <?php endif; ?>
         </section>
 
         <div class="row g-3">
@@ -161,6 +156,30 @@ $e = 'notificacionesEscapar';
                             </span>
                             <i class="bx bx-right-arrow-alt fs-4"></i>
                         </a>
+                    <?php endif; ?>
+                    <?php if ($sePuedeCompletar): ?>
+                        <div class="notif-resolver" id="notif_resolver" data-id="<?= (int) $n['id'] ?>">
+                            <div class="notif-resolver__paso" data-paso="inicio">
+                                <span class="notif-resolver__icono"><i class="bx bx-task"></i></span>
+                                <div class="notif-resolver__texto">
+                                    <strong>¿Ya la resolviste?</strong>
+                                    <small>Márcala como completada para cerrarla.</small>
+                                </div>
+                                <button type="button" class="btn notif-resolver__boton" data-accion="preguntar"><i class="bx bx-check"></i> Marcar como completada</button>
+                            </div>
+                            <div class="notif-resolver__paso" data-paso="confirmar" hidden>
+                                <span class="notif-resolver__icono notif-resolver__icono--atencion"><i class="bx bx-info-circle"></i></span>
+                                <div class="notif-resolver__texto">
+                                    <strong>¿Confirmas que está completada?</strong>
+                                    <small>Se cerrará para todas las personas que la recibieron.</small>
+                                </div>
+                                <div class="notif-resolver__botones">
+                                    <button type="button" class="btn btn-light" data-accion="cancelar">Cancelar</button>
+                                    <button type="button" class="btn btn-success" data-accion="completar"><i class="bx bx-check"></i> Sí, completar</button>
+                                </div>
+                            </div>
+                            <div class="notif-resolver__error" hidden></div>
+                        </div>
                     <?php endif; ?>
                 </div>
 
@@ -240,17 +259,31 @@ $e = 'notificacionesEscapar';
 <?php if ($vista !== null && $sePuedeCompletar): ?>
     <script>
         $(document).ready(function () {
-            $('#bt_completar').on('click', function () {
-                var boton = $(this);
-                if (!confirm('La tarea quedará completada para todas las personas que la recibieron. ¿Continuar?')) {
-                    return;
-                }
-                boton.prop('disabled', true);
-                $.post('api/notificaciones/completar.php', { id: boton.data('id') }, function () {
+            var resolver = $('#notif_resolver');
+            var error = resolver.find('.notif-resolver__error');
+
+            function mostrarPaso(paso) {
+                resolver.toggleClass('notif-resolver--confirmando', paso === 'confirmar');
+                resolver.find('[data-paso]').each(function () {
+                    this.hidden = $(this).data('paso') !== paso;
+                });
+                error.prop('hidden', true);
+            }
+
+            resolver.on('click', '[data-accion="preguntar"]', function () {
+                mostrarPaso('confirmar');
+                resolver.find('[data-accion="completar"]').trigger('focus');
+            });
+            resolver.on('click', '[data-accion="cancelar"]', function () {
+                mostrarPaso('inicio');
+            });
+            resolver.on('click', '[data-accion="completar"]', function () {
+                var botones = resolver.find('[data-paso="confirmar"] button').prop('disabled', true);
+                $.post('api/notificaciones/completar.php', { id: resolver.data('id') }, function () {
                     location.reload();
                 }, 'json').fail(function (respuesta) {
-                    boton.prop('disabled', false);
-                    alert((respuesta.responseJSON && respuesta.responseJSON.message) || 'No se pudo completar la tarea.');
+                    botones.prop('disabled', false);
+                    error.text((respuesta.responseJSON && respuesta.responseJSON.message) || 'No se pudo completar la tarea.').prop('hidden', false);
                 });
             });
         });
