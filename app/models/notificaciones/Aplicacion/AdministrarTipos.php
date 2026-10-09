@@ -147,11 +147,13 @@ final class AdministrarTipos
         if (!CodigoNotificacion::existe($tipo->codigo)) {
             throw new TipoSinImplementar("El código {$tipo->codigo} aún no está implementado en el sistema.");
         }
+        // Vence justo cuando el tipo empieza a avisar: el correo de prueba sale de inmediato.
+        $diasParaVencer = $tipo->diasAntesDeVencer !== null ? $tipo->diasAntesDeVencer : self::DIAS_VENCIMIENTO_DE_EJEMPLO;
         return GenerarNotificacion::ejecutarConTipo($mysqli, $tipo, $idEmpresa, [$idEmpleado], [
             'datos_plantilla' => self::datosDeEjemplo($tipo->codigo),
             'url' => self::URL_PRUEBA,
             'tipo_registro' => NotificacionPrueba::TIPO_REGISTRO,
-            'fecha_vencimiento' => (new DateTimeImmutable('+' . self::DIAS_VENCIMIENTO_DE_EJEMPLO . ' days'))->format('Y-m-d'),
+            'fecha_vencimiento' => (new DateTimeImmutable('+' . $diasParaVencer . ' days'))->format('Y-m-d'),
         ]);
     }
 
