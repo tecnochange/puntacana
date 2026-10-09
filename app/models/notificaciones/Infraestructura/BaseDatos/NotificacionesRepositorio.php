@@ -69,6 +69,20 @@ final class NotificacionesRepositorio
         return $afectadas > 0;
     }
 
+    /** Un destinatario completa a mano una TAREA ABIERTA. Devuelve si cambió algo. */
+    public function completarTarea(int $idEmpresa, int $idNotificacion, int $idEmpleado, DateTimeImmutable $ahora): bool
+    {
+        $fecha = Conexion::fecha($ahora);
+        $afectadas = $this->conexion->modificar(
+            'UPDATE Notificaciones
+             SET estado = ?, fecha_cierre = ?, id_empleado_cierre = ?, updated_at = ?
+             WHERE id = ? AND id_empresa = ? AND estado = ? AND clase = ?',
+            'ssisiiss',
+            [EstadoNotificacion::COMPLETADA, $fecha, $idEmpleado, $fecha, $idNotificacion, $idEmpresa, EstadoNotificacion::ABIERTA, ClaseNotificacion::TAREA]
+        );
+        return $afectadas > 0;
+    }
+
     /** Las TAREA abiertas cuya fecha_vencimiento ya pasó quedan VENCIDA. */
     public function marcarTareasVencidas(DateTimeImmutable $ahora): int
     {

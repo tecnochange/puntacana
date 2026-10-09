@@ -22,7 +22,8 @@ function notificacionesActividad(array $vista, DateTimeImmutable $ahora): array
     $actividad[] = ['fecha' => $fechaLectura, 'icono' => 'bx-show', 'clase' => 'neutra', 'texto' => $n['fecha_lectura'] ? 'La leíste' : 'La estás leyendo ahora'];
     if ($n['fecha_cierre']) {
         [$estadoTexto] = notificacionesEstadoVisible($n['estado']);
-        $actividad[] = ['fecha' => new DateTimeImmutable($n['fecha_cierre']), 'icono' => 'bx-flag', 'clase' => $n['estado'] === EstadoNotificacion::COMPLETADA ? 'exito' : 'peligro', 'texto' => 'Quedó ' . mb_strtolower($estadoTexto)];
+        $texto = 'Quedó ' . mb_strtolower($estadoTexto) . ($vista['nombre_cierre'] ? ' por ' . $vista['nombre_cierre'] : '');
+        $actividad[] = ['fecha' => new DateTimeImmutable($n['fecha_cierre']), 'icono' => 'bx-flag', 'clase' => $n['estado'] === EstadoNotificacion::COMPLETADA ? 'exito' : 'peligro', 'texto' => $texto];
     }
     usort($actividad, function (array $a, array $b) {
         return $a['fecha'] <=> $b['fecha'];
@@ -115,6 +116,7 @@ $e = 'notificacionesEscapar';
         $estaAbierta = $n['estado'] === EstadoNotificacion::ABIERTA;
         $registro = notificacionesRegistroVisible($n['tipo_registro'], $n['id_registro']);
         $tieneMensaje = $n['mensaje'] !== null && $n['mensaje'] !== '';
+        $sePuedeCompletar = $estaAbierta && $n['clase'] === ClaseNotificacion::TAREA;
         ?>
         <section class="notif-detalle-cabecera" style="--notif-color: <?= $color ?>">
             <div class="notif-detalle-cabecera__icono"><i class="bx <?= notificacionesIconoSeguro($n['icono']) ?>"></i></div>
@@ -134,6 +136,11 @@ $e = 'notificacionesEscapar';
                     <?php endif; ?>
                 </div>
             </div>
+            <?php if ($sePuedeCompletar): ?>
+                <div class="notif-detalle-cabecera__accion">
+                    <button type="button" class="btn btn-success" id="bt_completar" data-id="<?= (int) $n['id'] ?>"><i class="bx bx-check-circle"></i> Marcar como completada</button>
+                </div>
+            <?php endif; ?>
         </section>
 
         <div class="row g-3">
@@ -216,6 +223,8 @@ $e = 'notificacionesEscapar';
                         <?php if ($n['fecha_cierre']): ?>
                             <dt>Cerrada</dt>
                             <dd><?= (new DateTimeImmutable($n['fecha_cierre']))->format('d/m/Y H:i') ?></dd>
+                            <dt>Cerrada por</dt>
+                            <dd><?= $vista['nombre_cierre'] ? $e($vista['nombre_cierre']) : 'El sistema' ?></dd>
                         <?php endif; ?>
                         <dt>Correos</dt>
                         <dd><?= count($vista['correos_enviados']) === 0 ? 'Ninguno' : count($vista['correos_enviados']) . (count($vista['correos_enviados']) === 1 ? ' enviado' : ' enviados') ?></dd>
@@ -227,3 +236,23 @@ $e = 'notificacionesEscapar';
         </div>
     <?php endif; ?>
 </div>
+
+<?php if ($vista !== null && $sePuedeCompletar): ?>
+    <script>
+        $(document).ready(function () {
+            $('#bt_completar').on('click', function () {
+                var boton = $(this);
+                if (!confirm('La tarea quedará completada para todas las personas que la recibieron. ¿Continuar?')) {
+                    return;
+                }
+                boton.prop('disabled', true);
+                $.post('api/notificaciones/completar.php', { id: boton.data('id') }, function () {
+                    location.reload();
+                }, 'json').fail(function (respuesta) {
+                    boton.prop('disabled', false);
+                    alert((respuesta.responseJSON && respuesta.responseJSON.message) || 'No se pudo completar la tarea.');
+                });
+            });
+        });
+    </script>
+<?php endif; ?>

@@ -123,7 +123,7 @@ final class DestinatariosRepositorio
     public function notificacionDeEmpleado(int $idEmpresa, int $idEmpleado, int $idNotificacion): ?array
     {
         return $this->conexion->consultarUno(
-            'SELECT n.id, n.clase, n.titulo, n.mensaje, n.url, n.estado, n.fecha_vencimiento, n.fecha_cierre, n.created_at,
+            'SELECT n.id, n.clase, n.titulo, n.mensaje, n.url, n.estado, n.fecha_vencimiento, n.fecha_cierre, n.id_empleado_cierre, n.created_at,
                     n.tipo_registro, n.id_registro, n.id_empleado_autor, t.nombre AS nombre_tipo, t.icono, t.color,
                     t.muestra_en_bandeja, d.id AS id_destinatario, d.fecha_lectura
              FROM Notificaciones_Destinatarios d

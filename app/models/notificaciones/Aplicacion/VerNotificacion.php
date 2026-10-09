@@ -26,11 +26,13 @@ final class VerNotificacion
         $conexion = new Conexion($mysqli);
         $destinatarios = new DestinatariosRepositorio($conexion);
         $idAutor = $notificacion['id_empleado_autor'] !== null ? (int) $notificacion['id_empleado_autor'] : null;
-        $nombres = $idAutor ? (new EmpleadosLector($conexion))->nombresDeEmpresa([$idAutor], $idEmpresa) : [];
+        $idCierre = $notificacion['id_empleado_cierre'] !== null ? (int) $notificacion['id_empleado_cierre'] : null;
+        $nombres = (new EmpleadosLector($conexion))->nombresDeEmpresa(array_values(array_filter([$idAutor, $idCierre])), $idEmpresa);
 
         return [
             'notificacion' => $notificacion,
             'nombre_autor' => $idAutor && isset($nombres[$idAutor]) ? $nombres[$idAutor] : null,
+            'nombre_cierre' => $idCierre && isset($nombres[$idCierre]) ? $nombres[$idCierre] : null,
             'correos_enviados' => (new EnviosRepositorio($conexion))->fechasEnviadasADestinatario($idEmpresa, (int) $notificacion['id_destinatario']),
             'id_mas_reciente' => $destinatarios->vecinaEnBandeja($idEmpresa, $idEmpleado, $notificacion['created_at'], $idNotificacion, true),
             'id_mas_antigua' => $destinatarios->vecinaEnBandeja($idEmpresa, $idEmpleado, $notificacion['created_at'], $idNotificacion, false),
