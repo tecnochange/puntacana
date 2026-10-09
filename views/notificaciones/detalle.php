@@ -134,11 +134,6 @@ $e = 'notificacionesEscapar';
                     <?php endif; ?>
                 </div>
             </div>
-            <?php if ($n['url']): ?>
-                <div class="notif-detalle-cabecera__accion">
-                    <a href="<?= $e($n['url']) ?>" class="btn btn-primary"><i class="bx bx-link-external"></i> Ir al registro</a>
-                </div>
-            <?php endif; ?>
         </section>
 
         <div class="row g-3">

@@ -97,7 +97,6 @@
     .notif-detalle-cabecera__titulo { font-weight: 700; margin: .375rem 0 .625rem; line-height: 1.3; overflow-wrap: anywhere; }
     .notif-detalle-cabecera__meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .875rem; font-size: .8125rem; color: #868e96; }
     .notif-detalle-cabecera__meta i { vertical-align: -.125rem; }
-    .notif-detalle-cabecera__accion { flex-shrink: 0; align-self: center; }
     .notif-detalle-bloque { padding: 1.25rem; margin-bottom: 1rem; }
     .notif-detalle-mensaje { font-size: .9688rem; line-height: 1.65; color: #343a40; margin-bottom: 0; overflow-wrap: anywhere; }
     .notif-detalle-enlace { display: flex; align-items: center; gap: .875rem; margin-top: 1.125rem; padding: .875rem 1rem; border-radius: .75rem; border: .0625rem solid #e3e8f0;
@@ -174,8 +173,6 @@
         .notif-filtro { min-width: 0; flex: 1 1 8.75rem; }
         .notif-detalle-cabecera { flex-wrap: wrap; padding: 1.125rem; }
         .notif-detalle-cabecera__titulo { font-size: 1.375rem; }
-        .notif-detalle-cabecera__accion { width: 100%; }
-        .notif-detalle-cabecera__accion .btn { width: 100%; }
         .notif-item { flex-wrap: wrap; }
         .notif-item__acciones { width: 100%; justify-content: flex-end; }
     }
