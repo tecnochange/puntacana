@@ -158,57 +158,73 @@ final class RegistrosParaPrueba
     private function kpi(string $codigo, int $idEmpresa, int $idEmpleado, string $nombreEmpleado, DateTimeImmutable $hoy): ?array
     {
         $anio = (int) $hoy->format('Y');
-        $esComentario = $codigo === 'KPIS_KPI_COMENTARIO';
-        $esDocumento = $codigo === 'KPIS_KPI_DOCUMENTO';
-        // Para comentarios y documentos, un KPI que de verdad los tenga.
-        $tablaRelacionada = $esComentario ? 'Comentarios_Kpis' : ($esDocumento ? 'Documentos_Kpis' : null);
-        $ordenRelacionada = $tablaRelacionada === null
-            ? ''
-            : 'EXISTS (SELECT 1 FROM ' . self::BASE_KPIS . '.' . $tablaRelacionada . ' x WHERE x.id_kpi = k.id) DESC, ';
-
-        $fila = $this->conexion->consultarUno(
-            'SELECT k.id, k.indicador
-             FROM ' . self::BASE_KPIS . '.Kpis k
-             WHERE k.id_empresa = ? AND k.anio = ?
-             ORDER BY ' . $ordenRelacionada . 'EXISTS (SELECT 1 FROM ' . self::BASE_KPIS . '.Kpis_Colaborador c WHERE c.id_kpi = k.id AND c.id_colaborador = ?) DESC, k.id DESC
-             LIMIT 1',
-            'iii',
-            [$idEmpresa, $anio, $idEmpleado]
-        );
-        if ($fila === null) {
-            return null;
-        }
-        $idKpi = (int) $fila['id'];
         $datos = [
-            'kpi_nombre' => $fila['indicador'],
             'periodo_nombre' => self::MESES[(int) $hoy->format('n') - 1] . ' ' . $anio,
             'integrante_nombre' => $nombreEmpleado,
             'autor_nombre' => $nombreEmpleado,
         ];
+
+        // Las tablas de KPIs no tienen índices: cada búsqueda es un solo recorrido, sin subconsultas por fila.
+        $tablaRelacionada = null;
+        if ($codigo === 'KPIS_KPI_COMENTARIO') {
+            $tablaRelacionada = 'Comentarios_Kpis';
+        } elseif ($codigo === 'KPIS_KPI_DOCUMENTO') {
+            $tablaRelacionada = 'Documentos_Kpis';
+        }
+
+        $fila = null;
         if ($tablaRelacionada !== null) {
-            $ultimo = $this->conexion->consultarUno(
-                'SELECT x.id_empleado, ' . ($esDocumento ? 'x.archivo' : 'NULL AS archivo') . '
+            // El comentario o documento más reciente de un KPI del año.
+            $columnaArchivo = $tablaRelacionada === 'Documentos_Kpis' ? 'x.archivo' : 'NULL';
+            $fila = $this->conexion->consultarUno(
+                'SELECT k.id, k.indicador, x.id_empleado AS id_autor, ' . $columnaArchivo . ' AS archivo
                  FROM ' . self::BASE_KPIS . '.' . $tablaRelacionada . ' x
-                 WHERE x.id_kpi = ?
-                 ORDER BY x.created_at DESC
+                 JOIN ' . self::BASE_KPIS . '.Kpis k ON k.id = x.id_kpi
+                 WHERE k.id_empresa = ? AND k.anio = ?
+                 ORDER BY x.id DESC
                  LIMIT 1',
-                'i',
-                [$idKpi]
+                'ii',
+                [$idEmpresa, $anio]
             );
-            if ($ultimo !== null) {
-                $autor = $this->conexion->consultarUno('SELECT nombre FROM Empleados WHERE id = ? AND id_empresa = ?', 'ii', [(int) $ultimo['id_empleado'], $idEmpresa]);
-                if ($autor !== null) {
-                    $datos['autor_nombre'] = $autor['nombre'];
-                }
-                if ($esDocumento && $ultimo['archivo'] !== null) {
-                    $datos['archivo_nombre'] = basename((string) $ultimo['archivo']);
-                }
+        }
+        if ($fila === null) {
+            // Un KPI del año donde participa quien prueba.
+            $fila = $this->conexion->consultarUno(
+                'SELECT k.id, k.indicador
+                 FROM ' . self::BASE_KPIS . '.Kpis_Colaborador c
+                 JOIN ' . self::BASE_KPIS . '.Kpis k ON k.id = c.id_kpi
+                 WHERE c.id_colaborador = ? AND k.id_empresa = ? AND k.anio = ?
+                 ORDER BY k.id DESC
+                 LIMIT 1',
+                'iii',
+                [$idEmpleado, $idEmpresa, $anio]
+            );
+        }
+        if ($fila === null) {
+            $fila = $this->conexion->consultarUno(
+                'SELECT k.id, k.indicador FROM ' . self::BASE_KPIS . '.Kpis k WHERE k.id_empresa = ? AND k.anio = ? ORDER BY k.id DESC LIMIT 1',
+                'ii',
+                [$idEmpresa, $anio]
+            );
+        }
+        if ($fila === null) {
+            return null;
+        }
+
+        $datos['kpi_nombre'] = $fila['indicador'];
+        if (isset($fila['id_autor'])) {
+            $autor = $this->conexion->consultarUno('SELECT nombre FROM Empleados WHERE id = ? AND id_empresa = ?', 'ii', [(int) $fila['id_autor'], $idEmpresa]);
+            if ($autor !== null) {
+                $datos['autor_nombre'] = $autor['nombre'];
             }
+        }
+        if (isset($fila['archivo']) && $fila['archivo'] !== '') {
+            $datos['archivo_nombre'] = basename((string) $fila['archivo']);
         }
         return [
             'datos' => $datos,
-            'url' => '?pg=kpis/gestionar_kpi&id=' . $idKpi,
-            'id_registro' => $idKpi,
+            'url' => '?pg=kpis/gestionar_kpi&id=' . (int) $fila['id'],
+            'id_registro' => (int) $fila['id'],
             'fecha_vencimiento' => null,
         ];
     }

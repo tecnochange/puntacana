@@ -8,6 +8,7 @@ use Notificaciones\Dominio\ResultadoEnvio;
 final class EnviosRepositorio
 {
     private const LARGO_MAXIMO_MENSAJE_ERROR = 500;
+    private const LARGO_MAXIMO_ASUNTO = 200;
 
     /** @var Conexion */
     private $conexion;
@@ -39,7 +40,7 @@ final class EnviosRepositorio
                 $idEmpresa,
                 $idDestinatario,
                 $idEmpleado,
-                $asunto,
+                $asunto === null ? null : mb_substr($asunto, 0, self::LARGO_MAXIMO_ASUNTO),
                 $resultado,
                 $idMensajeProveedor,
                 $mensajeError === null ? null : mb_substr($mensajeError, 0, self::LARGO_MAXIMO_MENSAJE_ERROR),

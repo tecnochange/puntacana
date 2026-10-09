@@ -33,6 +33,7 @@ use Notificaciones\Infraestructura\Correo\MarcoCorreo;
 final class DespacharCorreos
 {
     private const LIMITE_INDIVIDUALES_POR_CORRIDA = 200;
+    private const LARGO_MAXIMO_ASUNTO = 150;
     /** Más alto: las asignaciones masivas (miles en un día) caen en los resúmenes. */
     private const LIMITE_AGRUPADOS_POR_CORRIDA = 2000;
     private const HORAS_PARA_CADUCAR = 48;
@@ -166,7 +167,7 @@ final class DespacharCorreos
         }
 
         $datos = $this->datosPlantilla($pendiente, $empleado['nombre']);
-        $asunto = $this->prefijoDesvio($configuracion, $empleado) . Plantilla::renderizarTexto($tipo->plantillaAsuntoCorreo, $datos);
+        $asunto = self::recortarAsunto($this->prefijoDesvio($configuracion, $empleado) . Plantilla::renderizarTexto($tipo->plantillaAsuntoCorreo, $datos));
         $html = MarcoCorreo::envolver(Plantilla::renderizarHtml($tipo->plantillaCuerpoCorreo, $datos));
 
         $respuesta = $this->proveedorCorreo->enviar($empleado['nombre'], $this->correoDestino($configuracion, $empleado), $asunto, $html);
@@ -268,6 +269,15 @@ final class DespacharCorreos
     private function correoDestino(array $configuracion, array $empleado): string
     {
         return $this->seDesvia($configuracion) ? $configuracion['correo_desvio_prueba'] : (string) $empleado['correo'];
+    }
+
+    /** Los títulos reales pueden ser largos: el asunto se corta con puntos suspensivos. */
+    private static function recortarAsunto(string $asunto): string
+    {
+        if (mb_strlen($asunto) <= self::LARGO_MAXIMO_ASUNTO) {
+            return $asunto;
+        }
+        return rtrim(mb_substr($asunto, 0, self::LARGO_MAXIMO_ASUNTO - 1)) . '…';
     }
 
     /** Un correo desviado dice en el asunto para quién era. */
