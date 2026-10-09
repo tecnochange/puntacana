@@ -8,9 +8,11 @@ use Notificaciones\Dominio\CodigoNotificacion;
 use Notificaciones\Dominio\DatosSensibles;
 use Notificaciones\Dominio\Excepciones\DatoNoPermitido;
 use Notificaciones\Dominio\Excepciones\UrlNoPermitida;
+use Notificaciones\Dominio\ModoOperacion;
 use Notificaciones\Dominio\Plantilla;
 use Notificaciones\Dominio\TipoNotificacion;
 use Notificaciones\Infraestructura\BaseDatos\Conexion;
+use Notificaciones\Infraestructura\BaseDatos\ConfiguracionRepositorio;
 use Notificaciones\Infraestructura\BaseDatos\DestinatariosRepositorio;
 use Notificaciones\Infraestructura\BaseDatos\EmpleadosLector;
 use Notificaciones\Infraestructura\BaseDatos\ErrorBaseDatos;
@@ -44,6 +46,9 @@ use Notificaciones\Infraestructura\BaseDatos\TiposRepositorio;
  * cron). Devuelve el id de la notificación, el de la existente si clave_evento
  * ya estaba, o NULL si el tipo está INACTIVO o ningún destinatario quedó válido.
  * Un tipo desactivado no rompe el flujo que llama: simplemente no notifica.
+ *
+ * En modo PRUEBA solo se notifica a los empleados de ids_empleados_prueba: se
+ * puede probar con flujos reales sin que le llegue nada a nadie más.
  */
 final class GenerarNotificacion
 {
@@ -57,9 +62,14 @@ final class GenerarNotificacion
     public static function ejecutar(mysqli $mysqli, string $codigo, int $idEmpresa, array $idsEmpleados, array $opciones = []): ?int
     {
         self::validarOpciones($opciones);
-        $tipo = (new TiposRepositorio(new Conexion($mysqli)))->buscarActivo($codigo, $idEmpresa);
+        $conexion = new Conexion($mysqli);
+        $tipo = (new TiposRepositorio($conexion))->buscarActivo($codigo, $idEmpresa);
         if ($tipo === null) {
             return null;
+        }
+        $configuracion = new ConfiguracionRepositorio($conexion);
+        if ($configuracion->modoOperacion($idEmpresa) === ModoOperacion::PRUEBA) {
+            $idsEmpleados = array_intersect(array_map('intval', $idsEmpleados), $configuracion->idsEmpleadosPrueba($idEmpresa));
         }
         return self::ejecutarConTipo($mysqli, $tipo, $idEmpresa, $idsEmpleados, $opciones);
     }

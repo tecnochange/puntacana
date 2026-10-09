@@ -10,7 +10,7 @@ use Notificaciones\Infraestructura\Web\Peticion;
 const NOTIFICACIONES_MODOS_VISIBLES = [
     ModoOperacion::APAGADO => ['Apagado', 'No se envía ningún correo. Las notificaciones siguen llegando a la bandeja.'],
     ModoOperacion::SOLO_BANDEJA => ['Solo bandeja', 'Los correos pendientes se descartan y quedan registrados como omitidos.'],
-    ModoOperacion::PRUEBA => ['Prueba', 'Solo reciben correo los empleados de prueba (o el correo de desvío, si lo indicas).'],
+    ModoOperacion::PRUEBA => ['Prueba', 'Solo los empleados de prueba reciben notificaciones, en la bandeja y por correo (o en el correo de desvío, si lo indicas).'],
     ModoOperacion::ACTIVO => ['Activo', 'Los correos salen a todos los destinatarios.'],
 ];
 const NOTIFICACIONES_DIAS_SEMANA = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => 'Domingo'];
@@ -67,7 +67,7 @@ if (!$esAdministrador) {
 
         <div class="notif-seccion">
             <h6>Pruebas</h6>
-            <p class="notif-ayuda">Aplica solo en modo Prueba.</p>
+            <p class="notif-ayuda">Aplica solo en modo Prueba: nadie fuera de esta lista recibe notificaciones.</p>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label" for="ids_empleados_prueba">Ids de empleados de prueba</label>

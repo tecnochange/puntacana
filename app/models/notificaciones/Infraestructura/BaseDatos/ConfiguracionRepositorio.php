@@ -2,6 +2,7 @@
 namespace Notificaciones\Infraestructura\BaseDatos;
 
 use DateTimeImmutable;
+use Notificaciones\Dominio\ModoOperacion;
 
 /**
  * Tabla Notificaciones_Configuracion. La administración trabaja con los valores
@@ -31,6 +32,19 @@ final class ConfiguracionRepositorio
             [$clave, self::EMPRESA_GENERAL, $idEmpresa]
         );
         return $fila['valor'] ?? $porDefecto;
+    }
+
+    /** ModoOperacion::*; un valor desconocido cuenta como APAGADO. */
+    public function modoOperacion(int $idEmpresa): string
+    {
+        return ModoOperacion::desdeValor($this->valor($idEmpresa, 'modo_operacion'));
+    }
+
+    /** Ids de ids_empleados_prueba ('45, 78' -> [45, 78]). */
+    public function idsEmpleadosPrueba(int $idEmpresa): array
+    {
+        $ids = array_filter(array_map('trim', explode(',', $this->valor($idEmpresa, 'ids_empleados_prueba'))), 'strlen');
+        return array_values(array_map('intval', $ids));
     }
 
     /** Valores generales: [clave => valor]. */

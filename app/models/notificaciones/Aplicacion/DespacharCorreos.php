@@ -351,11 +351,10 @@ final class DespacharCorreos
     {
         if (!isset($this->configuracionPorEmpresa[$idEmpresa])) {
             $ventana = explode('-', $this->configuraciones->valor($idEmpresa, 'ventana_envio', self::VENTANA_ENVIO_POR_DEFECTO));
-            $idsPrueba = array_filter(array_map('trim', explode(',', $this->configuraciones->valor($idEmpresa, 'ids_empleados_prueba'))), 'strlen');
 
             $this->configuracionPorEmpresa[$idEmpresa] = [
-                'modo_operacion' => ModoOperacion::desdeValor($this->configuraciones->valor($idEmpresa, 'modo_operacion')),
-                'ids_empleados_prueba' => array_map('intval', $idsPrueba),
+                'modo_operacion' => $this->configuraciones->modoOperacion($idEmpresa),
+                'ids_empleados_prueba' => $this->configuraciones->idsEmpleadosPrueba($idEmpresa),
                 'correo_desvio_prueba' => trim($this->configuraciones->valor($idEmpresa, 'correo_desvio_prueba')),
                 'hora_resumen' => (int) $this->configuraciones->valor($idEmpresa, 'hora_resumen', self::HORA_RESUMEN_POR_DEFECTO),
                 'dia_semana_resumen' => (int) $this->configuraciones->valor($idEmpresa, 'dia_semana_resumen', self::DIA_SEMANA_RESUMEN_POR_DEFECTO),
