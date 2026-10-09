@@ -86,7 +86,7 @@ function notificacionesPintarItem(array $n): void
     ?>
     <article class="notif-item<?= $claseLeida ?>" id="notificacion_<?= $n['id'] ?>" style="--notif-color: <?= $n['color'] ?>"
              data-buscar="<?= $e(mb_strtolower($n['titulo'] . ' ' . $n['mensaje'] . ' ' . $n['registro'] . ' ' . $n['nombre_tipo'])) ?>"
-             data-leida="<?= $n['leida'] ? 1 : 0 ?>" data-tipo="<?= $n['id_tipo'] ?>" data-estado="<?= $e($n['codigo_estado']) ?>"
+             data-leida="<?= $n['leida'] ? 1 : 0 ?>" data-tipo="<?= $n['id_tipo'] ?>" data-nombre-tipo="<?= $e($n['nombre_tipo']) ?>" data-estado="<?= $e($n['codigo_estado']) ?>"
              data-grupo="<?= $e($n['grupo']) ?>" data-creada="<?= $n['marca_creada'] ?>" data-dias-creada="<?= $n['dias_desde_creada'] ?>"
              data-dias-vencer="<?= $n['dias_para_vencer'] === null ? '' : $n['dias_para_vencer'] ?>">
         <div class="notif-item__icono"><i class="bx <?= $n['icono'] ?>"></i></div>
@@ -321,12 +321,12 @@ $estadosCerrados = array_diff_key(NOTIFICACIONES_ESTADOS_VISIBLES, [EstadoNotifi
             return valor === '' || valor === null ? null : parseInt(valor, 10);
         }
 
-        // El estado solo filtra el historial: lo abierto siempre está ABIERTA.
+        // El estado solo filtra el historial (lo abierto siempre está ABIERTA) y el tipo solo la pestaña abierta (sus opciones son las de esa pestaña).
         function cumple(item, idPanel) {
             var diasVencer = numero(item, 'data-dias-vencer');
             if (filtros.texto !== '' && item.getAttribute('data-buscar').indexOf(filtros.texto) === -1) return false;
             if (filtros.lectura !== '' && item.getAttribute('data-leida') !== filtros.lectura) return false;
-            if (filtros.tipo !== '' && item.getAttribute('data-tipo') !== filtros.tipo) return false;
+            if (filtros.tipo !== '' && idPanel === filtros.pestana && item.getAttribute('data-tipo') !== filtros.tipo) return false;
             if (filtros.estado !== '' && idPanel === 'tab_historial' && item.getAttribute('data-estado') !== filtros.estado) return false;
             if (filtros.recibidas !== '' && numero(item, 'data-dias-creada') > parseInt(filtros.recibidas, 10)) return false;
             if (filtros.vencimiento === 'sin_fecha') return diasVencer === null;
@@ -412,8 +412,29 @@ $estadosCerrados = array_diff_key(NOTIFICACIONES_ESTADOS_VISIBLES, [EstadoNotifi
             $('#notif_cantidad_filtros').text(cantidad).toggleClass('d-none', cantidad === 0);
         }
 
+        // El filtro de tipo ofrece solo los tipos que hay en la pestaña abierta.
+        function actualizarOpcionesTipo() {
+            var nombres = {};
+            paneles[filtros.pestana].items.forEach(function (item) {
+                nombres[item.getAttribute('data-tipo')] = item.getAttribute('data-nombre-tipo');
+            });
+            var ids = Object.keys(nombres).sort(function (a, b) {
+                return nombres[a].localeCompare(nombres[b], 'es');
+            });
+            var select = $('#notif_filtro_tipo');
+            select.find('option:not([value=""])').remove();
+            ids.forEach(function (id) {
+                select.append($('<option></option>').val(id).text(nombres[id]));
+            });
+            if (filtros.tipo !== '' && !nombres.hasOwnProperty(filtros.tipo)) {
+                filtros.tipo = '';
+            }
+            select.val(filtros.tipo);
+        }
+
         function aplicar() {
             var totalPestana = 0, visiblesPestana = 0;
+            actualizarOpcionesTipo();
             $.each(paneles, function (id, datos) {
                 var visibles = datos.items.filter(function (item) {
                     return cumple(item, id);
