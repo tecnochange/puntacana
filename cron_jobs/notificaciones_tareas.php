@@ -15,8 +15,9 @@ const NOTIFICACIONES_NOMBRE_CANDADO = 'notificaciones_tareas';
 // Solo la empresa en uso real; las demás son copias heredadas (ver memoria "una sola empresa").
 const NOTIFICACIONES_EMPRESAS = [1];
 
-// connect.php arma $url con SERVER_NAME, que no existe por línea de comandos.
+// connect.php arma $url con SERVER_NAME y REQUEST_URI, que no existen por línea de comandos.
 $_SERVER['SERVER_NAME'] = NOTIFICACIONES_DOMINIO_PORTAL;
+$_SERVER['REQUEST_URI'] = '/';
 require __DIR__ . '/../app/connect.php';
 require_once __DIR__ . '/../app/models/notificaciones/cargar.php';
 
