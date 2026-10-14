@@ -1,6 +1,7 @@
 <?php
 include("../../app/connect.php");
 include("../../app/arrays.php");
+require_once __DIR__ . '/../../app/models/notificaciones/cargar.php';
 
 $hoy = date("Y-m-d H:i:s");
 $id = $_POST["id"];
@@ -13,7 +14,11 @@ $id_kpi = $_POST["id_kpi"];
 $descripcion = $_POST["descripcion"];
 
 
-mysqli_query($connect_kpis, "DELETE FROM Kpis_Colaborador WHERE id = '" . $id . "' ");
+$fila_retirada = \Notificaciones\Integracion\AvisosKpis::filaDeIntegrante($connect_admin, (int) $id);
+if (mysqli_query($connect_kpis, "DELETE FROM Kpis_Colaborador WHERE id = '" . $id . "' ")) {
+    // Avisa a los Líderes del KPI (el módulo de notificaciones nunca interrumpe el guardado).
+    \Notificaciones\Integracion\AvisosKpis::integranteRetirado($connect_admin, $fila_retirada, $_SESSION['id_user'] ?? $id_user);
+}
 
 $sentencia_auditoria = "
 INSERT INTO Auditoria_Kpi(

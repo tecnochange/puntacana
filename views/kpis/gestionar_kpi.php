@@ -56,7 +56,10 @@ if ($_POST["guardar_comentario_kpi"] != "") {
 
         $sentencia_co = "INSERT INTO Comentarios_Kpis (id_empresa, id_kpi, id_empleado, comentario, frecuencia, created_at) VALUES
         (" . $user_log["id_empresa"] . "," . $_POST["id_kpi"] . "," . $user_log["id"] . ",'" . $_POST["comentario"] . "','" . $_POST["frecuencia"] . "','$hoy')";
-        mysqli_query($connect_kpis, $sentencia_co);
+        if (mysqli_query($connect_kpis, $sentencia_co)) {
+            // Avisa a los Líderes del KPI (el módulo de notificaciones nunca interrumpe el guardado).
+            \Notificaciones\Integracion\AvisosKpis::comentarioAgregado($connect_admin, (int) $_POST["id_kpi"], $user_log["id"]);
+        }
 
         echo '<script> window.location.href = "?pg=kpis/gestionar_kpi&id=' . $idKpi . '&id_user=' . $user_log["id"] . '&role=' . $user_log["role"] . '&id_empresa='.$user_log["id_empresa"].' ";</script>';
     }
@@ -96,7 +99,10 @@ if ($_POST["cargar_documento_kpi"]) {
 		( '" . $_POST["id_empresa"] . "', '" . $_POST["id_kpi"] . "', '" . $_POST["id_usuario"] . "', '" . $archivo . "', '" . $_POST["comentario"] . "','" . $_POST["frecuencia"] . "', '" . $hoy . "' )
 		";
 
-    mysqli_query($connect_kpis, $sentencia_doc);
+    if (mysqli_query($connect_kpis, $sentencia_doc)) {
+        // Avisa a los Líderes del KPI con el nombre original del archivo.
+        \Notificaciones\Integracion\AvisosKpis::documentoAgregado($connect_admin, (int) $_POST["id_kpi"], (string) ($_FILES["archivo_kpi"]["name"] ?? ''), $user_log["id"]);
+    }
 
     echo '<script> window.location.href = "?pg=kpis/gestionar_kpi&id=' . $idKpi . '&id_user=' . $user_log["id"] . '&role=' . $user_log["role"] . '&id_empresa=' . $user_log["id_empresa"] . '";</script>';
 }

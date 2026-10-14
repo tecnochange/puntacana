@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../notificaciones/cargar.php';
 
 class KpisCrud
 {
@@ -49,8 +50,9 @@ class KpisCrud
     public function actualizar_avance_Kpis($request)
     {
 
-        global $connect_kpis;
+        global $connect_kpis, $connect_admin;
         $hoy = date("Y-m-d H:i:s");
+        $avances_anteriores = \Notificaciones\Integracion\AvisosKpis::avancesDeKpi($connect_admin, (int) $request["id_kpi"]);
 
         if ($request["tipo"] == 1) { //MENSUAL
             $avance_1 = $request["avance_1"];
@@ -165,7 +167,10 @@ class KpisCrud
 
         //echo $sentencia;
 
-        mysqli_query($connect_kpis, $sentencia);
+        if (mysqli_query($connect_kpis, $sentencia)) {
+            // Avisa a los Líderes si se cargó un periodo que estaba vacío (el módulo de notificaciones nunca interrumpe el guardado).
+            \Notificaciones\Integracion\AvisosKpis::avancesGuardados($connect_admin, (int) $request["id_kpi"], $avances_anteriores, $_SESSION['id_user'] ?? null);
+        }
     }
 
     //PARA CREAR LOS ADMINSITRADORES DE LOS KPIS
@@ -281,8 +286,9 @@ class KpisCrud
 
     public function Guardar_Integrantes($id_empresa, $id_empleado, $anio, $request)
     {
-        global $connect_kpis;
+        global $connect_kpis, $connect_admin;
         $empleados = $request["empleados"] ?? [];
+        $integrantes_anteriores = \Notificaciones\Integracion\AvisosKpis::integrantesDeKpi($connect_admin, (int) $request["id_registro"]);
 
         foreach ($empleados as $id_colaborador => $tipo) {
 
@@ -302,6 +308,8 @@ class KpisCrud
 
                 mysqli_query($connect_kpis, $sentencia);
         }
+        // Avisa a los integrantes que se sumaron.
+        \Notificaciones\Integracion\AvisosKpis::integrantesGuardados($connect_admin, (int) $request["id_registro"], $integrantes_anteriores, $id_empleado);
         echo "<div class='alert alert-success'>Integrantes asociados correctamente al Kpi.</div>";
 
         /* dd($id_empresa);
