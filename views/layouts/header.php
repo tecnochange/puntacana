@@ -18,7 +18,7 @@
 
 	
 	
-	<table class="e_web" style=" width: 130px; margin-top: 8px;">
+	<table class="e_web" style=" width: max-content; margin-top: 8px;">
 		<tr>
 			<td>
 				<b>
