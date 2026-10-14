@@ -48,7 +48,9 @@ use Notificaciones\Infraestructura\BaseDatos\TiposRepositorio;
  * Un tipo desactivado no rompe el flujo que llama: simplemente no notifica.
  *
  * En modo PRUEBA solo se notifica a los empleados de ids_empleados_prueba: se
- * puede probar con flujos reales sin que le llegue nada a nadie más.
+ * puede probar con flujos reales sin que le llegue nada a nadie más. En modo
+ * APAGADO no se crea nada (devuelve NULL): así no se acumulan avisos viejos que
+ * aparecerían de golpe al encender.
  */
 final class GenerarNotificacion
 {
@@ -62,13 +64,21 @@ final class GenerarNotificacion
     public static function ejecutar(mysqli $mysqli, string $codigo, int $idEmpresa, array $idsEmpleados, array $opciones = []): ?int
     {
         self::validarOpciones($opciones);
+        // Un mal uso desde el código debe fallar aunque el módulo esté apagado o el tipo inactivo.
+        self::validarDatosPlantilla($codigo, isset($opciones['datos_plantilla']) ? $opciones['datos_plantilla'] : []);
+        self::validarUrl(isset($opciones['url']) ? (string) $opciones['url'] : null);
+        self::interpretarFechaVencimiento(isset($opciones['fecha_vencimiento']) ? (string) $opciones['fecha_vencimiento'] : null);
         $conexion = new Conexion($mysqli);
         $tipo = (new TiposRepositorio($conexion))->buscarActivo($codigo, $idEmpresa);
         if ($tipo === null) {
             return null;
         }
         $configuracion = new ConfiguracionRepositorio($conexion);
-        if ($configuracion->modoOperacion($idEmpresa) === ModoOperacion::PRUEBA) {
+        $modo = $configuracion->modoOperacion($idEmpresa);
+        if ($modo === ModoOperacion::APAGADO) {
+            return null;
+        }
+        if ($modo === ModoOperacion::PRUEBA) {
             $idsEmpleados = array_intersect(array_map('intval', $idsEmpleados), $configuracion->idsEmpleadosPrueba($idEmpresa));
         }
         return self::ejecutarConTipo($mysqli, $tipo, $idEmpresa, $idsEmpleados, $opciones);

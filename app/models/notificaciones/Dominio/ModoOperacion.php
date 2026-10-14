@@ -4,7 +4,7 @@ namespace Notificaciones\Dominio;
 /** Qué hace el despacho de correos para una empresa (configuración modo_operacion). */
 final class ModoOperacion
 {
-    /** El despacho no toca nada: los correos pendientes esperan. */
+    /** Módulo detenido: no se crean notificaciones, la campana no aparece y el despacho no envía. */
     const APAGADO = 'APAGADO';
 
     /** Solo bandeja: los correos pendientes se consumen y se registran como omitidos. */

@@ -1,20 +1,23 @@
 <?php
 // Campana de la cabecera: lleva a la bandeja y muestra cuántas notificaciones hay sin leer.
-// Se incluye en views/layouts/header.php (escritorio y móvil). Si el módulo falla, la
-// campana se muestra sin número: la cabecera de todo el portal no puede romperse por esto.
+// Se incluye en views/layouts/header.php (escritorio y móvil). Con el módulo APAGADO no se
+// muestra, y tampoco si el módulo falla: la cabecera del portal no puede romperse por esto.
 require_once __DIR__ . '/../../../app/models/notificaciones/cargar.php';
 
 if (!function_exists('notificacionesSinLeerDeCabecera')) {
-    function notificacionesSinLeerDeCabecera(): int
+    /** Sin leer del usuario, o NULL si la campana no debe mostrarse (módulo apagado o con error). */
+    function notificacionesSinLeerDeCabecera(): ?int
     {
+        static $consultado = false;
         static $total = null;
-        if ($total === null) {
+        if (!$consultado) {
+            $consultado = true;
             global $connect_admin, $user_log;
             try {
                 $total = \Notificaciones\Aplicacion\ContarSinLeer::ejecutar($connect_admin, (int) $user_log['id_empresa'], (int) $user_log['id']);
             } catch (Throwable $error) {
                 error_log('[notificaciones] campana: ' . $error->getMessage());
-                $total = 0;
+                $total = null;
             }
         }
         return $total;
@@ -22,6 +25,9 @@ if (!function_exists('notificacionesSinLeerDeCabecera')) {
 }
 
 $notificacionesSinLeer = notificacionesSinLeerDeCabecera();
+if ($notificacionesSinLeer === null) {
+    return;
+}
 $notificacionesTitulo = $notificacionesSinLeer === 0 ? 'Mis notificaciones' : ($notificacionesSinLeer === 1 ? '1 notificación sin leer' : $notificacionesSinLeer . ' notificaciones sin leer');
 ?>
 <?php if (!defined('NOTIFICACIONES_CAMPANA_ESTILOS')): define('NOTIFICACIONES_CAMPANA_ESTILOS', true); ?>

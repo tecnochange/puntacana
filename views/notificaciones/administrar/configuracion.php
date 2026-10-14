@@ -8,8 +8,8 @@ use Notificaciones\Dominio\ModoOperacion;
 use Notificaciones\Infraestructura\Web\Peticion;
 
 const NOTIFICACIONES_MODOS_VISIBLES = [
-    ModoOperacion::APAGADO => ['Apagado', 'No se envía ningún correo. Las notificaciones siguen llegando a la bandeja.'],
-    ModoOperacion::SOLO_BANDEJA => ['Solo bandeja', 'Los correos pendientes se descartan y quedan registrados como omitidos.'],
+    ModoOperacion::APAGADO => ['Apagado', 'El módulo no funciona: no se crean notificaciones, no se envían correos y la campana no aparece en la cabecera.'],
+    ModoOperacion::SOLO_BANDEJA => ['Solo bandeja', 'Las notificaciones llegan a la bandeja y a la campana, pero no se envía ningún correo (quedan registrados como omitidos).'],
     ModoOperacion::PRUEBA => ['Prueba', 'Todos los correos llegan al correo de desvío; ningún empleado recibe correo. Los flujos reales solo notifican a los empleados de la lista.'],
     ModoOperacion::ACTIVO => ['Activo', 'Los correos salen a todos los destinatarios.'],
 ];
