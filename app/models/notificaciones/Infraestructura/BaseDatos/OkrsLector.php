@@ -9,8 +9,11 @@ namespace Notificaciones\Infraestructura\BaseDatos;
 final class OkrsLector
 {
     private const BASE_OKRS = 'puntacana_okrs';
-    /** Okrs.estado y Okrs_Resultados.estado: 1 activo (0 borrado, 2 cerrado). */
-    private const ESTADO_ACTIVO = 1;
+    /**
+     * Okrs_Resultados.estado: 1 activo; la pantalla de KRs solo lista esos. Okrs.estado no se
+     * usa: ninguna pantalla filtra por él y la mayoría de los OKRs de 2026 tienen 0.
+     */
+    private const KR_ACTIVO = 1;
     /** Okrs_Actividades.estado_backlog: 1 Planificado, 2 En Progreso, 3 En Revisión, 4 Completado. */
     private const PLAN_COMPLETADO = 4;
 
@@ -137,7 +140,7 @@ final class OkrsLector
     }
 
     /**
-     * KRs activos de OKRs activos que vencen entre dos fechas (Y-m-d, inclusive):
+     * KRs activos que vencen entre dos fechas (Y-m-d, inclusive):
      * [['id', 'id_okrs', 'titulo', 'okr_titulo', 'fecha_entrega', 'responsables' => int[]], ...]
      */
     public function resultadosQueVencenEntre(int $idEmpresa, string $desde, string $hasta): array
@@ -145,10 +148,10 @@ final class OkrsLector
         $filas = $this->conexion->consultar(
             'SELECT r.id, r.id_okrs, r.descripcion, r.responsables, r.fecha_entrega, o.objetivo_okr
              FROM ' . self::BASE_OKRS . '.Okrs_Resultados r
-             JOIN ' . self::BASE_OKRS . '.Okrs o ON o.id = r.id_okrs
-             WHERE o.id_empresa = ? AND o.estado = ? AND r.estado = ? AND r.fecha_entrega BETWEEN ? AND ?',
-            'iiiss',
-            [$idEmpresa, self::ESTADO_ACTIVO, self::ESTADO_ACTIVO, $desde, $hasta]
+             LEFT JOIN ' . self::BASE_OKRS . '.Okrs o ON o.id = r.id_okrs
+             WHERE r.id_empresa = ? AND r.estado = ? AND r.fecha_entrega BETWEEN ? AND ?',
+            'iiss',
+            [$idEmpresa, self::KR_ACTIVO, $desde, $hasta]
         );
         return array_map(function (array $fila) {
             return [
@@ -163,7 +166,7 @@ final class OkrsLector
     }
 
     /**
-     * Planes de acción sin completar, de OKRs activos, que vencen entre dos fechas:
+     * Planes de acción sin completar que vencen entre dos fechas:
      * [['id', 'titulo', 'fecha_entrega', 'responsables' => int[]], ...]
      */
     public function planesQueVencenEntre(int $idEmpresa, string $desde, string $hasta): array
@@ -171,10 +174,9 @@ final class OkrsLector
         $filas = $this->conexion->consultar(
             'SELECT a.id, a.descripcion, a.id_asignado, a.fecha_entrega
              FROM ' . self::BASE_OKRS . '.Okrs_Actividades a
-             JOIN ' . self::BASE_OKRS . '.Okrs o ON o.id = a.id_okrs
-             WHERE a.id_empresa = ? AND o.estado = ? AND a.estado_backlog <> ? AND a.fecha_entrega BETWEEN ? AND ?',
-            'iiiss',
-            [$idEmpresa, self::ESTADO_ACTIVO, self::PLAN_COMPLETADO, $desde, $hasta]
+             WHERE a.id_empresa = ? AND a.estado_backlog <> ? AND a.fecha_entrega BETWEEN ? AND ?',
+            'iiss',
+            [$idEmpresa, self::PLAN_COMPLETADO, $desde, $hasta]
         );
         return array_map(function (array $fila) {
             return [
