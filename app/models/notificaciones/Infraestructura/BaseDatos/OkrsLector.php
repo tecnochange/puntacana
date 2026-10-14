@@ -76,6 +76,31 @@ final class OkrsLector
         ];
     }
 
+    /**
+     * ['id', 'id_empresa', 'titulo', 'fecha_entrega', 'responsables' => int[]], o NULL si no existe.
+     * Los responsables de un plan son su id_asignado.
+     */
+    public function planAccion(int $idPlan): ?array
+    {
+        $fila = $this->conexion->consultarUno(
+            'SELECT a.id, a.id_empresa, a.descripcion, a.id_asignado, a.fecha_entrega
+             FROM ' . self::BASE_OKRS . '.Okrs_Actividades a
+             WHERE a.id = ?',
+            'i',
+            [$idPlan]
+        );
+        if ($fila === null) {
+            return null;
+        }
+        return [
+            'id' => (int) $fila['id'],
+            'id_empresa' => (int) $fila['id_empresa'],
+            'titulo' => trim((string) $fila['descripcion']),
+            'fecha_entrega' => $fila['fecha_entrega'],
+            'responsables' => self::idsDeLista($fila['id_asignado']),
+        ];
+    }
+
     /** Las listas de responsables se guardan como texto "12,45, 78". */
     private static function idsDeLista(?string $lista): array
     {

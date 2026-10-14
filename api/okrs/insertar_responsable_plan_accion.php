@@ -1,5 +1,6 @@
 <?php
 include("../../app/connect.php");
+require_once __DIR__ . '/../../app/models/notificaciones/cargar.php';
 $id_empresa = $_POST["id_empresa"];
 $id_plan = $_POST["id_plan"];
 $id_colaborador = $_POST["id_colaborador"];
@@ -27,7 +28,10 @@ $lista_txt = implode(",", $array_responsables);
 
 
 $sentencia = "UPDATE Okrs_Actividades SET id_asignado = '".$lista_txt."' WHERE id = '".$id_plan."' AND id_empresa = '".$id_empresa."' ";
-mysqli_query($connect_okrs, $sentencia);
+if (mysqli_query($connect_okrs, $sentencia) && $insertar) {
+    // Avisa al nuevo asignado (el módulo de notificaciones nunca interrumpe el guardado).
+    \Notificaciones\Integracion\AvisosOkrs::planAccionGuardado($connect_admin, (int) $id_plan, explode(",", $data["id_asignado"]), $_SESSION['id_user'] ?? null);
+}
 ?>
 
 <script>

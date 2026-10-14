@@ -63,6 +63,24 @@ final class AvisosOkrs
         }
     }
 
+    /** Tras agregar asignados a un plan de acción: avisa a los que no estaban antes. */
+    public static function planAccionGuardado(mysqli $mysqli, int $idPlan, array $asignadosAnteriores, $idAutor): void
+    {
+        try {
+            $plan = (new OkrsLector(new Conexion($mysqli)))->planAccion($idPlan);
+            if ($plan === null) {
+                return;
+            }
+            self::avisarNuevos($mysqli, CodigoNotificacion::OKRS_PLAN_ACCION_ASIGNACION, $plan, $asignadosAnteriores, $idAutor, [
+                'datos_plantilla' => ['plan_accion_titulo' => $plan['titulo']],
+                'url' => '?pg=okrs/okr/planes_accion&id_plan_accion=' . $plan['id'],
+                'tipo_registro' => 'OKRS_PLAN_ACCION',
+            ]);
+        } catch (Throwable $error) {
+            self::registrar('planAccionGuardado', $error);
+        }
+    }
+
     private static function responsablesAntes(mysqli $mysqli, string $lectura, int $id): array
     {
         try {
