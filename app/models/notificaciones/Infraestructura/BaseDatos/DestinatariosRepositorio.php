@@ -119,6 +119,21 @@ final class DestinatariosRepositorio
         );
     }
 
+    /** Cuántas notificaciones de su bandeja no ha leído el empleado (el número de la campana). */
+    public function contarSinLeer(int $idEmpresa, int $idEmpleado): int
+    {
+        $fila = $this->conexion->consultarUno(
+            'SELECT COUNT(*) AS total
+             FROM Notificaciones_Destinatarios d
+             JOIN Notificaciones n ON n.id = d.id_notificacion
+             JOIN Notificaciones_Tipos t ON t.id = n.id_tipo
+             WHERE d.id_empleado = ? AND d.fecha_lectura IS NULL AND d.id_empresa = ? AND t.muestra_en_bandeja = TRUE',
+            'ii',
+            [$idEmpleado, $idEmpresa]
+        );
+        return $fila !== null ? (int) $fila['total'] : 0;
+    }
+
     /** La notificación, solo si este empleado es destinatario. */
     public function notificacionDeEmpleado(int $idEmpresa, int $idEmpleado, int $idNotificacion): ?array
     {

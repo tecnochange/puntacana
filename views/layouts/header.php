@@ -3,6 +3,7 @@
 		<img src="<?php echo $recursos_local . $user_log["logo"]; ?>" style="margin: 5px; height: 50px; padding: 2px;">
 	</a>
 
+	<span class="solo_movil"><?php include __DIR__ . '/../notificaciones/componentes/campana.php'; ?></span>
 	<a href="<?php echo $url; ?>?pg=perfil/colaborador/detalle" class="solo_movil">
 		<i class="bx bx-user icons_menu_h" title="Mi Perfil"></i>
 	</a>
@@ -30,7 +31,8 @@
                     ?>
                 </b>
 			</td>
-			<td style="padding: 8px 20px;">
+			<td style="padding: 8px 20px; white-space: nowrap;">
+                <?php include __DIR__ . '/../notificaciones/componentes/campana.php'; ?>
                 <a href="<?php echo $url; ?>?pg=perfil/resumen">
 					<i class="bx bx-user icons_menu_h" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Mi Perfil"></i>
 				</a>
