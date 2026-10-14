@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../notificaciones/cargar.php';
 
 class OkrsCrud
 {
@@ -205,14 +206,19 @@ class OkrsCrud
                 '$this->hoy')
         ";
 
-        mysqli_query($connect_okrs, $sentencia);
+        if (mysqli_query($connect_okrs, $sentencia)) {
+            // Avisa a los responsables del KR nuevo (el módulo de notificaciones nunca interrumpe el guardado).
+            global $connect_admin;
+            \Notificaciones\Integracion\AvisosOkrs::resultadoClaveGuardado($connect_admin, (int) mysqli_insert_id($connect_okrs), [], $_SESSION['id_user'] ?? null);
+        }
     }
 
     public function Actualizar_Resultados_Claves($request)
     {
-        global $connect_okrs;
+        global $connect_okrs, $connect_admin;
 
         $responsables = implode(',', $request["id_responsables"]);
+        $responsables_anteriores = \Notificaciones\Integracion\AvisosOkrs::responsablesDeResultadoClave($connect_admin, (int) $request["id_registro"]);
 
         $sentencia =
             " UPDATE
@@ -227,10 +233,13 @@ class OkrsCrud
             periodo = '" . $request["periodo"] . "',
             descripcion = '" . $request["descripcion_del_resultado"] . "'
         WHERE
-            id = '" . $request["id_registro"] . "' 
+            id = '" . $request["id_registro"] . "'
         ";
 
-        mysqli_query($connect_okrs, $sentencia);
+        if (mysqli_query($connect_okrs, $sentencia)) {
+            // Avisa solo a los responsables que se agregaron en esta edición.
+            \Notificaciones\Integracion\AvisosOkrs::resultadoClaveGuardado($connect_admin, (int) $request["id_registro"], $responsables_anteriores, $_SESSION['id_user'] ?? null);
+        }
     }
 
     public function Crear_Iniciativa($request)
