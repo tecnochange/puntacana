@@ -285,7 +285,11 @@ class OkrsCrud
         ";
 
         try {
-            mysqli_query($connect_okrs, $sentencia);
+            if (mysqli_query($connect_okrs, $sentencia)) {
+                // Avisa a los responsables de la iniciativa nueva.
+                global $connect_admin;
+                \Notificaciones\Integracion\AvisosOkrs::iniciativaGuardada($connect_admin, (int) mysqli_insert_id($connect_okrs), [], $_SESSION['id_user'] ?? null);
+            }
             echo '<script>window.location.href = "?pg=okrs/okr/iniciativas&id_okr=' . $request["id_okr"] . '&id_resultado=' . $request["id_resultado"] . '"</script>';
         } catch (\Throwable $th) {
             throw $th;
@@ -295,9 +299,10 @@ class OkrsCrud
 
     public function Actualizar_Iniciativa($request)
     {
-        global $connect_okrs;
+        global $connect_okrs, $connect_admin;
 
         $responsables = implode(',', $request["id_responsables"]);
+        $responsables_anteriores = \Notificaciones\Integracion\AvisosOkrs::responsablesDeIniciativa($connect_admin, (int) $request["id_registro"]);
 
         $sentencia =
             " UPDATE
@@ -311,11 +316,14 @@ class OkrsCrud
             tendencia = '" . $request["tendencia"] . "',
             updated_at = '" . $this->hoy . "'
         WHERE
-            id = '" . $request["id_registro"] . "' 
+            id = '" . $request["id_registro"] . "'
         ";
 
         try {
-            mysqli_query($connect_okrs, $sentencia);
+            if (mysqli_query($connect_okrs, $sentencia)) {
+                // Avisa solo a los responsables que se agregaron en esta edición.
+                \Notificaciones\Integracion\AvisosOkrs::iniciativaGuardada($connect_admin, (int) $request["id_registro"], $responsables_anteriores, $_SESSION['id_user'] ?? null);
+            }
             echo '<script>window.location.href = "?pg=okrs/okr/iniciativas&id_okr=' . $request["id_okr"] . '&id_resultado=' . $request["id_resultado"] . '"</script>';
         } catch (\Throwable $th) {
             throw $th;
