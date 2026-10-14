@@ -15,6 +15,30 @@ use Throwable;
  */
 final class AvisosOkrs
 {
+    /** Dueño e integrantes del OKR antes de cambiarlo, para avisar solo a los nuevos. */
+    public static function personasDeObjetivo(mysqli $mysqli, int $idOkr): array
+    {
+        return self::responsablesAntes($mysqli, 'objetivo', $idOkr);
+    }
+
+    /** Tras crear un OKR, cambiar su dueño o sumar integrantes: avisa a quien no estaba antes. */
+    public static function objetivoGuardado(mysqli $mysqli, int $idOkr, array $personasAnteriores, $idAutor): void
+    {
+        try {
+            $okr = (new OkrsLector(new Conexion($mysqli)))->objetivo($idOkr);
+            if ($okr === null) {
+                return;
+            }
+            self::avisarNuevos($mysqli, CodigoNotificacion::OKRS_OBJETIVO_ASIGNACION, $okr, $personasAnteriores, $idAutor, [
+                'datos_plantilla' => ['okr_titulo' => $okr['titulo']],
+                'url' => '?pg=okrs/okr/detalle&id=' . $okr['id'],
+                'tipo_registro' => 'OKRS_OBJETIVO',
+            ]);
+        } catch (Throwable $error) {
+            self::registrar('objetivoGuardado', $error);
+        }
+    }
+
     /** Responsables del KR antes de editarlo, para avisar solo a los nuevos. */
     public static function responsablesDeResultadoClave(mysqli $mysqli, int $idResultado): array
     {

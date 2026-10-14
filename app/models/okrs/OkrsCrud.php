@@ -68,6 +68,12 @@ class OkrsCrud
 		";
         mysqli_query($connect_okrs, $sentencia_equipo);
 
+        if ($id_tmp) {
+            // Avisa al dueño del OKR nuevo (el módulo de notificaciones nunca interrumpe el guardado).
+            global $connect_admin;
+            \Notificaciones\Integracion\AvisosOkrs::objetivoGuardado($connect_admin, (int) $id_tmp, [], $_SESSION['id_user'] ?? null);
+        }
+
         echo '
             <script>
                 window.location.href = "?pg=okrs/okr/detalle&id=' . $id_tmp . '";
@@ -77,7 +83,8 @@ class OkrsCrud
 
     public function Actualizar_Okrs($request)
     {
-        global $connect_okrs;
+        global $connect_okrs, $connect_admin;
+        $personas_anteriores = \Notificaciones\Integracion\AvisosOkrs::personasDeObjetivo($connect_admin, (int) $request["id_registro"]);
 
         $sentencia = " 
         UPDATE
@@ -94,7 +101,10 @@ class OkrsCrud
         WHERE
             id = '" . $request["id_registro"] . "' 
         ";
-        mysqli_query($connect_okrs, $sentencia);
+        if (mysqli_query($connect_okrs, $sentencia)) {
+            // Si cambió el dueño, avisa al nuevo.
+            \Notificaciones\Integracion\AvisosOkrs::objetivoGuardado($connect_admin, (int) $request["id_registro"], $personas_anteriores, $_SESSION['id_user'] ?? null);
+        }
         //echo '<script>window.location.href = "?pg=okrs/okr/detalle&id='.$request["id_registro"].'"</script>';
     }
 
@@ -144,8 +154,9 @@ class OkrsCrud
 
     public function Guardar_Integrantes($id_empresa, $request)
     {
-        global $connect_okrs;
+        global $connect_okrs, $connect_admin;
         $empleados = $request["empleados"] ?? [];
+        $personas_anteriores = \Notificaciones\Integracion\AvisosOkrs::personasDeObjetivo($connect_admin, (int) $request["id_registro"]);
 
         foreach ($empleados as $id_empleado => $roles) {
             // Determinar qué checkboxes fueron marcados
@@ -158,6 +169,8 @@ class OkrsCrud
                 ('$id_empresa', '" . $request["id_registro"] . "', '$id_empleado', '$tipo', 1, '" . $this->hoy . "')";
             mysqli_query($connect_okrs, $sentencia);
         }
+        // Avisa a los integrantes que se sumaron.
+        \Notificaciones\Integracion\AvisosOkrs::objetivoGuardado($connect_admin, (int) $request["id_registro"], $personas_anteriores, $_SESSION['id_user'] ?? null);
         echo "<div class='alert alert-success'>Integrantes asociados correctamente al OKRs.</div>";
     }
 

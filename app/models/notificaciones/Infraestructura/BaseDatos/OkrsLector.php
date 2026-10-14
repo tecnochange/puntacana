@@ -19,6 +19,37 @@ final class OkrsLector
     }
 
     /**
+     * ['id', 'id_empresa', 'titulo', 'fecha_entrega', 'responsables' => int[]], o NULL si no existe.
+     * Los responsables de un OKR son su dueño y los integrantes de su equipo.
+     */
+    public function objetivo(int $idOkr): ?array
+    {
+        $fila = $this->conexion->consultarUno(
+            'SELECT o.id, o.id_empresa, o.id_empleado, o.objetivo_okr, o.fecha_termina
+             FROM ' . self::BASE_OKRS . '.Okrs o
+             WHERE o.id = ?',
+            'i',
+            [$idOkr]
+        );
+        if ($fila === null) {
+            return null;
+        }
+        $integrantes = $this->conexion->consultar(
+            'SELECT e.id_empleado FROM ' . self::BASE_OKRS . '.Okrs_Equipos e WHERE e.id_okrs = ?',
+            'i',
+            [$idOkr]
+        );
+        $ids = array_merge([(int) $fila['id_empleado']], array_map('intval', array_column($integrantes, 'id_empleado')));
+        return [
+            'id' => (int) $fila['id'],
+            'id_empresa' => (int) $fila['id_empresa'],
+            'titulo' => trim((string) $fila['objetivo_okr']),
+            'fecha_entrega' => $fila['fecha_termina'],
+            'responsables' => self::idsDeLista(implode(',', $ids)),
+        ];
+    }
+
+    /**
      * ['id', 'id_empresa', 'id_okrs', 'titulo', 'okr_titulo', 'fecha_entrega', 'responsables' => int[]],
      * o NULL si no existe.
      */
