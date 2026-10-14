@@ -77,7 +77,7 @@ if ($_POST["cargar_documento_kpi"]) {
             $name = preg_replace('([^A-Za-z0-9.])', '', $file['name']);
 
             $sku = time();
-            $dir_subida = '/var/www/html/goforagile.com/recursos/'; //carpeta de recursos
+            $dir_subida = '/var/www/html/puntacana.goforagile.com/recursos/'; //carpeta de recursos
             $fichero_subido = $dir_subida . basename($sku . $name);
 
             if (move_uploaded_file($file['tmp_name'], $fichero_subido)) {

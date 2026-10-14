@@ -41,6 +41,12 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
     #tablaEmpleados th {
         white-space: nowrap !important;
     }
+
+    .checks_eliminar_masivo{
+        height: 12px !important;
+        margin: 7px 3px;
+        transform: scale(1.5);
+    }
 </style>
 
 <div class="container-fluid pb-4" style="max-width: 90%; margin: 0 auto;">
@@ -222,6 +228,7 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
 
     <div class="card mb-3">
         <div class="card-header">
+            <button class="btn btn-danger btn-sm" onclick="EliminarSeleccionados()" style="float: right;">Eliminar Seleccionados</button>
             <h5 class="mb-0">Listado de Integrantes del Kpi</h5>
             <p class="mb-0">Asignación de roles y responsabilidades (Lider / Colaborador) al KPI</p>
         </div>
@@ -230,13 +237,14 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
                 <table class="table">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Foto</th>
                             <th>Nombre</th>
                             <th>Cargo</th>
                             <th>Vicepresidencia</th>
                             <th>Área</th>
                             <th>Rol Kpi</th>
-                            <th>Acciones</th>
+                            <th style="width: 90px;" >Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -249,6 +257,9 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
                             ?>
 
                             <tr>
+                                <td>
+                                    <input class="checks_eliminar_masivo" type="checkbox" name="integrante_lista[]" value="<?= $integrante["id"]; ?>">
+                                </td>
                                 <td><img src="<?= $recursos_local . $integrante_foto; ?>" width="40" height="40" class="foto_miniaturas" title="<?= $integrante["nombre"]; ?>" onclick="FichaEmpleado('<?= $integrante['id_colaborador']; ?>')"></td>
                                 <td><?= $integrante["nombre"]; ?></td>
                                 <td><?= $integrante["cargo"]; ?></td>
@@ -256,6 +267,8 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
                                 <td><?= $integrante["area"]; ?></td>
                                 <td><?= $tipo; ?></td>
                                 <td>
+
+                                    
 
                                     <div class="btn-group dropstart">
                                         <a class="btn btn-sm btn-outline-dark dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -511,6 +524,57 @@ $mensajes_kpis = $ClassKpisServicios->mensajes_kpis($user_log["id_empresa"]);
                     console.log("Error :", error);
                 }
         });
+
+    }
+</script>
+
+<script>
+    var permitir_del_masivos = false;
+    function EliminarSeleccionados() {
+
+        if (permitir_del_masivos == false) {
+            $("#modal_general").modal("show");
+            $("#modal_body").html("Estas a punto de borrar a todos los integrantes seleccionados y relacionado a este KPI. Esta acción es irreversible. Se guardará un registro de la acción con tu nombre. ¿Estas seguro? <br><br> ");
+            $("#modal_body").append('<button class="btn btn-danger" onclick="permitir_del_masivos = true; EliminarSeleccionados()" >Eliminar Integrante Seleccionados</button>');
+
+        } 
+        else { 
+
+            let ids = [];
+
+            $('.checks_eliminar_masivo:checked').each(function() {
+                let valor = $(this).val();
+                ids.push(valor);
+                //console.log(valor);
+            });
+
+            ids_string = ids.join(',');
+
+            descripcion = 'Eliminar integrante masivos ';
+
+            $.ajax({
+                url: api + "eliminar_integrante_masivo.php",
+                type: "POST",
+                data: {
+                    id_empresa: <?php echo $user_log["id_empresa"]; ?>,
+                    ids_string: ids_string,
+                    url: '<?php echo $url; ?>?pg=kpis/detalle/integrantes',
+                    id_user: <?php echo $user_log["id"]; ?>,
+                    descripcion: descripcion,
+                    id_kpi: "<?php echo $id; ?>"
+                },
+                success: function(data) {
+                    $("#xscript").html(data);
+                },
+                error: function(xhr, status, error) {
+                    console.log("Error :", error);
+                }
+            });
+
+        }
+
+
+        
 
     }
 </script>

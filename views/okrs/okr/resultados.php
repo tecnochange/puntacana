@@ -23,13 +23,13 @@ if ($_POST["guardar_formulario"]) {
     if($_POST["id_registro"]) {
         //ACTUALIZAR RESULTADOS CLAVES
         $OkrsCRUD->Actualizar_Resultados_Claves($_POST);
-        echo '<script> window.location.href = "?pg=okrs/okr/resultados"; </script>';
+        echo '<script> window.location.href = "?pg=okrs/okr/resultados&id_resultado='.$_POST["id_registro"].'"; </script>';
     } 
     else {
         //CREAR RESULTADOS CLAVES
         $_POST["id_okrs"] = $_SESSION["id_okrs_edit"];
         $OkrsCRUD->Crear_Resultados_Claves($user_log["id_empresa"], $_POST);
-        echo '<script> window.location.href = "?pg=okrs/okr/resultados"; </script>';
+        echo '<script> window.location.href = "?pg=okrs/okr/resultados&id_resultado='.$_POST["id_registro"].'"; </script>';
     }
 }
 
@@ -136,7 +136,7 @@ if (isset($_GET["id_resultado"]) && !empty($_GET["id_resultado"])) {
 
                     <div class="col-md-12 mb-2">
                         <label>* Descripción del Resultado</label>
-                        <textarea name="descripcion_del_resultado" class="form-control"><?= $data_resultado_clave["descripcion"]; ?></textarea>
+                        <textarea name="descripcion_del_resultado" class="form-control" oninput="LimpiarCaracteresEspeciales(this)" ><?= $data_resultado_clave["descripcion"]; ?></textarea>
                     </div>
 
                     <div class="col-md-12 mb-2">
@@ -267,4 +267,30 @@ if (isset($_GET["id_resultado"]) && !empty($_GET["id_resultado"])) {
         }
 
     }
+
+    /*
+    function LimpiarChart(texto) {
+        return texto
+            // Elimina caracteres de control, excepto:
+            // \n = salto de línea
+            // \r = retorno de carro
+            // \t = tabulación
+            .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, '')
+
+            // Elimina caracteres Unicode invisibles
+            .replace(/[\u200B-\u200D\u2060\uFEFF]/g, '');
+    }
+    */
+   //oninput="this.value = LimpiarChart(this.value)"
+</script>
+
+<script>
+function LimpiarCaracteresEspeciales(textarea) {
+    
+    // Permite letras, números, espacios y algunos signos básicos
+    textarea.value = textarea.value.replace(
+        /[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.,;:¡!¿?()\-%#\/]/g,
+        ''
+    );
+}
 </script>

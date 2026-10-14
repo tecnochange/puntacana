@@ -82,7 +82,7 @@ $objetivos_estrategicos = $OkrsServicios->Obtener_Objetivos_Estrategicos($user_l
 
                     <div class="col-md-3 mb-2">
                         <label><strong>Tipo de OKRs *</strong></label>
-                        <select class="form-control" name="tipo" onchange="ObjetivosAltaDireccion()" required <?= $disabled; ?>>
+                        <select class="form-control form-control-sm" name="tipo" onchange="ObjetivosAltaDireccion()" required <?= $disabled; ?>>
                             <option value="">Seleccione...</option>
                             <?php
                             foreach ($Array_Tipo_OKR as $nodo) {
@@ -98,7 +98,7 @@ $objetivos_estrategicos = $OkrsServicios->Obtener_Objetivos_Estrategicos($user_l
 
                     <div class="col-md-2 mb-2">
                         <label><strong>* Año</strong></label>
-                        <select class="form-control" name="anio" id="anio" onchange="ObjetivosAltaDireccion()" required>
+                        <select class="form-control form-control-sm" name="anio" id="anio" onchange="ObjetivosAltaDireccion()" required>
                             <option value="">Seleccione...</option>
                             <?php
                             foreach ($Array_Anio as $periodo) {
@@ -143,24 +143,24 @@ $objetivos_estrategicos = $OkrsServicios->Obtener_Objetivos_Estrategicos($user_l
 
                     <div class="col-md-12 mb-2">
                         <label><strong>Descripción del (O) *</strong></label>
-                        <textarea rows="3" class="form-control" name="objetivo_okr" required placeholder="Ingrese su Objetivo en este espacio..."><?php echo $data["objetivo_okr"] ?></textarea>
+                        <textarea rows="3" class="form-control" name="objetivo_okr" oninput="LimpiarCaracteresEspeciales(this)" required placeholder="Ingrese su Objetivo en este espacio..."><?php echo $data["objetivo_okr"] ?></textarea>
                     </div>
 
 
 
                     <div class="col-md-2 mb-2">
                         <label><strong>* Periodo Inicia</strong></label>
-                        <input type="date" class="form-control" name="fecha_inicia" value="<?php echo $data["fecha_inicia"]; ?>" required>
+                        <input type="date" class="form-control form-control-sm" name="fecha_inicia" value="<?php echo $data["fecha_inicia"]; ?>" required>
                     </div>
 
                     <div class="col-md-2 mb-2">
                         <label><strong>* Periodo Termina</strong></label>
-                        <input type="date" class="form-control" name="fecha_termina" value="<?php echo $data["fecha_termina"]; ?>" required>
+                        <input type="date" class="form-control form-control-sm" name="fecha_termina" value="<?php echo $data["fecha_termina"]; ?>" required>
                     </div>
 
                     <div class="col-md-2 mb-2">
                         <label><strong>Periodo *</strong></label>
-                        <select class="form-control" name="periodo" required>
+                        <select class="form-control form-control-sm" name="periodo" required>
                             <!-- <option value="">Selecciona...</option> -->
                             <option value="Anual">Anual</option>
                             <?php
@@ -235,8 +235,13 @@ $objetivos_estrategicos = $OkrsServicios->Obtener_Objetivos_Estrategicos($user_l
     }
 </script>
 
+
+
 <script>
    
+   $(document).ready(function() {
+        $('.multiples_responsables').select2();
+    });
 
     
     var permitir = false;
@@ -253,7 +258,7 @@ $objetivos_estrategicos = $OkrsServicios->Obtener_Objetivos_Estrategicos($user_l
             data = {
                 id_empresa: <?php echo $user_log["id_empresa"]; ?>, 
                 id_user: <?php echo $user_log["id"]; ?>,
-                id_okr: <?php echo $_SESSION["id_okrs_edit"]; ?>, 
+                id_okr: "<?php echo $_SESSION["id_okrs_edit"]; ?>", 
                 url: '?pg=okrs/objetivos_asociados'
             };
             jQuery.ajax({
@@ -273,4 +278,16 @@ $objetivos_estrategicos = $OkrsServicios->Obtener_Objetivos_Estrategicos($user_l
         }
 
     }
+</script>
+
+
+<script>
+function LimpiarCaracteresEspeciales(textarea) {
+    
+    // Permite letras, números, espacios y algunos signos básicos
+    textarea.value = textarea.value.replace(
+        /[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.,;:¡!¿?()\-%#\/]/g,
+        ''
+    );
+}
 </script>

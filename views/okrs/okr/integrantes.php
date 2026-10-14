@@ -345,7 +345,7 @@ $integrantes_asociados = $OkrsServicios->obtener_integrantes_asociados($user_log
             if(tipo == 3){ $(".chk-rol-apoyo").prop("checked", false); }
         }
 
-        //actualizarBoton();
+        $("#btnAsociarIntegrantes").prop("disabled",false);
     }
 </script>
 

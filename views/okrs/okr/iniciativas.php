@@ -95,7 +95,7 @@ if (isset($_GET["id_iniciativa"]) && !empty($_GET["id_iniciativa"])) {
 
                     <div class="col-md-12 mb-2">
                         <label>* Descripción de la iniciativa</label>
-                        <textarea name="descripcion_iniciativa" class="form-control"><?= $data_iniciativa["descripcion"]; ?></textarea>
+                        <textarea name="descripcion_iniciativa" class="form-control" oninput="LimpiarCaracteresEspeciales(this)" ><?= $data_iniciativa["descripcion"]; ?></textarea>
                     </div>
 
                     <div class="col-md-3 mb-2">
@@ -218,3 +218,16 @@ if (isset($_GET["id_iniciativa"]) && !empty($_GET["id_iniciativa"])) {
         $('.multiples_responsables').select2();
     });
 </script>
+
+<script>
+function LimpiarCaracteresEspeciales(textarea) {
+    
+    // Permite letras, números, espacios y algunos signos básicos
+    textarea.value = textarea.value.replace(
+        /[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.,;:¡!¿?()\-%#\/]/g,
+        ''
+    );
+}
+</script>
+
+

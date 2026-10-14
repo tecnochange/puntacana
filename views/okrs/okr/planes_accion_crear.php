@@ -173,7 +173,7 @@ foreach($array_responsables as $responsable){
 
                     <div class="col-md-12 mb-2">
                         <label>* Plan de Acción</label>
-                        <textarea name="descripcion" class="form-control"><?= isset($data_plan_accion["descripcion"]) ? $data_plan_accion["descripcion"] : ""; ?></textarea>
+                        <textarea name="descripcion" class="form-control" oninput="LimpiarCaracteresEspeciales(this)" ><?= isset($data_plan_accion["descripcion"]) ? $data_plan_accion["descripcion"] : ""; ?></textarea>
                     </div>
 
                     <div class="col-md-3 mb-2">
@@ -424,3 +424,15 @@ foreach($array_responsables as $responsable){
 </script>
 
 <?php include("views/okrs/okr/js/okrs_planes_accion.php"); ?>
+
+
+<script>
+function LimpiarCaracteresEspeciales(textarea) {
+    
+    // Permite letras, números, espacios y algunos signos básicos
+    textarea.value = textarea.value.replace(
+        /[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.,;:¡!¿?()\-%#\/]/g,
+        ''
+    );
+}
+</script>

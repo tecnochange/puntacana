@@ -122,7 +122,7 @@ if (isset($_GET["id_resultado"]) && !empty($_GET["id_resultado"])) {
 
                     <div class="col-md-12 mb-2">
                         <label>* Descripción del Resultado</label>
-                        <textarea name="descripcion_del_resultado" class="form-control"><?= $data_resultado_clave["descripcion"]; ?></textarea>
+                        <textarea name="descripcion_del_resultado" class="form-control" oninput="LimpiarCaracteresEspeciales(this)" ><?= $data_resultado_clave["descripcion"]; ?></textarea>
                     </div>
 
                     <div class="col-md-12 mb-2">
@@ -191,4 +191,19 @@ if (isset($_GET["id_resultado"]) && !empty($_GET["id_resultado"])) {
         }
 
     }
+
 </script>
+
+
+<script>
+function LimpiarCaracteresEspeciales(textarea) {
+    
+    // Permite letras, números, espacios y algunos signos básicos
+    textarea.value = textarea.value.replace(
+        /[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.,;:¡!¿?()\-%#\/]/g,
+        ''
+    );
+}
+</script>
+
+
