@@ -39,8 +39,8 @@ final class OkrsLector
             'id' => (int) $fila['id'],
             'id_empresa' => (int) $fila['id_empresa'],
             'id_okrs' => (int) $fila['id_okrs'],
-            'titulo' => (string) $fila['descripcion'],
-            'okr_titulo' => (string) $fila['objetivo_okr'],
+            'titulo' => trim((string) $fila['descripcion']),
+            'okr_titulo' => trim((string) $fila['objetivo_okr']),
             'fecha_entrega' => $fila['fecha_entrega'],
             'responsables' => self::idsDeLista($fila['responsables']),
         ];

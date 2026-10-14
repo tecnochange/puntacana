@@ -11,6 +11,15 @@ const NOTIFICACIONES_CLASES_VISIBLES = [
     'TAREA' => ['Tarea', 'bx-task'],
     'AVISO' => ['Aviso', 'bx-bell'],
 ];
+// Nombre visible de tipo_registro; uno que no esté aquí se muestra tal cual.
+const NOTIFICACIONES_REGISTROS_VISIBLES = [
+    'OKRS_OBJETIVO' => 'Objetivo',
+    'OKRS_KR' => 'Resultado clave',
+    'OKRS_INICIATIVA' => 'Iniciativa',
+    'OKRS_PLAN_ACCION' => 'Plan de acción',
+    'KPIS_KPI' => 'KPI',
+    'PRUEBA' => 'Prueba',
+];
 const NOTIFICACIONES_DIAS_VENCE_PRONTO = 3;
 const NOTIFICACIONES_DIAS_URGENTE = 1;
 const NOTIFICACIONES_ICONO_POR_DEFECTO = 'bx-bell';
@@ -35,13 +44,14 @@ function notificacionesIconoSeguro(?string $icono): string
     return $esBoxicon ? $icono : NOTIFICACIONES_ICONO_POR_DEFECTO;
 }
 
-/** "kr #123" si la notificación trae registro; vacío si no. */
+/** "Resultado clave #123" si la notificación trae registro; vacío si no. */
 function notificacionesRegistroVisible(?string $tipoRegistro, $idRegistro): string
 {
     if ($idRegistro === null) {
         return '';
     }
-    $tipo = $tipoRegistro !== null && $tipoRegistro !== '' ? "$tipoRegistro " : '';
+    $nombre = NOTIFICACIONES_REGISTROS_VISIBLES[$tipoRegistro] ?? $tipoRegistro;
+    $tipo = $nombre !== null && $nombre !== '' ? "$nombre " : '';
     return $tipo . '#' . (int) $idRegistro;
 }
 
