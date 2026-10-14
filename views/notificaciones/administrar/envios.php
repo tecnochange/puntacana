@@ -35,6 +35,9 @@ if (!$esAdministrador) {
             <span class="text-muted small">Últimos <?= count($envios) ?> intentos de correo.</span>
             <div class="d-flex align-items-center gap-2">
                 <span id="resultado_proceso" class="small"></span>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="bt_generar_tareas" title="Crea las tareas de vencimiento y de seguimiento que tocan hoy (lo mismo que el proceso diario)">
+                    <i class="bx bx-calendar-plus"></i> Generar tareas ahora
+                </button>
                 <button type="button" class="btn btn-outline-primary btn-sm" id="bt_procesar_envios">
                     <i class="bx bx-play-circle"></i> Procesar envíos ahora
                 </button>
@@ -79,6 +82,18 @@ if (!$esAdministrador) {
         if ($.fn.DataTable && $('#tabla_envios').length) {
             $('#tabla_envios').DataTable({ order: [[0, 'desc']], pageLength: 25, language: { search: 'Buscar:', lengthMenu: 'Mostrar _MENU_', info: '_START_ a _END_ de _TOTAL_', paginate: { previous: 'Anterior', next: 'Siguiente' }, zeroRecords: 'Sin resultados' } });
         }
+        $('#bt_generar_tareas').on('click', function () {
+            var boton = $(this).prop('disabled', true);
+            $('#resultado_proceso').text('Generando...');
+            $.post('api/notificaciones/administrar/generar_tareas.php', {}, function (respuesta) {
+                if (respuesta.status !== 'success') {
+                    $('#resultado_proceso').text(respuesta.message);
+                    return;
+                }
+                var t = respuesta.data;
+                $('#resultado_proceso').text('Tareas creadas ' + t.creadas + ' · completadas solas ' + t.completadas + ' · canceladas ' + t.canceladas + (t.errores ? ' · errores ' + t.errores : ''));
+            }, 'json').always(function () { boton.prop('disabled', false); });
+        });
         $('#bt_procesar_envios').on('click', function () {
             var boton = $(this).prop('disabled', true);
             $('#resultado_proceso').text('Procesando...');

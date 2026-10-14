@@ -69,6 +69,17 @@ final class NotificacionesRepositorio
         return $afectadas > 0;
     }
 
+    /** clave_evento de las notificaciones ABIERTAS cuya clave empieza por $prefijo. */
+    public function clavesAbiertasConPrefijo(int $idEmpresa, string $prefijo): array
+    {
+        $filas = $this->conexion->consultar(
+            'SELECT clave_evento FROM Notificaciones WHERE id_empresa = ? AND estado = ? AND clave_evento LIKE ?',
+            'iss',
+            [$idEmpresa, EstadoNotificacion::ABIERTA, addcslashes($prefijo, '%_\\') . '%']
+        );
+        return array_column($filas, 'clave_evento');
+    }
+
     /** Un destinatario completa a mano una TAREA ABIERTA. Devuelve si cambió algo. */
     public function completarTarea(int $idEmpresa, int $idNotificacion, int $idEmpleado, DateTimeImmutable $ahora): bool
     {

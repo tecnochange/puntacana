@@ -9,6 +9,10 @@ namespace Notificaciones\Infraestructura\BaseDatos;
 final class OkrsLector
 {
     private const BASE_OKRS = 'puntacana_okrs';
+    /** Okrs.estado y Okrs_Resultados.estado: 1 activo (0 borrado, 2 cerrado). */
+    private const ESTADO_ACTIVO = 1;
+    /** Okrs_Actividades.estado_backlog: 1 Planificado, 2 En Progreso, 3 En Revisión, 4 Completado. */
+    private const PLAN_COMPLETADO = 4;
 
     /** @var Conexion */
     private $conexion;
@@ -130,6 +134,56 @@ final class OkrsLector
             'fecha_entrega' => $fila['fecha_entrega'],
             'responsables' => self::idsDeLista($fila['id_asignado']),
         ];
+    }
+
+    /**
+     * KRs activos de OKRs activos que vencen entre dos fechas (Y-m-d, inclusive):
+     * [['id', 'id_okrs', 'titulo', 'okr_titulo', 'fecha_entrega', 'responsables' => int[]], ...]
+     */
+    public function resultadosQueVencenEntre(int $idEmpresa, string $desde, string $hasta): array
+    {
+        $filas = $this->conexion->consultar(
+            'SELECT r.id, r.id_okrs, r.descripcion, r.responsables, r.fecha_entrega, o.objetivo_okr
+             FROM ' . self::BASE_OKRS . '.Okrs_Resultados r
+             JOIN ' . self::BASE_OKRS . '.Okrs o ON o.id = r.id_okrs
+             WHERE o.id_empresa = ? AND o.estado = ? AND r.estado = ? AND r.fecha_entrega BETWEEN ? AND ?',
+            'iiiss',
+            [$idEmpresa, self::ESTADO_ACTIVO, self::ESTADO_ACTIVO, $desde, $hasta]
+        );
+        return array_map(function (array $fila) {
+            return [
+                'id' => (int) $fila['id'],
+                'id_okrs' => (int) $fila['id_okrs'],
+                'titulo' => trim((string) $fila['descripcion']),
+                'okr_titulo' => trim((string) $fila['objetivo_okr']),
+                'fecha_entrega' => $fila['fecha_entrega'],
+                'responsables' => self::idsDeLista($fila['responsables']),
+            ];
+        }, $filas);
+    }
+
+    /**
+     * Planes de acción sin completar, de OKRs activos, que vencen entre dos fechas:
+     * [['id', 'titulo', 'fecha_entrega', 'responsables' => int[]], ...]
+     */
+    public function planesQueVencenEntre(int $idEmpresa, string $desde, string $hasta): array
+    {
+        $filas = $this->conexion->consultar(
+            'SELECT a.id, a.descripcion, a.id_asignado, a.fecha_entrega
+             FROM ' . self::BASE_OKRS . '.Okrs_Actividades a
+             JOIN ' . self::BASE_OKRS . '.Okrs o ON o.id = a.id_okrs
+             WHERE a.id_empresa = ? AND o.estado = ? AND a.estado_backlog <> ? AND a.fecha_entrega BETWEEN ? AND ?',
+            'iiiss',
+            [$idEmpresa, self::ESTADO_ACTIVO, self::PLAN_COMPLETADO, $desde, $hasta]
+        );
+        return array_map(function (array $fila) {
+            return [
+                'id' => (int) $fila['id'],
+                'titulo' => trim((string) $fila['descripcion']),
+                'fecha_entrega' => $fila['fecha_entrega'],
+                'responsables' => self::idsDeLista($fila['id_asignado']),
+            ];
+        }, $filas);
     }
 
     /** Las listas de responsables se guardan como texto "12,45, 78". */

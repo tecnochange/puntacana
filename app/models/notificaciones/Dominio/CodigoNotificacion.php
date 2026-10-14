@@ -20,45 +20,45 @@ use Notificaciones\Dominio\Excepciones\CodigoDesconocido;
 final class CodigoNotificacion
 {
     // OKRs: objetivos
-    /** Al owner cuando se le asigna un objetivo. */
+    /** Al dueño de un OKR nuevo, al dueño nuevo y a los integrantes que se suman. */
     const OKRS_OBJETIVO_ASIGNACION = 'OKRS_OBJETIVO_ASIGNACION';
     /** Al owner, 10 días antes de la fecha de entrega del objetivo. */
     const OKRS_OBJETIVO_VENCIMIENTO = 'OKRS_OBJETIVO_VENCIMIENTO';
 
     // OKRs: resultados clave
-    /** Al owner y a los responsables cuando se les asigna un resultado clave. */
+    /** A los responsables nuevos de un resultado clave (OkrsCrud al crearlo o editarlo). */
     const OKRS_KR_ASIGNACION = 'OKRS_KR_ASIGNACION';
-    /** Al owner y a los responsables, 10 días antes de la fecha de entrega del resultado clave. */
+    /** A los responsables, desde dias_antes_de_vencer días antes de la fecha de entrega (cron diario). */
     const OKRS_KR_VENCIMIENTO = 'OKRS_KR_VENCIMIENTO';
     /** Al owner y a los responsables, 3 días antes del seguimiento de una etapa del resultado clave. */
     const OKRS_KR_SEGUIMIENTO_ETAPA = 'OKRS_KR_SEGUIMIENTO_ETAPA';
 
     // OKRs: iniciativas
-    /** Al owner y a los responsables cuando se les asigna una iniciativa. */
+    /** A los responsables nuevos de una iniciativa. */
     const OKRS_INICIATIVA_ASIGNACION = 'OKRS_INICIATIVA_ASIGNACION';
     /** Al owner y a los responsables, 10 días antes de la fecha de entrega de la iniciativa. */
     const OKRS_INICIATIVA_VENCIMIENTO = 'OKRS_INICIATIVA_VENCIMIENTO';
 
     // OKRs: planes de acción
-    /** Al owner y a los responsables cuando se les asigna un plan de acción. */
+    /** A quien se agrega como asignado de un plan de acción. */
     const OKRS_PLAN_ACCION_ASIGNACION = 'OKRS_PLAN_ACCION_ASIGNACION';
-    /** Al owner y a los responsables, 10 días antes de la fecha de entrega del plan de acción. */
+    /** A los asignados, desde dias_antes_de_vencer días antes de la fecha de entrega, si no está Completado (cron diario). */
     const OKRS_PLAN_ACCION_VENCIMIENTO = 'OKRS_PLAN_ACCION_VENCIMIENTO';
     /** Al owner y a los responsables, 3 días antes del seguimiento de una etapa del plan de acción. */
     const OKRS_PLAN_ACCION_SEGUIMIENTO_ETAPA = 'OKRS_PLAN_ACCION_SEGUIMIENTO_ETAPA';
 
     // KPIs
-    /** A los integrantes cuando se les asigna un KPI. */
+    /** A los integrantes nuevos de un KPI. */
     const KPIS_KPI_ASIGNACION = 'KPIS_KPI_ASIGNACION';
-    /** A los líderes del KPI, 3 días antes del seguimiento de un periodo. */
+    /** A los Líderes del KPI desde que cierra un periodo habilitado sin resultado; se completa sola al cargarlo (cron diario). */
     const KPIS_KPI_SEGUIMIENTO_PERIODO = 'KPIS_KPI_SEGUIMIENTO_PERIODO';
-    /** Al integrante retirado y a los líderes del KPI. */
+    /** A los Líderes del KPI cuando se retira a un integrante. */
     const KPIS_KPI_INTEGRANTE_RETIRADO = 'KPIS_KPI_INTEGRANTE_RETIRADO';
     /** A los líderes del KPI cuando alguien comenta (sin el texto del comentario). */
     const KPIS_KPI_COMENTARIO = 'KPIS_KPI_COMENTARIO';
     /** A los líderes del KPI cuando alguien sube un archivo. */
     const KPIS_KPI_DOCUMENTO = 'KPIS_KPI_DOCUMENTO';
-    /** A los integrantes cuando se cargan los resultados de un periodo. */
+    /** A los Líderes del KPI cuando se carga el resultado de un periodo que estaba vacío. */
     const KPIS_KPI_RESULTADO_CARGADO = 'KPIS_KPI_RESULTADO_CARGADO';
 
     /**

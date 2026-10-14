@@ -80,6 +80,70 @@ final class KpisLector
         return $avances;
     }
 
+    /**
+     * KPIs de un año fiscal con su frecuencia y sus 12 resultados:
+     * [['id', 'titulo', 'frecuencia', 'avances' => [1 => valor, ...]], ...]
+     */
+    public function paraSeguimiento(int $idEmpresa, int $anioFiscal): array
+    {
+        $columnas = [];
+        for ($mes = 1; $mes <= self::CANTIDAD_MESES; $mes++) {
+            $columnas[] = 'f.avance_' . $mes;
+        }
+        $filas = $this->conexion->consultar(
+            'SELECT k.id, k.indicador, f.tipo, ' . implode(', ', $columnas) . '
+             FROM ' . self::BASE_KPIS . '.Kpis k
+             JOIN ' . self::BASE_KPIS . '.Frecuencia_Kpis f ON f.id_kpi = k.id
+             WHERE k.id_empresa = ? AND k.anio = ?',
+            'ii',
+            [$idEmpresa, $anioFiscal]
+        );
+        $kpis = [];
+        foreach ($filas as $fila) {
+            $avances = [];
+            for ($mes = 1; $mes <= self::CANTIDAD_MESES; $mes++) {
+                $avances[$mes] = trim((string) $fila['avance_' . $mes]);
+            }
+            $kpis[] = ['id' => (int) $fila['id'], 'titulo' => trim((string) $fila['indicador']), 'frecuencia' => (int) $fila['tipo'], 'avances' => $avances];
+        }
+        return $kpis;
+    }
+
+    /** [id_kpi => int[] ids de Líderes] de toda la empresa, en una sola lectura de Kpis_Colaborador. */
+    public function lideresPorKpi(int $idEmpresa): array
+    {
+        $filas = $this->conexion->consultar(
+            'SELECT c.id_kpi, c.id_colaborador FROM ' . self::BASE_KPIS . '.Kpis_Colaborador c WHERE c.id_empresa = ? AND c.tipo = ?',
+            'ii',
+            [$idEmpresa, self::TIPO_LIDER]
+        );
+        $lideres = [];
+        foreach ($filas as $fila) {
+            $lideres[(int) $fila['id_kpi']][] = (int) $fila['id_colaborador'];
+        }
+        return array_map(function (array $ids) {
+            return self::ids($ids);
+        }, $lideres);
+    }
+
+    /** Meses (1-12) que la administración habilitó para cargar en ese año fiscal (Habilitar_Mes = 'on'). */
+    public function mesesHabilitados(int $idEmpresa, int $anioFiscal): array
+    {
+        $nombres = [1 => 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        $fila = $this->conexion->consultarUno(
+            'SELECT ' . implode(', ', $nombres) . ' FROM ' . self::BASE_KPIS . '.Habilitar_Mes WHERE id_empresa = ? AND anio = ? ORDER BY id DESC LIMIT 1',
+            'ii',
+            [$idEmpresa, $anioFiscal]
+        );
+        $habilitados = [];
+        foreach ($nombres as $mes => $columna) {
+            if ($fila !== null && $fila[$columna] === 'on') {
+                $habilitados[] = $mes;
+            }
+        }
+        return $habilitados;
+    }
+
     private static function ids(array $valores): array
     {
         return array_values(array_unique(array_filter(array_map('intval', $valores), function ($id) {
