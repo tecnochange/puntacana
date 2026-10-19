@@ -168,7 +168,11 @@ final class DespacharCorreos
 
         $datos = $this->datosPlantilla($pendiente, $empleado['nombre']);
         $asunto = self::recortarAsunto($this->prefijoDesvio($configuracion, $empleado) . Plantilla::renderizarTexto($tipo->plantillaAsuntoCorreo, $datos));
-        $html = MarcoCorreo::envolver(Plantilla::renderizarHtml($tipo->plantillaCuerpoCorreo, $datos));
+        $html = MarcoCorreo::envolver(Plantilla::renderizarHtml($tipo->plantillaCuerpoCorreo, $datos), [
+            'etiquetas' => MarcoCorreo::etiquetas($tipo->clase, $this->fechaVencimiento($pendiente), $this->ahora),
+            'titulo' => $tipo->nombre,
+            'resumen' => $pendiente['titulo'],
+        ]);
 
         $respuesta = $this->proveedorCorreo->enviar($empleado['nombre'], $this->correoDestino($configuracion, $empleado), $asunto, $html);
         $this->registrarRespuesta($pendiente, $asunto, $respuesta);
@@ -204,7 +208,12 @@ final class DespacharCorreos
         }
 
         $asunto = $this->prefijoDesvio($configuracion, $empleado) . sprintf(self::ASUNTO_RESUMEN, count($vigentes));
-        $html = MarcoCorreo::envolver($this->contenidoResumen($empleado['nombre'], $vigentes));
+        $titulo = count($vigentes) === 1 ? 'Tienes 1 notificación nueva' : 'Tienes ' . count($vigentes) . ' notificaciones nuevas';
+        $html = MarcoCorreo::envolver($this->contenidoResumen($empleado['nombre'], $vigentes), [
+            'etiquetas' => [['texto' => 'Resumen', 'tono' => 'azul']],
+            'titulo' => $titulo,
+            'resumen' => $vigentes[0]['titulo'],
+        ]);
         $respuesta = $this->proveedorCorreo->enviar($empleado['nombre'], $this->correoDestino($configuracion, $empleado), $asunto, $html);
         foreach ($vigentes as $pendiente) {
             $this->registrarRespuesta($pendiente, $asunto, $respuesta);
@@ -213,16 +222,18 @@ final class DespacharCorreos
 
     private function contenidoResumen(string $nombreEmpleado, array $pendientes): string
     {
-        $items = '';
+        $items = [];
         foreach ($pendientes as $pendiente) {
-            $enlace = htmlspecialchars($this->enlace($pendiente), ENT_QUOTES, 'UTF-8');
-            $titulo = htmlspecialchars($pendiente['titulo'], ENT_QUOTES, 'UTF-8');
             $fechaVencimiento = Plantilla::formatearFecha($this->fechaVencimiento($pendiente));
-            $vence = $fechaVencimiento === '' ? '' : " (vence $fechaVencimiento)";
-            $items .= "<li><a href=\"$enlace\">$titulo</a>$vence</li>";
+            $items[] = [
+                'titulo' => $pendiente['titulo'],
+                'enlace' => $this->enlace($pendiente),
+                // Muchos títulos ya dicen la fecha ("... vence el 30/10/2026"): no repetirla.
+                'detalle' => $fechaVencimiento === '' || strpos($pendiente['titulo'], $fechaVencimiento) !== false ? '' : 'Vence el ' . $fechaVencimiento,
+            ];
         }
         $nombreSeguro = htmlspecialchars($nombreEmpleado, ENT_QUOTES, 'UTF-8');
-        return "<p>Hola $nombreSeguro,</p><p>Tienes estas notificaciones nuevas:</p><ul>$items</ul>";
+        return "<p>Hola $nombreSeguro, esto es lo que llegó a tu bandeja:</p>" . MarcoCorreo::tarjetas($items);
     }
 
     /** Reserva el correo y programa el siguiente recordatorio. false si otra corrida lo reservó. */

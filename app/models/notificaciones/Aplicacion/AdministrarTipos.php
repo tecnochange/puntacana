@@ -121,17 +121,23 @@ final class AdministrarTipos
             return ['error' => implode(' ', $errores)];
         }
 
+        $vencimientoDeEjemplo = new DateTimeImmutable('+' . self::DIAS_VENCIMIENTO_DE_EJEMPLO . ' days');
         $datos = self::datosDeEjemplo($codigo) + [
             'destinatario_nombre' => self::DESTINATARIO_DE_EJEMPLO,
-            'fecha_vencimiento' => Plantilla::formatearFecha(new DateTimeImmutable('+' . self::DIAS_VENCIMIENTO_DE_EJEMPLO . ' days')),
+            'fecha_vencimiento' => Plantilla::formatearFecha($vencimientoDeEjemplo),
             'enlace' => '#',
         ];
+        $titulo = Plantilla::renderizarTexto($valores['plantilla_titulo'], $datos);
         return [
             'error' => null,
-            'titulo' => Plantilla::renderizarTexto($valores['plantilla_titulo'], $datos),
+            'titulo' => $titulo,
             'mensaje' => Plantilla::renderizarTexto($valores['plantilla_mensaje'], $datos),
             'asunto' => Plantilla::renderizarTexto($valores['plantilla_asunto_correo'], $datos),
-            'cuerpo_html' => MarcoCorreo::envolver(Plantilla::renderizarHtml($valores['plantilla_cuerpo_correo'], $datos)),
+            'cuerpo_html' => MarcoCorreo::envolver(Plantilla::renderizarHtml($valores['plantilla_cuerpo_correo'], $datos), [
+                'etiquetas' => MarcoCorreo::etiquetas($actual['clase'], $vencimientoDeEjemplo, new DateTimeImmutable()),
+                'titulo' => $valores['nombre'] !== '' ? $valores['nombre'] : $actual['nombre'],
+                'resumen' => $titulo,
+            ]),
         ];
     }
 
