@@ -2,6 +2,7 @@
 namespace Notificaciones\Infraestructura\BaseDatos;
 
 use DateTimeImmutable;
+use Notificaciones\Dominio\PeriodosKpi;
 
 /**
  * Busca un registro real de OKRs o KPIs para el envío de prueba de un tipo, así
@@ -157,9 +158,10 @@ final class RegistrosParaPrueba
 
     private function kpi(string $codigo, int $idEmpresa, int $idEmpleado, string $nombreEmpleado, DateTimeImmutable $hoy): ?array
     {
-        $anio = (int) $hoy->format('Y');
+        // Kpis.anio es el ciclo fiscal, no el año calendario: un KPI de otro ciclo se ve vacío en gestionar_kpi.
+        $anio = $this->cicloEnCurso($idEmpresa, $hoy);
         $datos = [
-            'periodo_nombre' => self::MESES[(int) $hoy->format('n') - 1] . ' ' . $anio,
+            'periodo_nombre' => self::MESES[(int) $hoy->format('n') - 1] . ' ' . $hoy->format('Y'),
             'integrante_nombre' => $nombreEmpleado,
             'autor_nombre' => $nombreEmpleado,
         ];
@@ -227,6 +229,18 @@ final class RegistrosParaPrueba
             'id_registro' => (int) $fila['id'],
             'fecha_vencimiento' => null,
         ];
+    }
+
+    /**
+     * El ciclo de KPIs en curso: el mismo "año en curso" de la empresa con el que
+     * las pantallas de KPIs filtran por defecto (Empresas.anio_curso). Si no está
+     * configurado, el año fiscal de hoy (julio a junio).
+     */
+    private function cicloEnCurso(int $idEmpresa, DateTimeImmutable $hoy): int
+    {
+        $fila = $this->conexion->consultarUno('SELECT anio_curso FROM Empresas WHERE id = ?', 'i', [$idEmpresa]);
+        $anioCurso = $fila !== null ? (int) $fila['anio_curso'] : 0;
+        return $anioCurso > 0 ? $anioCurso : PeriodosKpi::anioFiscal($hoy);
     }
 
     /** La fecha si es hoy o futura; NULL si ya pasó o no es válida. */
