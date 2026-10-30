@@ -200,7 +200,7 @@ $objetivos_estrategicos = $OkrsServicios->Obtener_Objetivos_Estrategicos($user_l
 
 </div>
 
-<script src="<?php echo $url; ?>agent-engine/assets/ai-field/ai-field.js?v=<?= (int) @filemtime(__DIR__ . "/../../../agent-engine/assets/ai-field/ai-field.js") ?>" data-endpoint="/agent-engine/public/api" data-accent="#007bff" defer></script>
+<script src="<?php echo $url; ?>agent-engine/assets/ai-field/ai-field.js?v=<?= (int) max(@filemtime(__DIR__ . "/../../../agent-engine/assets/ai-field/ai-field.js"), @filemtime(__DIR__ . "/../../../agent-engine/assets/ai-field/ai-field.css")) ?>" data-endpoint="/agent-engine/public/api" data-accent="#007bff" defer></script>
 
 <script>
     var api = '<?php echo $url; ?>api/okrs/';
