@@ -221,7 +221,7 @@ if (isset($_GET["id_resultado"]) && !empty($_GET["id_resultado"])) {
     });
 </script>
 
-<script src="<?php echo $url; ?>agent-engine/assets/ai-field/ai-field.js" data-endpoint="/agent-engine/public/api" data-accent="#007bff" defer></script>
+<script src="<?php echo $url; ?>agent-engine/assets/ai-field/ai-field.js?v=<?= (int) @filemtime(__DIR__ . "/../../../agent-engine/assets/ai-field/ai-field.js") ?>" data-endpoint="/agent-engine/public/api" data-accent="#007bff" defer></script>
 
 <script>
 function LimpiarCaracteresEspeciales(textarea) {
